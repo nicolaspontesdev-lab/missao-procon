@@ -1,0 +1,2517 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#101733">
+  <meta name="description" content="Missão PROCON: um jogo educativo sobre direitos do consumidor.">
+  <title>Missão PROCON — Defesa do Consumidor</title>
+  <style>
+    :root {
+      --ink: #101733;
+      --ink-2: #26345e;
+      --paper: #fff8df;
+      --paper-2: #f2dfaa;
+      --blue: #2463eb;
+      --blue-dark: #14378e;
+      --cyan: #55d9e8;
+      --yellow: #ffd84a;
+      --orange: #f28c28;
+      --red: #d83a4e;
+      --red-dark: #7f1e36;
+      --green: #31b86b;
+      --green-dark: #17663f;
+      --white: #fffdf2;
+      --shadow: #080d22;
+      --pixel: 4px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { min-height: 100%; background: var(--ink); }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      margin: 0;
+      color: var(--white);
+      font-family: "Courier New", Courier, monospace;
+      font-weight: 700;
+      background:
+        linear-gradient(rgba(16, 23, 51, .82), rgba(16, 23, 51, .95)),
+        repeating-linear-gradient(0deg, transparent 0 31px, rgba(85, 217, 232, .07) 31px 32px),
+        repeating-linear-gradient(90deg, transparent 0 31px, rgba(85, 217, 232, .07) 31px 32px),
+        #101733;
+      overflow-x: hidden;
+    }
+
+    button { font: inherit; }
+
+    button:focus-visible {
+      outline: 4px solid var(--yellow);
+      outline-offset: 5px;
+    }
+
+    .scanlines {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      pointer-events: none;
+      opacity: .15;
+      background: repeating-linear-gradient(0deg, rgba(255,255,255,.03) 0 1px, rgba(0,0,0,.06) 1px 3px);
+      mix-blend-mode: overlay;
+    }
+
+    .shell {
+      width: min(1180px, calc(100% - 28px));
+      margin: 18px auto;
+      position: relative;
+    }
+
+    .cabinet {
+      border: 5px solid var(--shadow);
+      box-shadow: 0 0 0 4px var(--blue), 0 0 0 8px var(--shadow), 12px 14px 0 rgba(0,0,0,.28);
+      background: var(--ink-2);
+      min-height: calc(100dvh - 48px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cabinet::before,
+    .cabinet::after {
+      content: "";
+      position: absolute;
+      z-index: 2;
+      width: 10px;
+      height: 10px;
+      background: var(--yellow);
+      box-shadow: 0 0 0 3px var(--shadow);
+      top: 13px;
+    }
+    .cabinet::before { left: 13px; }
+    .cabinet::after { right: 13px; }
+
+    .topbar {
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 10px 18px;
+      background: var(--blue-dark);
+      border-bottom: 5px solid var(--shadow);
+      position: relative;
+      z-index: 5;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: max-content;
+      letter-spacing: .04em;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      color: var(--ink);
+      background: var(--yellow);
+      border: 4px solid var(--shadow);
+      box-shadow: inset -5px -5px 0 var(--orange);
+      display: grid;
+      place-items: center;
+      font-size: 27px;
+      line-height: 1;
+    }
+
+    .brand-title {
+      font-size: clamp(17px, 2.1vw, 25px);
+      color: var(--white);
+      text-shadow: 3px 3px 0 var(--shadow);
+    }
+
+    .brand-subtitle {
+      color: var(--cyan);
+      font-size: 10px;
+      letter-spacing: .2em;
+      margin-top: 3px;
+    }
+
+    .ticker {
+      flex: 1;
+      color: var(--yellow);
+      overflow: hidden;
+      white-space: nowrap;
+      font-size: 12px;
+      letter-spacing: .08em;
+      opacity: .9;
+    }
+
+    .ticker span { display: inline-block; animation: ticker 18s linear infinite; }
+
+    .sound-button {
+      flex: none;
+      min-width: 48px;
+      height: 44px;
+      border: 4px solid var(--shadow);
+      background: var(--cyan);
+      color: var(--ink);
+      box-shadow: inset -4px -4px 0 #2497ad;
+      cursor: pointer;
+      font-size: 19px;
+    }
+
+    .sound-button[aria-pressed="false"] {
+      background: #8290a8;
+      box-shadow: inset -4px -4px 0 #4b5870;
+    }
+
+    .screen { min-height: calc(100dvh - 125px); position: relative; }
+    .screen[hidden] { display: none !important; }
+
+    .start-screen,
+    .intro-screen,
+    .final-screen {
+      display: grid;
+      place-items: center;
+      padding: clamp(20px, 5vw, 60px);
+      text-align: center;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(85,217,232,.2), transparent 32%),
+        linear-gradient(135deg, rgba(36,99,235,.16) 25%, transparent 25%) 0 0 / 32px 32px,
+        var(--ink-2);
+    }
+
+    .start-card,
+    .intro-card,
+    .final-card {
+      width: min(790px, 100%);
+      background: var(--paper);
+      color: var(--ink);
+      border: 5px solid var(--shadow);
+      box-shadow: 0 0 0 5px var(--yellow), 0 0 0 10px var(--shadow), 14px 16px 0 rgba(0,0,0,.25);
+      padding: clamp(24px, 5vw, 54px);
+      position: relative;
+    }
+
+    .start-card { width: min(880px, 100%); }
+
+    .start-card::before,
+    .intro-card::before,
+    .final-card::before {
+      content: "";
+      position: absolute;
+      inset: 11px;
+      border: 3px dashed rgba(20,55,142,.26);
+      pointer-events: none;
+    }
+
+    .tiny-label {
+      display: inline-block;
+      background: var(--blue-dark);
+      color: var(--cyan);
+      padding: 7px 11px;
+      border: 3px solid var(--shadow);
+      font-size: 11px;
+      letter-spacing: .16em;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cover-art {
+      display: block;
+      width: min(820px, 96%);
+      height: auto;
+      aspect-ratio: 895 / 439;
+      margin: 0 auto 22px;
+      position: relative;
+      object-fit: contain;
+      background: #55d9e8;
+      border: 5px solid var(--shadow);
+      box-shadow: 0 0 0 4px var(--cyan), 8px 8px 0 #b9c7e7;
+      image-rendering: pixelated;
+      z-index: 1;
+    }
+
+    .cover-building {
+      position: absolute;
+      z-index: 2;
+      left: 50%;
+      bottom: 16px;
+      width: 205px;
+      height: 85px;
+      transform: translateX(-50%);
+      background: var(--paper);
+      border: 5px solid var(--shadow);
+      box-shadow: inset -8px -8px 0 var(--paper-2);
+    }
+
+    .cover-building::before {
+      content: "PROCON";
+      position: absolute;
+      left: 23px;
+      right: 23px;
+      top: 10px;
+      padding: 6px 3px;
+      background: var(--blue);
+      color: white;
+      border: 3px solid var(--shadow);
+      box-shadow: inset -4px -4px 0 var(--blue-dark);
+      font-size: 15px;
+      letter-spacing: .13em;
+    }
+
+    .cover-building::after {
+      content: "";
+      position: absolute;
+      left: 78px;
+      bottom: -5px;
+      width: 40px;
+      height: 35px;
+      background: #55d9e8;
+      border: 5px solid var(--shadow);
+      box-shadow: inset 8px 0 0 rgba(255,255,255,.4);
+    }
+
+    .cover-flag {
+      position: absolute;
+      z-index: 3;
+      left: calc(50% + 105px);
+      bottom: 26px;
+      width: 6px;
+      height: 72px;
+      background: var(--shadow);
+    }
+    .cover-flag::before {
+      content: "";
+      position: absolute;
+      left: 6px;
+      top: 0;
+      width: 38px;
+      height: 23px;
+      background: #31b86b;
+      border: 3px solid var(--shadow);
+      box-shadow: inset -7px -5px 0 #17663f;
+      animation: flag-wave .9s steps(2) infinite;
+    }
+
+    .cover-car {
+      position: absolute;
+      z-index: 4;
+      left: 4%;
+      bottom: 9px;
+      width: 58px;
+      height: 24px;
+      background: var(--red);
+      border: 4px solid var(--shadow);
+      box-shadow: inset -7px -5px 0 var(--red-dark), 12px 9px 0 -4px var(--shadow), 43px 9px 0 -4px var(--shadow);
+      animation: cover-car 5s steps(12) infinite;
+    }
+
+    h1 {
+      font-size: clamp(34px, 7vw, 78px);
+      line-height: .92;
+      margin: 28px 0 12px;
+      color: var(--blue);
+      letter-spacing: -.06em;
+      text-shadow: 4px 4px 0 var(--cyan), 8px 8px 0 var(--shadow);
+      position: relative;
+      z-index: 1;
+    }
+
+    .mission-line {
+      font-size: clamp(14px, 2.5vw, 21px);
+      color: var(--red);
+      letter-spacing: .08em;
+      margin: 0 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .start-copy,
+    .intro-copy {
+      max-width: 620px;
+      margin: 0 auto 28px;
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: 700;
+      line-height: 1.55;
+      color: #334064;
+      position: relative;
+      z-index: 1;
+    }
+
+    .primary-button,
+    .next-button,
+    .restart-button {
+      border: 4px solid var(--shadow);
+      background: var(--yellow);
+      color: var(--ink);
+      padding: 15px 22px;
+      box-shadow: inset -6px -6px 0 var(--orange), 6px 6px 0 var(--shadow);
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      transition: transform 90ms ease, box-shadow 90ms ease;
+      position: relative;
+      z-index: 1;
+    }
+
+    .primary-button:hover,
+    .next-button:hover,
+    .restart-button:hover { transform: translate(-2px, -2px); box-shadow: inset -6px -6px 0 var(--orange), 8px 8px 0 var(--shadow); }
+    .primary-button:active,
+    .next-button:active,
+    .restart-button:active { transform: translate(4px, 4px); box-shadow: inset -3px -3px 0 var(--orange), 2px 2px 0 var(--shadow); }
+
+    .key-help {
+      margin: 22px 0 0;
+      color: #5d6882;
+      font-size: 11px;
+      position: relative;
+      z-index: 1;
+    }
+
+    kbd {
+      display: inline-block;
+      min-width: 25px;
+      padding: 3px 5px;
+      color: var(--ink);
+      background: #fff;
+      border: 2px solid var(--ink);
+      box-shadow: 2px 2px 0 var(--ink);
+      font: inherit;
+      font-size: 10px;
+    }
+
+    .intro-icon {
+      width: 92px;
+      height: 92px;
+      margin: 0 auto 24px;
+      display: grid;
+      place-items: center;
+      background: var(--cyan);
+      border: 5px solid var(--shadow);
+      box-shadow: inset -8px -8px 0 #2699ae, 8px 8px 0 var(--shadow);
+      color: var(--blue-dark);
+      font-size: 49px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .intro-card h2,
+    .final-card h2 {
+      color: var(--blue-dark);
+      font-size: clamp(25px, 5vw, 43px);
+      margin: 12px 0 18px;
+      text-shadow: 3px 3px 0 #b9c7e7;
+      position: relative;
+      z-index: 1;
+    }
+
+    .rules {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 28px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .rule {
+      background: #fff;
+      border: 3px solid var(--ink);
+      padding: 15px 8px;
+      font-size: 12px;
+      box-shadow: 4px 4px 0 #b9c7e7;
+    }
+
+    .rule b { display: block; color: var(--red); font-size: 20px; margin-bottom: 5px; }
+
+    .game-screen { background: #34426a; }
+
+    .hud {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr) auto;
+      gap: 6px;
+      padding: 10px;
+      border-bottom: 5px solid var(--shadow);
+      background: var(--ink);
+    }
+
+    .hud-item {
+      background: var(--ink-2);
+      border: 3px solid #445785;
+      padding: 8px 10px;
+      min-width: 0;
+    }
+
+    .hud-label { display: block; color: #93a4cc; font-size: 9px; letter-spacing: .12em; }
+    .hud-value { display: block; color: var(--white); font-size: clamp(15px, 2.5vw, 21px); margin-top: 2px; }
+    #scoreValue { color: var(--yellow); }
+    #correctValue { color: #6cec9f; }
+    #wrongValue { color: #ff7d8e; }
+
+    .combo-badge {
+      align-self: center;
+      min-width: 108px;
+      text-align: center;
+      padding: 9px 12px;
+      background: var(--ink-2);
+      color: #93a4cc;
+      border: 3px solid #445785;
+      box-shadow: none;
+      transform: scale(1);
+    }
+    .combo-badge.show {
+      color: var(--ink);
+      background: var(--yellow);
+      border-color: var(--shadow);
+      box-shadow: inset -4px -4px 0 var(--orange);
+      animation: combo-pop .35s steps(3) forwards;
+    }
+
+    .case-progress { height: 7px; background: #151d3a; border-bottom: 3px solid var(--shadow); }
+    .case-progress > span { display: block; width: 10%; height: 100%; background: var(--cyan); transition: width .35s steps(5); box-shadow: 3px 0 0 var(--white); }
+
+    .game-layout {
+      padding: clamp(10px, 2vw, 22px);
+      display: grid;
+      grid-template-columns: minmax(0, 1.16fr) minmax(330px, .84fr);
+      gap: clamp(12px, 2vw, 22px);
+      align-items: stretch;
+    }
+
+    .office {
+      min-height: 530px;
+      position: relative;
+      overflow: hidden;
+      border: 5px solid var(--shadow);
+      background: #e7bf72;
+      box-shadow: inset 0 0 0 4px #f9df9e;
+      image-rendering: pixelated;
+    }
+
+    .office::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 28;
+      pointer-events: none;
+      box-shadow: inset 14px 14px 0 rgba(255,255,255,.08), inset -18px -18px 0 rgba(16,23,51,.18);
+      background: linear-gradient(115deg, rgba(255,255,255,.10) 0 15%, transparent 15% 100%);
+    }
+
+    .office::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 27;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .office.fx-correct::after { background: rgba(49,184,107,.28); animation: office-flash .48s steps(4); }
+    .office.fx-wrong::after { background: rgba(216,58,78,.25); animation: office-flash .48s steps(4); }
+
+    .wall-pattern {
+      position: absolute;
+      inset: 0 0 37% 0;
+      background:
+        linear-gradient(90deg, rgba(157,91,55,.15) 2px, transparent 2px) 0 0 / 42px 42px,
+        linear-gradient(rgba(157,91,55,.15) 2px, transparent 2px) 0 0 / 42px 42px,
+        #e7bf72;
+    }
+
+    .room-light {
+      position: absolute;
+      z-index: 1;
+      left: 11%;
+      top: 0;
+      width: 43%;
+      height: 64%;
+      opacity: .24;
+      background: linear-gradient(110deg, rgba(255,255,255,.9), transparent 56%);
+      clip-path: polygon(0 0, 72% 0, 100% 100%, 29% 100%);
+      pointer-events: none;
+    }
+
+    .window {
+      position: absolute;
+      left: 7%;
+      top: 7%;
+      width: 46%;
+      height: 34%;
+      border: 8px solid #6c3e32;
+      box-shadow: 0 0 0 4px var(--shadow), inset 0 0 0 4px #a36346;
+      overflow: hidden;
+      background: linear-gradient(#55d9e8 0 62%, #a9e9ee 62%);
+    }
+
+    .window::before,
+    .window::after {
+      content: "";
+      position: absolute;
+      z-index: 4;
+      background: #6c3e32;
+      box-shadow: 0 0 0 2px var(--shadow);
+    }
+    .window::before { width: 6px; top: 0; bottom: 0; left: calc(50% - 3px); }
+    .window::after { height: 6px; left: 0; right: 0; top: calc(50% - 3px); }
+
+    .cloud {
+      position: absolute;
+      width: 44px;
+      height: 13px;
+      background: var(--white);
+      top: 16%;
+      left: 10%;
+      box-shadow: 13px -9px 0 var(--white), 28px 0 0 var(--white);
+      animation: cloud 11s linear infinite alternate;
+    }
+
+    .sun {
+      position: absolute;
+      right: 10%;
+      top: 9%;
+      width: 27px;
+      height: 27px;
+      background: var(--yellow);
+      box-shadow: 0 0 0 5px #f4a62a;
+    }
+
+    .city {
+      position: absolute;
+      inset: auto 0 0;
+      height: 49%;
+      background:
+        linear-gradient(90deg, #31518d 0 18%, transparent 18% 23%, #263e73 23% 43%, transparent 43% 49%, #3c62a3 49% 70%, transparent 70% 75%, #25386a 75% 100%);
+    }
+    .city::before {
+      content: "";
+      position: absolute;
+      inset: 12px 8px 8px;
+      background: repeating-linear-gradient(90deg, var(--yellow) 0 5px, transparent 5px 17px), repeating-linear-gradient(0deg, transparent 0 13px, #293c6f 13px 18px);
+      opacity: .75;
+    }
+
+    .procon-sign {
+      position: absolute;
+      right: 6%;
+      top: 8%;
+      width: 31%;
+      background: var(--blue);
+      color: white;
+      border: 5px solid var(--shadow);
+      box-shadow: inset -6px -6px 0 var(--blue-dark), 5px 5px 0 rgba(0,0,0,.2);
+      padding: 14px 8px;
+      text-align: center;
+      font-size: clamp(16px, 2.5vw, 25px);
+      letter-spacing: .06em;
+    }
+    .procon-sign small { display: block; color: var(--yellow); font-size: 9px; margin-top: 5px; letter-spacing: .1em; }
+
+    .notice-board {
+      position: absolute;
+      right: 8%;
+      top: 27%;
+      width: 26%;
+      height: 18%;
+      background: #a96d43;
+      border: 5px solid #6c3e32;
+      box-shadow: 0 0 0 3px var(--shadow);
+    }
+    .notice-board::before,
+    .notice-board::after {
+      content: "CDC";
+      position: absolute;
+      background: var(--paper);
+      color: var(--blue-dark);
+      border: 2px solid var(--shadow);
+      padding: 6px 8px;
+      font-size: 9px;
+      transform: rotate(-3deg);
+      left: 9%; top: 14%;
+    }
+    .notice-board::after { content: "DIREITOS"; left: auto; right: 7%; top: 44%; transform: rotate(3deg); color: var(--red); }
+
+    .wall-clock {
+      position: absolute;
+      z-index: 3;
+      left: 55%;
+      top: 8%;
+      width: 43px;
+      height: 43px;
+      border: 5px solid var(--shadow);
+      background: var(--white);
+      box-shadow: inset -5px -5px 0 #b9c7e7, 4px 4px 0 rgba(0,0,0,.18);
+    }
+    .wall-clock::before {
+      content: "";
+      position: absolute;
+      left: 17px;
+      top: 8px;
+      width: 4px;
+      height: 14px;
+      background: var(--red);
+      transform-origin: bottom;
+      animation: clock-hand 8s steps(8) infinite;
+    }
+    .wall-clock::after {
+      content: "";
+      position: absolute;
+      left: 17px;
+      top: 18px;
+      width: 12px;
+      height: 4px;
+      background: var(--blue-dark);
+    }
+
+    .floor {
+      position: absolute;
+      inset: 63% 0 0;
+      background:
+        linear-gradient(45deg, #c98d55 25%, transparent 25%, transparent 75%, #c98d55 75%) 0 0 / 36px 36px,
+        linear-gradient(45deg, #d9a668 25%, #e3b879 25%, #e3b879 75%, #d9a668 75%) 18px 18px / 36px 36px;
+      border-top: 5px solid #6c3e32;
+    }
+
+    .file-cabinet {
+      position: absolute;
+      z-index: 3;
+      left: 1.5%;
+      bottom: 9%;
+      width: 70px;
+      height: 145px;
+      background: #71809a;
+      border: 5px solid var(--shadow);
+      box-shadow: inset -7px -7px 0 #4a5871;
+    }
+    .file-cabinet i {
+      display: block;
+      height: 29px;
+      margin: 7px;
+      background: #8796ae;
+      border: 3px solid var(--shadow);
+      box-shadow: inset -3px -3px 0 #5b6981;
+      position: relative;
+    }
+    .file-cabinet i::after {
+      content: "";
+      position: absolute;
+      left: 14px;
+      top: 8px;
+      width: 22px;
+      height: 6px;
+      background: var(--shadow);
+    }
+
+    .pixel-plant {
+      position: absolute;
+      z-index: 4;
+      right: 3%;
+      bottom: 31%;
+      width: 54px;
+      height: 104px;
+    }
+    .pixel-plant::before {
+      content: "";
+      position: absolute;
+      left: 17px;
+      bottom: 29px;
+      width: 19px;
+      height: 57px;
+      background: #31b86b;
+      box-shadow: -15px -11px 0 #31b86b, 16px -23px 0 #31b86b, -7px -34px 0 #6cec9f, 15px 5px 0 #17663f;
+      border: 4px solid var(--shadow);
+    }
+    .pixel-plant::after {
+      content: "";
+      position: absolute;
+      left: 7px;
+      bottom: 0;
+      width: 42px;
+      height: 34px;
+      background: #d86d3d;
+      border: 5px solid var(--shadow);
+      box-shadow: inset -6px -6px 0 #923e31;
+    }
+
+    .counter {
+      position: absolute;
+      z-index: 6;
+      left: 7%;
+      right: 6%;
+      bottom: 7%;
+      height: 25%;
+      background: #825039;
+      border: 5px solid var(--shadow);
+      box-shadow: inset 0 9px 0 #a96d43, inset 0 -9px 0 #5d362e;
+    }
+    .counter::before {
+      content: "ATENDIMENTO";
+      position: absolute;
+      left: 50%;
+      top: 33%;
+      transform: translateX(-50%);
+      background: var(--paper);
+      color: var(--blue-dark);
+      border: 4px solid var(--shadow);
+      padding: 10px 16px;
+      box-shadow: inset -4px -4px 0 var(--paper-2);
+      font-size: clamp(10px, 2vw, 16px);
+    }
+
+    .counter-top {
+      position: absolute;
+      z-index: 8;
+      left: 4%;
+      right: 3%;
+      bottom: 29%;
+      height: 25px;
+      background: #bd7650;
+      border: 5px solid var(--shadow);
+      box-shadow: inset 0 -5px 0 #7d4937;
+    }
+
+    .computer {
+      position: absolute;
+      z-index: 9;
+      right: 20%;
+      bottom: 34%;
+      width: 90px;
+      height: 72px;
+      background: #59677c;
+      border: 5px solid var(--shadow);
+      box-shadow: inset -6px -6px 0 #39465b;
+    }
+    .computer::before {
+      content: "PROCON";
+      position: absolute;
+      inset: 8px 9px 17px 8px;
+      color: var(--cyan);
+      background: var(--blue-dark);
+      border: 3px solid var(--shadow);
+      display: grid;
+      place-items: center;
+      font-size: 8px;
+      animation: screen-glow 2s steps(2) infinite;
+    }
+    .computer::after {
+      content: "";
+      position: absolute;
+      width: 15px;
+      height: 22px;
+      background: #39465b;
+      left: 32px;
+      bottom: -25px;
+      border: 4px solid var(--shadow);
+      box-shadow: -16px 17px 0 -5px #59677c, 16px 17px 0 -5px #59677c;
+    }
+
+    .papers {
+      position: absolute;
+      z-index: 9;
+      left: 43%;
+      bottom: 34%;
+      width: 66px;
+      height: 12px;
+      background: var(--paper);
+      border: 3px solid var(--shadow);
+      box-shadow: -5px -9px 0 var(--paper-2), -5px -12px 0 2px var(--shadow), 4px -19px 0 var(--white), 4px -22px 0 2px var(--shadow);
+    }
+
+    .keyboard {
+      position: absolute;
+      z-index: 10;
+      right: 8%;
+      bottom: 32.5%;
+      width: 82px;
+      height: 23px;
+      transform: skewX(-9deg);
+      border: 4px solid var(--shadow);
+      background: repeating-linear-gradient(90deg, #eef1e6 0 6px, #8b97a8 6px 8px), #eef1e6;
+      box-shadow: inset 0 -5px 0 #778398;
+    }
+
+    .coffee-mug {
+      position: absolute;
+      z-index: 10;
+      left: 36%;
+      bottom: 34%;
+      width: 29px;
+      height: 31px;
+      background: var(--cyan);
+      border: 4px solid var(--shadow);
+      box-shadow: inset -5px -4px 0 #2699ae;
+    }
+    .coffee-mug::before {
+      content: "";
+      position: absolute;
+      right: -14px;
+      top: 5px;
+      width: 11px;
+      height: 14px;
+      border: 4px solid var(--shadow);
+      border-left: 0;
+      background: transparent;
+    }
+    .coffee-mug::after {
+      content: "";
+      position: absolute;
+      left: 6px;
+      top: -17px;
+      width: 4px;
+      height: 11px;
+      background: rgba(255,255,255,.7);
+      box-shadow: 8px -5px 0 rgba(255,255,255,.45);
+      animation: steam 1.1s steps(3) infinite;
+    }
+
+    .character {
+      position: absolute;
+      z-index: 5;
+      width: 92px;
+      height: 186px;
+      bottom: 27%;
+      transform-origin: bottom center;
+    }
+
+    .character-shadow {
+      position: absolute;
+      z-index: 0;
+      left: 5px;
+      bottom: -8px;
+      width: 84px;
+      height: 18px;
+      background: rgba(16,23,51,.34);
+      border: 4px solid rgba(16,23,51,.2);
+      transform: skewX(-18deg);
+    }
+
+    .character .head {
+      position: absolute;
+      z-index: 3;
+      top: 10px;
+      left: 19px;
+      width: 57px;
+      height: 59px;
+      background: #d78c5f;
+      border: 5px solid var(--shadow);
+      box-shadow: inset -6px -5px 0 #b45f47;
+    }
+    .character .head::before {
+      content: "";
+      position: absolute;
+      left: -11px;
+      top: 24px;
+      width: 8px;
+      height: 15px;
+      background: #d78c5f;
+      border: 3px solid var(--shadow);
+      box-shadow: 57px 0 0 -3px #d78c5f, 57px 0 0 0 var(--shadow);
+    }
+    .character .head::after {
+      content: "";
+      position: absolute;
+      z-index: 7;
+      left: 25px;
+      top: 35px;
+      width: 8px;
+      height: 5px;
+      background: #b45f47;
+    }
+
+    .character .hair {
+      position: absolute;
+      z-index: 4;
+      top: 3px;
+      left: 15px;
+      width: 65px;
+      height: 26px;
+      background: #3b292c;
+      border: 5px solid var(--shadow);
+      box-shadow: inset -7px -5px 0 #231a22;
+    }
+    .character .hair::after {
+      content: "";
+      position: absolute;
+      right: -5px;
+      bottom: -20px;
+      width: 13px;
+      height: 25px;
+      background: #3b292c;
+      border-right: 5px solid var(--shadow);
+    }
+
+    .eye {
+      position: absolute;
+      z-index: 6;
+      top: 39px;
+      width: 6px;
+      height: 7px;
+      background: var(--shadow);
+    }
+    .eye.left { left: 32px; }
+    .eye.right { left: 56px; }
+    .eye::after {
+      content: "";
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      top: 1px;
+      left: 1px;
+      background: var(--white);
+    }
+
+    .mouth {
+      position: absolute;
+      z-index: 6;
+      top: 57px;
+      left: 42px;
+      width: 14px;
+      height: 5px;
+      background: var(--red-dark);
+    }
+
+    .character .body {
+      position: absolute;
+      top: 66px;
+      left: 12px;
+      width: 74px;
+      height: 82px;
+      background: var(--blue);
+      border: 5px solid var(--shadow);
+      box-shadow: inset -8px -7px 0 var(--blue-dark);
+    }
+    .character .body::before,
+    .character .body::after {
+      content: "";
+      position: absolute;
+      width: 20px;
+      height: 65px;
+      top: 5px;
+      background: #d78c5f;
+      border: 5px solid var(--shadow);
+    }
+    .character .body::before { left: -24px; transform: rotate(5deg); }
+    .character .body::after { right: -24px; transform: rotate(-5deg); }
+
+    .collar {
+      position: absolute;
+      z-index: 8;
+      left: 21px;
+      top: -5px;
+      width: 28px;
+      height: 20px;
+      background: var(--white);
+      border: 4px solid var(--shadow);
+      clip-path: polygon(0 0, 50% 50%, 100% 0, 100% 52%, 50% 100%, 0 52%);
+    }
+
+    .legs {
+      position: absolute;
+      top: 141px;
+      left: 20px;
+      width: 24px;
+      height: 40px;
+      background: #26345e;
+      border: 5px solid var(--shadow);
+      box-shadow: 31px 0 0 #26345e, 31px 0 0 5px var(--shadow);
+    }
+    .legs::after {
+      content: "";
+      position: absolute;
+      left: -8px;
+      bottom: -9px;
+      width: 30px;
+      height: 11px;
+      background: #171a29;
+      border: 4px solid var(--shadow);
+      box-shadow: 32px 0 0 -4px #171a29, 32px 0 0 0 var(--shadow);
+    }
+
+    .consumer { left: 12%; animation: consumer-enter .55s steps(5) both; }
+    .consumer .body { background: #e04a5d; box-shadow: inset -8px -7px 0 #9f2941; }
+    .consumer[data-variant="1"] .body { background: #9c5ad7; box-shadow: inset -8px -7px 0 #673391; }
+    .consumer[data-variant="2"] .body { background: #2eaf79; box-shadow: inset -8px -7px 0 #176749; }
+    .consumer[data-variant="3"] .body { background: #e9962d; box-shadow: inset -8px -7px 0 #a85821; }
+    .consumer[data-variant="1"] .hair { background: #d38b31; box-shadow: inset -7px -5px 0 #945126; }
+    .consumer[data-variant="2"] .hair { height: 18px; background: #171a29; }
+    .consumer[data-variant="3"] .hair { background: #7789a5; box-shadow: inset -7px -5px 0 #4c5870; }
+    .consumer[data-variant="3"] .head { background: #a76447; box-shadow: inset -6px -5px 0 #7e453b; }
+    .consumer[data-variant="1"] .eye { box-shadow: 0 0 0 3px #26345e; }
+    .consumer[data-variant="2"] .collar { background: var(--yellow); }
+    .consumer[data-variant="3"] .head::before { background: #a76447; box-shadow: 57px 0 0 -3px #a76447, 57px 0 0 0 var(--shadow); }
+
+    .agent { right: 10%; bottom: 30%; transform: scale(.92); }
+    .agent .body { background: var(--blue); }
+    .agent-badge {
+      position: absolute;
+      z-index: 8;
+      top: 87px;
+      left: 34px;
+      width: 18px;
+      height: 21px;
+      background: var(--yellow);
+      border: 3px solid var(--shadow);
+    }
+    .agent-badge::after {
+      content: "§";
+      display: grid;
+      place-items: center;
+      color: var(--blue-dark);
+      font-size: 10px;
+    }
+
+    .consumer.correct { animation: happy-jump .45s steps(4) 2; }
+    .consumer.correct .mouth { height: 8px; border-bottom: 4px solid var(--white); }
+    .consumer.wrong .mouth { height: 8px; background: transparent; border-top: 4px solid var(--red-dark); }
+    .consumer.wrong { animation: sad-wobble .42s steps(4); }
+
+    .speech-ping {
+      position: absolute;
+      z-index: 12;
+      left: 27%;
+      bottom: 59%;
+      width: 42px;
+      height: 37px;
+      display: grid;
+      place-items: center;
+      color: var(--blue-dark);
+      background: var(--white);
+      border: 4px solid var(--shadow);
+      box-shadow: 4px 4px 0 rgba(0,0,0,.2);
+      animation: ping .8s steps(2) infinite;
+    }
+    .speech-ping::after {
+      content: "";
+      position: absolute;
+      bottom: -11px;
+      left: 8px;
+      width: 8px;
+      height: 8px;
+      background: var(--white);
+      border-left: 4px solid var(--shadow);
+      border-bottom: 4px solid var(--shadow);
+    }
+
+    .effect-layer {
+      position: absolute;
+      z-index: 26;
+      left: 22%;
+      bottom: 50%;
+      width: 1px;
+      height: 1px;
+      pointer-events: none;
+    }
+    .effect-layer i {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: var(--yellow);
+      box-shadow: 2px 2px 0 rgba(16,23,51,.45);
+      animation: pixel-burst .72s steps(6) both;
+    }
+    .effect-layer.wrong i { background: var(--red); }
+    .effect-layer i:nth-child(1) { --x: -68px; --y: -52px; }
+    .effect-layer i:nth-child(2) { --x: -34px; --y: -78px; animation-delay: .04s; }
+    .effect-layer i:nth-child(3) { --x: 4px; --y: -86px; }
+    .effect-layer i:nth-child(4) { --x: 44px; --y: -66px; animation-delay: .05s; }
+    .effect-layer i:nth-child(5) { --x: 72px; --y: -32px; }
+    .effect-layer i:nth-child(6) { --x: 82px; --y: 10px; animation-delay: .03s; }
+    .effect-layer i:nth-child(7) { --x: 57px; --y: 48px; }
+    .effect-layer i:nth-child(8) { --x: 17px; --y: 64px; animation-delay: .04s; }
+    .effect-layer i:nth-child(9) { --x: -26px; --y: 57px; }
+    .effect-layer i:nth-child(10) { --x: -62px; --y: 35px; animation-delay: .06s; }
+    .effect-layer i:nth-child(11) { --x: -82px; --y: 0px; }
+    .effect-layer i:nth-child(12) { --x: 18px; --y: -46px; animation-delay: .08s; }
+
+    /* Refinamento do cenário: profundidade, proporção e leitura visual. */
+    .room-light { display: none; }
+    .file-cabinet { display: none; }
+
+    .window {
+      box-shadow: 0 0 0 4px var(--shadow), inset 0 0 0 4px #a36346, inset 16px 0 0 rgba(255,255,255,.10);
+    }
+
+    .city {
+      height: 50%;
+      background: linear-gradient(#9debf2, #6cbfd4);
+      overflow: hidden;
+    }
+    .city::before {
+      inset: auto 0 0;
+      height: 45%;
+      opacity: .65;
+      background: linear-gradient(90deg, #6782a8 0 12%, transparent 12% 17%, #7b93b2 17% 29%, transparent 29% 34%, #5f7da5 34% 48%, transparent 48% 54%, #8299b7 54% 69%, transparent 69% 74%, #647fa6 74% 87%, transparent 87% 91%, #758eaf 91%);
+    }
+    .city::after {
+      content: "";
+      position: absolute;
+      z-index: 4;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 8px;
+      background: #33456f;
+      box-shadow: 0 -4px 0 var(--shadow);
+    }
+    .tower {
+      position: absolute;
+      z-index: 3;
+      bottom: 7px;
+      width: 16%;
+      background: #2f4f88;
+      border: 3px solid var(--shadow);
+      border-bottom: 0;
+      box-shadow: inset -5px 0 0 #213a6c;
+    }
+    .tower::before {
+      content: "";
+      position: absolute;
+      inset: 8px 5px 5px;
+      background: repeating-linear-gradient(0deg, var(--yellow) 0 5px, transparent 5px 13px), repeating-linear-gradient(90deg, transparent 0 6px, #2f4f88 6px 11px);
+      opacity: .9;
+    }
+    .tower-a { left: 4%; height: 66%; }
+    .tower-b { left: 23%; height: 44%; background: #466ba0; }
+    .tower-c { left: 43%; height: 76%; width: 19%; }
+    .tower-d { left: 66%; height: 53%; background: #3c6097; }
+    .tower-e { right: 1%; height: 70%; width: 15%; }
+
+    .notice-board {
+      background: #9d613f;
+      box-shadow: 0 0 0 3px var(--shadow), inset 0 0 0 5px #c48355;
+    }
+    .notice-board::before,
+    .notice-board::after {
+      z-index: 3;
+      box-shadow: 3px 3px 0 rgba(16,23,51,.22);
+    }
+    .notice-board i {
+      position: absolute;
+      z-index: 2;
+      width: 36%;
+      height: 37%;
+      background: #fff8df;
+      border: 2px solid var(--shadow);
+      box-shadow: inset 0 -5px 0 var(--paper-2);
+    }
+    .notice-board i::before {
+      content: "";
+      position: absolute;
+      left: 7px;
+      right: 7px;
+      top: 9px;
+      height: 3px;
+      background: #8c96aa;
+      box-shadow: 0 8px 0 #8c96aa, 0 16px 0 #8c96aa;
+    }
+    .notice-board i::after {
+      content: "";
+      position: absolute;
+      top: -5px;
+      left: 50%;
+      width: 7px;
+      height: 7px;
+      background: var(--red);
+      border: 2px solid var(--shadow);
+    }
+    .notice-board i:nth-child(1) { left: 8%; bottom: 10%; transform: rotate(2deg); }
+    .notice-board i:nth-child(2) { right: 8%; top: 12%; transform: rotate(-2deg); }
+
+    .wall-clock {
+      left: 54%;
+      top: 8%;
+      width: 60px;
+      height: 42px;
+      background: #dce4e4;
+      box-shadow: inset -5px -5px 0 #8d9bad, 4px 4px 0 rgba(0,0,0,.18);
+    }
+    .wall-clock::before {
+      content: "09:00";
+      inset: 7px 8px 8px;
+      width: auto;
+      height: auto;
+      display: grid;
+      place-items: center;
+      background: var(--ink);
+      color: var(--cyan);
+      font-size: 9px;
+      animation: clock-blink 2s steps(2) infinite;
+    }
+    .wall-clock::after {
+      left: auto;
+      right: 10px;
+      top: 12px;
+      width: 3px;
+      height: 3px;
+      background: var(--red);
+      box-shadow: none;
+    }
+
+    .floor {
+      background: conic-gradient(#d3a066 25%, #e2bb7e 0 50%, #d3a066 0 75%, #e2bb7e 0) 0 0 / 42px 42px;
+      box-shadow: inset 0 12px 0 rgba(92,55,43,.12);
+    }
+
+    .counter {
+      left: 7%;
+      right: 6%;
+      bottom: 6%;
+      height: 23%;
+      background: linear-gradient(#8c563c 0 10px, #74442f 10px 100%);
+      box-shadow: inset 0 9px 0 #a96d43, inset 0 -10px 0 #4b2c29, 10px 11px 0 rgba(16,23,51,.18);
+    }
+    .counter::before {
+      z-index: 3;
+      top: 34%;
+      padding: 11px 18px;
+      background: #fff8df;
+      box-shadow: inset -5px -5px 0 var(--paper-2), 4px 4px 0 rgba(16,23,51,.2);
+    }
+    .counter::after {
+      content: "";
+      position: absolute;
+      z-index: 1;
+      inset: 20px 28px;
+      border: 4px solid #563127;
+      box-shadow: inset 0 0 0 5px rgba(169,109,67,.32);
+    }
+    .counter-top {
+      bottom: 28.5%;
+      height: 24px;
+      background: linear-gradient(#d58b5d 0 7px, #a86246 7px 100%);
+      box-shadow: inset 0 -5px 0 #704033, 7px 7px 0 rgba(16,23,51,.18);
+    }
+
+    .character {
+      --skin: #d78c5f;
+      --skin-dark: #b45f47;
+      --shirt: var(--blue);
+      --shirt-dark: var(--blue-dark);
+    }
+    .character .head {
+      background: var(--skin);
+      box-shadow: inset -6px -5px 0 var(--skin-dark);
+    }
+    .character .head::before {
+      background: var(--skin);
+      box-shadow: 57px 0 0 -3px var(--skin), 57px 0 0 0 var(--shadow);
+    }
+    .character .head::after { background: var(--skin-dark); }
+    .character .body {
+      background: var(--shirt);
+      box-shadow: inset -8px -7px 0 var(--shirt-dark);
+    }
+    .character .body::before,
+    .character .body::after {
+      width: 16px;
+      height: 57px;
+      top: 9px;
+      background: linear-gradient(var(--shirt) 0 41%, var(--skin) 41% 100%);
+      border-width: 4px;
+      box-shadow: inset 0 -6px 0 var(--skin-dark);
+    }
+    .character .body::before { left: -19px; transform: rotate(6deg); }
+    .character .body::after { right: -19px; transform: rotate(-6deg); }
+
+    .consumer {
+      --shirt: #e04a5d;
+      --shirt-dark: #9f2941;
+      --char-scale: .9;
+      z-index: 5;
+      left: 12%;
+      bottom: 28.5%;
+      transform: scale(.9);
+      transform-origin: bottom center;
+    }
+    .consumer .body,
+    .consumer[data-variant="1"] .body,
+    .consumer[data-variant="2"] .body,
+    .consumer[data-variant="3"] .body { background: var(--shirt); box-shadow: inset -8px -7px 0 var(--shirt-dark); }
+    .consumer[data-variant="1"] { --shirt: #9c5ad7; --shirt-dark: #673391; }
+    .consumer[data-variant="2"] { --shirt: #2eaf79; --shirt-dark: #176749; }
+    .consumer[data-variant="3"] { --shirt: #e9962d; --shirt-dark: #a85821; --skin: #a76447; --skin-dark: #7e453b; }
+    .consumer[data-variant="3"] .head { background: var(--skin); box-shadow: inset -6px -5px 0 var(--skin-dark); }
+    .consumer[data-variant="3"] .head::before { background: var(--skin); box-shadow: 57px 0 0 -3px var(--skin), 57px 0 0 0 var(--shadow); }
+
+    .agent {
+      --shirt: var(--blue);
+      --shirt-dark: var(--blue-dark);
+      right: 11%;
+      bottom: 28.5%;
+      transform: scale(.88);
+    }
+    .agent .body { background: var(--shirt); box-shadow: inset -8px -7px 0 var(--shirt-dark); }
+    .agent-badge { top: 89px; left: 36px; }
+
+    .speech-ping { left: 26%; bottom: 59%; }
+    .effect-layer { left: 21%; bottom: 56%; }
+
+    .computer {
+      right: 20%;
+      bottom: 33.5%;
+      transform: scale(.94);
+      transform-origin: bottom center;
+    }
+    .keyboard { right: 7%; bottom: 31%; }
+    .pixel-plant { right: 2.5%; bottom: 30.5%; transform: scale(.9); transform-origin: bottom center; }
+    .coffee-mug { left: 39%; bottom: 33%; }
+    .papers { left: 47%; bottom: 33%; }
+
+    .dialog-wrap { display: flex; flex-direction: column; min-width: 0; }
+
+    .case-tag {
+      align-self: flex-start;
+      margin-left: 14px;
+      margin-bottom: -4px;
+      padding: 8px 13px;
+      background: var(--red);
+      color: var(--white);
+      border: 4px solid var(--shadow);
+      box-shadow: inset -4px -4px 0 var(--red-dark);
+      font-size: 12px;
+      z-index: 2;
+    }
+
+    .dialog-box {
+      flex: 1;
+      min-height: 470px;
+      display: flex;
+      flex-direction: column;
+      color: var(--ink);
+      background: var(--paper);
+      border: 5px solid var(--shadow);
+      box-shadow: inset 0 0 0 5px var(--paper-2), 7px 7px 0 rgba(0,0,0,.26);
+      padding: clamp(23px, 3vw, 36px);
+      position: relative;
+      overflow: hidden;
+      animation: dialog-in .35s steps(4) both;
+    }
+
+    .dialog-box::before {
+      content: "";
+      width: 14px;
+      height: 14px;
+      position: absolute;
+      right: 16px;
+      top: 16px;
+      background: var(--blue);
+      box-shadow: -18px 0 0 var(--cyan);
+    }
+
+    .speaker {
+      color: var(--blue-dark);
+      font-size: 11px;
+      letter-spacing: .13em;
+      margin: 0 0 16px;
+    }
+
+    .question-text {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: clamp(19px, 2.3vw, 27px);
+      line-height: 1.35;
+      font-weight: 800;
+      color: #1d294d;
+      flex: 1;
+    }
+
+    .question-text::before { content: "“"; color: var(--blue); }
+    .question-text::after { content: "”"; color: var(--blue); }
+
+    .instruction {
+      color: #69728a;
+      font-size: 10px;
+      line-height: 1.4;
+      margin: 22px 0 10px;
+      letter-spacing: .06em;
+    }
+
+    .answer-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .answer-button {
+      border: 4px solid var(--shadow);
+      color: var(--white);
+      min-height: 62px;
+      padding: 12px 9px;
+      cursor: pointer;
+      box-shadow: 5px 5px 0 var(--shadow);
+      transition: filter .1s;
+      text-shadow: 2px 2px 0 rgba(0,0,0,.25);
+    }
+    .answer-button:hover:not(:disabled) { filter: brightness(1.14); transform: translate(-1px, -1px); }
+    .answer-button:active:not(:disabled) { transform: translate(4px, 4px); box-shadow: 1px 1px 0 var(--shadow); }
+    .answer-button:disabled { cursor: default; opacity: .54; }
+    .answer-button.true { background: var(--green); box-shadow: inset -5px -5px 0 var(--green-dark), 5px 5px 0 var(--shadow); }
+    .answer-button.false { background: var(--red); box-shadow: inset -5px -5px 0 var(--red-dark), 5px 5px 0 var(--shadow); }
+    .answer-button.reveal-correct { opacity: 1; animation: selected-correct .55s steps(4); outline: 4px solid var(--yellow); outline-offset: -8px; }
+    .answer-button.selected-wrong { opacity: 1; animation: shake .35s steps(5); }
+
+    .button-key { opacity: .74; font-size: 10px; display: block; margin-top: 4px; }
+
+    .feedback {
+      margin-top: 18px;
+      border: 4px solid var(--shadow);
+      padding: 16px;
+      background: #fff;
+      box-shadow: 5px 5px 0 #a9b5d1;
+      animation: feedback-in .28s steps(4) both;
+    }
+    .feedback[hidden] { display: none; }
+    .feedback.correct { border-color: var(--green-dark); background: #dcf7e5; box-shadow: 5px 5px 0 var(--green-dark); }
+    .feedback.wrong { border-color: var(--red-dark); background: #ffe1e1; box-shadow: 5px 5px 0 var(--red-dark); }
+
+    .feedback-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .feedback-title { font-size: clamp(17px, 2.5vw, 22px); }
+    .feedback.correct .feedback-title { color: var(--green-dark); }
+    .feedback.wrong .feedback-title { color: var(--red-dark); }
+    .points-earned { color: var(--blue-dark); font-size: 13px; white-space: nowrap; }
+    .feedback-text { margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; line-height: 1.46; color: #334064; }
+    .next-button { width: 100%; margin-top: 15px; padding: 12px; }
+
+    .score-float {
+      position: absolute;
+      z-index: 20;
+      right: 36%;
+      bottom: 48%;
+      color: var(--yellow);
+      font-size: 25px;
+      text-shadow: 3px 3px 0 var(--shadow);
+      pointer-events: none;
+      animation: score-float .8s steps(7) both;
+    }
+
+    .final-card { max-width: 850px; }
+    .final-stamp {
+      width: 106px;
+      height: 106px;
+      margin: 0 auto 20px;
+      display: grid;
+      place-items: center;
+      color: var(--yellow);
+      background: var(--blue);
+      border: 6px solid var(--shadow);
+      box-shadow: inset -8px -8px 0 var(--blue-dark), 8px 8px 0 var(--shadow);
+      font-size: 52px;
+      animation: medal-pop .6s steps(6) both;
+      position: relative;
+      z-index: 1;
+    }
+
+    .rank-label {
+      display: inline-block;
+      max-width: 100%;
+      background: var(--red);
+      color: #fff;
+      border: 4px solid var(--shadow);
+      box-shadow: inset -5px -5px 0 var(--red-dark);
+      padding: 10px 16px;
+      margin-bottom: 24px;
+      font-size: clamp(12px, 2.5vw, 20px);
+      position: relative;
+      z-index: 1;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin: 0 0 26px;
+      position: relative;
+      z-index: 1;
+    }
+    .result-item { background: #fff; border: 3px solid var(--ink); padding: 13px 5px; box-shadow: 4px 4px 0 #b9c7e7; }
+    .result-item span { display: block; color: #68738f; font-size: 9px; margin-bottom: 6px; }
+    .result-item strong { font-size: clamp(17px, 3vw, 26px); color: var(--blue-dark); }
+
+    .final-actions {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 13px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .review-button {
+      border: 4px solid var(--shadow);
+      background: var(--cyan);
+      color: var(--ink);
+      padding: 15px 22px;
+      box-shadow: inset -6px -6px 0 #2699ae, 6px 6px 0 var(--shadow);
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .review-button:hover { transform: translate(-2px, -2px); box-shadow: inset -6px -6px 0 #2699ae, 8px 8px 0 var(--shadow); }
+
+    .review-panel {
+      margin: 28px 0 0;
+      max-height: 340px;
+      overflow-y: auto;
+      text-align: left;
+      background: #e6edf8;
+      border: 4px solid var(--ink);
+      box-shadow: inset 0 0 0 4px #b9c7e7, 6px 6px 0 #7382a6;
+      padding: 20px;
+      position: relative;
+      z-index: 2;
+    }
+    .review-panel[hidden] { display: none; }
+    .review-panel h3 {
+      margin: 0 0 16px;
+      color: var(--blue-dark);
+      font-size: 16px;
+      letter-spacing: .05em;
+      text-align: center;
+    }
+    .review-item {
+      background: var(--white);
+      border: 3px solid var(--ink);
+      box-shadow: 4px 4px 0 #9aa8c8;
+      padding: 14px;
+      margin-bottom: 13px;
+    }
+    .review-item:last-child { margin-bottom: 0; }
+    .review-item strong {
+      display: block;
+      color: var(--red-dark);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 14px;
+      line-height: 1.35;
+      margin-bottom: 7px;
+    }
+    .review-item p {
+      margin: 0;
+      color: #43506c;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .disclaimer {
+      max-width: 700px;
+      margin: 20px auto 0;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 11px;
+      line-height: 1.4;
+      color: #68738f;
+      position: relative;
+      z-index: 1;
+    }
+
+    .confetti { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+    .confetti i {
+      position: absolute;
+      top: -20px;
+      width: 9px;
+      height: 14px;
+      background: var(--yellow);
+      animation: confetti-fall 2.8s steps(10) infinite;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @keyframes ticker { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
+    @keyframes cover-clouds { to { transform: translateX(42px); } }
+    @keyframes cover-car { 0% { transform: translateX(-95px); } 72%, 100% { transform: translateX(500px); } }
+    @keyframes flag-wave { 50% { width: 32px; } }
+    @keyframes consumer-enter { from { transform: translateX(-220px) scale(var(--char-scale, 1)); } to { transform: translateX(0) scale(var(--char-scale, 1)); } }
+    @keyframes dialog-in { from { transform: scaleY(.06); opacity: .3; } to { transform: scaleY(1); opacity: 1; } }
+    @keyframes cloud { to { transform: translateX(70px); } }
+    @keyframes screen-glow { 50% { color: var(--white); background: #194ca7; } }
+    @keyframes ping { 50% { transform: translateY(-5px); } }
+    @keyframes combo-pop { 0% { transform: scale(0) rotate(-8deg); } 70% { transform: scale(1.18) rotate(3deg); } 100% { transform: scale(1); } }
+    @keyframes happy-jump { 0%,100% { transform: translateY(0) scale(var(--char-scale, 1)); } 50% { transform: translateY(-15px) scale(var(--char-scale, 1)); } }
+    @keyframes sad-wobble { 0%,100% { transform: rotate(0) scale(var(--char-scale, 1)); } 25% { transform: rotate(-4deg) scale(var(--char-scale, 1)); } 75% { transform: rotate(4deg) scale(var(--char-scale, 1)); } }
+    @keyframes selected-correct { 50% { filter: brightness(1.5); transform: scale(1.035); } }
+    @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 50% { transform: translateX(8px); } 75% { transform: translateX(-5px); } }
+    @keyframes feedback-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes score-float { 0% { opacity: 0; transform: translateY(10px) scale(.7); } 20% { opacity: 1; } 100% { opacity: 0; transform: translateY(-75px) scale(1.2); } }
+    @keyframes medal-pop { from { transform: scale(0) rotate(-20deg); } to { transform: scale(1) rotate(0); } }
+    @keyframes confetti-fall { to { transform: translateY(780px) rotate(270deg); } }
+    @keyframes clock-hand { to { transform: rotate(360deg); } }
+    @keyframes clock-blink { 50% { color: var(--white); } }
+    @keyframes steam { 50% { transform: translateY(-6px); opacity: .35; } }
+    @keyframes office-flash { 0% { opacity: 0; } 35% { opacity: 1; } 100% { opacity: 0; } }
+    @keyframes pixel-burst { from { transform: translate(0, 0) scale(1.35); opacity: 1; } to { transform: translate(var(--x), var(--y)) scale(.2) rotate(90deg); opacity: 0; } }
+
+    @media (max-width: 850px) {
+      .ticker { display: none; }
+      .topbar { justify-content: space-between; }
+      .game-layout { grid-template-columns: 1fr; }
+      .office { min-height: 390px; }
+      .dialog-box { min-height: 380px; }
+      .character { bottom: 26%; transform: scale(.82); }
+      .consumer { --char-scale: .82; left: 14%; z-index: 5; }
+      .agent { right: 10%; bottom: 28%; transform: scale(.76); }
+      .speech-ping { left: 28%; bottom: 58%; }
+      .effect-layer { left: 23%; bottom: 55%; }
+      .hud { grid-template-columns: repeat(4, 1fr); }
+      .combo-badge { position: absolute; z-index: 30; top: 89px; left: 50%; transform: translateX(-50%) scale(0); }
+      .combo-badge.show { animation: combo-pop-mobile .35s steps(3) forwards; }
+      @keyframes combo-pop-mobile { 0% { transform: translateX(-50%) scale(0); } 100% { transform: translateX(-50%) scale(1); } }
+    }
+
+    @media (max-width: 560px) {
+      .shell { width: 100%; margin: 0; }
+      .cabinet { min-height: 100dvh; border-left: 0; border-right: 0; box-shadow: none; }
+      .topbar { min-height: 62px; padding: 8px 12px; }
+      .brand-mark { width: 36px; height: 36px; font-size: 22px; }
+      .brand-subtitle { display: none; }
+      .sound-button { height: 40px; min-width: 44px; }
+      .start-screen, .intro-screen, .final-screen { padding: 28px 20px 40px; }
+      .start-card, .intro-card, .final-card { padding: 34px 22px; box-shadow: 0 0 0 4px var(--yellow), 0 0 0 8px var(--shadow), 8px 10px 0 rgba(0,0,0,.25); }
+      .rules { grid-template-columns: 1fr; gap: 8px; }
+      .rule { display: flex; align-items: center; gap: 12px; text-align: left; padding: 10px 12px; }
+      .rule b { margin: 0; min-width: 38px; }
+      .hud { gap: 3px; padding: 6px; }
+      .hud-item { padding: 7px 4px; border-width: 2px; text-align: center; }
+      .hud-label { font-size: 7px; }
+      .hud-value { font-size: 14px; }
+      .game-layout { padding: 7px; gap: 12px; }
+      .office { min-height: 310px; border-width: 4px; }
+      .room-light, .file-cabinet, .pixel-plant { display: none; }
+      .window { height: 31%; border-width: 5px; }
+      .procon-sign { top: 7%; border-width: 4px; padding: 10px 5px; }
+      .notice-board { display: none; }
+      .character { transform: scale(.63); bottom: 22%; }
+      .consumer { --char-scale: .63; left: 9%; transform-origin: bottom left; }
+      .agent { right: 5%; transform: scale(.58); bottom: 25%; transform-origin: bottom right; }
+      .computer { transform: scale(.7); transform-origin: bottom right; right: 17%; bottom: 35%; }
+      .papers { transform: scale(.72); left: 42%; bottom: 35%; }
+      .keyboard { transform: scale(.65) skewX(-9deg); transform-origin: bottom right; right: 5%; }
+      .coffee-mug { transform: scale(.7); left: 34%; }
+      .speech-ping { transform: scale(.76); left: 28%; bottom: 58%; }
+      .counter::before { padding: 7px 9px; border-width: 3px; }
+      .dialog-box { min-height: 430px; padding: 28px 20px 22px; border-width: 4px; }
+      .question-text { font-size: 20px; }
+      .answer-buttons { grid-template-columns: 1fr; gap: 10px; }
+      .answer-button { min-height: 56px; }
+      .result-grid { grid-template-columns: 1fr 1fr; }
+      .final-actions { flex-direction: column; }
+      .final-actions button { width: 100%; }
+      .review-panel { padding: 14px; max-height: 300px; }
+      .score-float { right: 27%; bottom: 48%; }
+      .cover-art { width: 100%; height: auto; }
+      .cover-building { transform: translateX(-50%) scale(.82); transform-origin: bottom center; }
+      .cover-flag { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="scanlines" aria-hidden="true"></div>
+  <main class="shell">
+    <section class="cabinet" aria-label="Jogo Missão PROCON">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">§</div>
+          <div>
+            <div class="brand-title">MISSÃO PROCON</div>
+            <div class="brand-subtitle">DEFESA DO CONSUMIDOR</div>
+          </div>
+        </div>
+        <div class="ticker" aria-hidden="true"><span>ORIENTAR • INFORMAR • PROTEGER • EQUILIBRAR AS RELAÇÕES DE CONSUMO •&nbsp;</span></div>
+        <button class="sound-button" id="soundButton" type="button" aria-label="Desligar som" aria-pressed="true" title="Ligar ou desligar som">♫</button>
+      </header>
+
+      <section class="screen start-screen" id="startScreen">
+        <div class="start-card">
+          <img class="cover-art" src="procon-cover-v2.png" width="1790" height="878" alt="Fachada em pixel art de um posto do PROCON, com consumidor, agente, bicicleta e carro">
+          <span class="tiny-label">ARQUIVO 01 • TREINAMENTO OFICIAL</span>
+          <h1>MISSÃO<br>PROCON</h1>
+          <p class="mission-line">DEFENDA. ORIENTE. RESOLVA.</p>
+          <p class="start-copy">Você foi convocado para o plantão de atendimento. Analise dez casos, identifique direitos básicos do consumidor e conquiste sua credencial de fiscal.</p>
+          <button class="primary-button" id="startButton" type="button">INICIAR FISCALIZAÇÃO</button>
+          <p class="key-help">CONTROLES: <kbd>V</kbd> VERDADEIRO &nbsp; <kbd>F</kbd> FALSO &nbsp; <kbd>ENTER</kbd> CONTINUAR</p>
+        </div>
+      </section>
+
+      <section class="screen intro-screen" id="introScreen" hidden>
+        <div class="intro-card">
+          <div class="intro-icon" aria-hidden="true">!</div>
+          <span class="tiny-label">BRIEFING DA MISSÃO</span>
+          <h2>ATENÇÃO, NOVO FISCAL!</h2>
+          <p class="intro-copy">Dez consumidores estão a caminho. Decida se cada afirmação é verdadeira ou falsa. Você recebe 100 pontos por acerto e bônus por sequência.</p>
+          <div class="rules" aria-label="Regras da partida">
+            <div class="rule"><b>10</b> CASOS</div>
+            <div class="rule"><b>+100</b> POR ACERTO</div>
+            <div class="rule"><b>COMBO</b> BÔNUS</div>
+          </div>
+          <button class="primary-button" id="briefingButton" type="button">ABRIR O POSTO</button>
+        </div>
+      </section>
+
+      <section class="screen game-screen" id="gameScreen" hidden>
+        <div class="hud" aria-label="Placar da partida">
+          <div class="hud-item"><span class="hud-label">CASO</span><strong class="hud-value" id="caseValue">1/10</strong></div>
+          <div class="hud-item"><span class="hud-label">PONTOS</span><strong class="hud-value" id="scoreValue">0000</strong></div>
+          <div class="hud-item"><span class="hud-label">ACERTOS</span><strong class="hud-value" id="correctValue">0</strong></div>
+          <div class="hud-item"><span class="hud-label">ERROS</span><strong class="hud-value" id="wrongValue">0</strong></div>
+          <div class="combo-badge" id="comboBadge" aria-live="polite">COMBO x2</div>
+        </div>
+        <div class="case-progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+        <div class="game-layout">
+          <div class="office" id="office" aria-label="Posto de atendimento do PROCON em estilo pixel art">
+            <div class="wall-pattern"></div>
+            <div class="room-light" aria-hidden="true"></div>
+            <div class="window" aria-hidden="true">
+              <div class="sun"></div><div class="cloud"></div>
+              <div class="city"><i class="tower tower-a"></i><i class="tower tower-b"></i><i class="tower tower-c"></i><i class="tower tower-d"></i><i class="tower tower-e"></i></div>
+            </div>
+            <div class="procon-sign">PROCON<small>POSTO DE ATENDIMENTO</small></div>
+            <div class="notice-board" aria-hidden="true"><i></i><i></i></div>
+            <div class="wall-clock" aria-hidden="true"></div>
+            <div class="floor"></div>
+            <div class="file-cabinet" aria-hidden="true"><i></i><i></i><i></i></div>
+            <div class="pixel-plant" aria-hidden="true"></div>
+
+            <div class="character consumer" id="consumer" data-variant="0" aria-hidden="true">
+              <span class="character-shadow"></span>
+              <div class="head"></div><div class="hair"></div>
+              <span class="eye left"></span><span class="eye right"></span><span class="mouth"></span>
+              <div class="body"><span class="collar"></span></div><div class="legs"></div>
+            </div>
+            <div class="speech-ping" id="speechPing" aria-hidden="true">?</div>
+
+            <div class="character agent" aria-hidden="true">
+              <span class="character-shadow"></span>
+              <div class="head"></div><div class="hair"></div>
+              <span class="eye left"></span><span class="eye right"></span><span class="mouth"></span>
+              <div class="body"><span class="collar"></span></div><span class="agent-badge"></span><div class="legs"></div>
+            </div>
+
+            <div class="counter"></div><div class="counter-top"></div>
+            <div class="computer" aria-hidden="true"></div><div class="papers" aria-hidden="true"></div>
+            <div class="keyboard" aria-hidden="true"></div><div class="coffee-mug" aria-hidden="true"></div>
+            <div class="effect-layer" id="effectLayer" aria-hidden="true"></div>
+          </div>
+
+          <div class="dialog-wrap">
+            <div class="case-tag" id="caseTag">CASO 01</div>
+            <section class="dialog-box" id="dialogBox" aria-labelledby="speakerLabel">
+              <p class="speaker" id="speakerLabel">RELATO DO CONSUMIDOR</p>
+              <blockquote class="question-text" id="questionText"></blockquote>
+              <p class="instruction" id="instructionText">A AFIRMAÇÃO ESTÁ CORRETA?</p>
+              <div class="answer-buttons" id="answerButtons">
+                <button class="answer-button true" id="trueButton" type="button" data-answer="true">VERDADEIRO <span class="button-key">TECLA V</span></button>
+                <button class="answer-button false" id="falseButton" type="button" data-answer="false">FALSO <span class="button-key">TECLA F</span></button>
+              </div>
+              <div class="feedback" id="feedback" aria-live="assertive" hidden>
+                <div class="feedback-heading">
+                  <strong class="feedback-title" id="feedbackTitle"></strong>
+                  <span class="points-earned" id="pointsEarned"></span>
+                </div>
+                <p class="feedback-text" id="feedbackText"></p>
+                <button class="next-button" id="nextButton" type="button">PRÓXIMO CASO</button>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen final-screen" id="finalScreen" hidden>
+        <div class="confetti" id="confetti" aria-hidden="true"></div>
+        <div class="final-card">
+          <div class="final-stamp" aria-hidden="true">★</div>
+          <span class="tiny-label">MISSÃO CONCLUÍDA</span>
+          <h2>RELATÓRIO FINAL</h2>
+          <div class="rank-label" id="rankLabel">DEFENSOR DO CONSUMIDOR</div>
+          <div class="result-grid" aria-label="Resultado final">
+            <div class="result-item"><span>PONTOS</span><strong id="finalScore">0000</strong></div>
+            <div class="result-item"><span>ACERTOS</span><strong id="finalCorrect">0</strong></div>
+            <div class="result-item"><span>ERROS</span><strong id="finalWrong">0</strong></div>
+            <div class="result-item"><span>APROVEIT.</span><strong id="finalPercent">0%</strong></div>
+          </div>
+          <div class="final-actions">
+            <button class="review-button" id="reviewButton" type="button" hidden>REVISAR ERROS</button>
+            <button class="restart-button" id="restartButton" type="button">JOGAR NOVAMENTE</button>
+          </div>
+          <section class="review-panel" id="reviewPanel" aria-labelledby="reviewTitle" hidden>
+            <h3 id="reviewTitle">CASOS PARA REVISAR</h3>
+            <div id="reviewList"></div>
+          </section>
+          <p class="disclaimer">Conteúdo educativo e informativo. Este jogo não substitui orientação jurídica nem a análise de um caso concreto pelos canais oficiais de defesa do consumidor.</p>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <div class="sr-only" id="liveRegion" aria-live="polite"></div>
+
+  <script>
+    "use strict";
+
+    // Edite ou acrescente novos itens mantendo apenas estes três campos.
+    const questions = [
+      {
+        text: "O PROCON atua na proteção e na orientação dos consumidores.",
+        answer: true,
+        explanation: "O PROCON orienta consumidores e atua na proteção de seus direitos nas relações de consumo."
+      },
+      {
+        text: "O PROCON existe apenas para defender os interesses das empresas.",
+        answer: false,
+        explanation: "O órgão busca proteger o consumidor e contribuir para relações de consumo mais equilibradas."
+      },
+      {
+        text: "Um consumidor pode procurar o PROCON para registrar problemas relacionados a produtos ou serviços.",
+        answer: true,
+        explanation: "Reclamações sobre produtos e serviços estão entre as situações que podem ser levadas ao PROCON."
+      },
+      {
+        text: "O PROCON substitui completamente o Poder Judiciário em qualquer conflito de consumo.",
+        answer: false,
+        explanation: "O PROCON atua na esfera administrativa; determinadas questões podem precisar ser levadas ao Judiciário."
+      },
+      {
+        text: "Propaganda enganosa pode ser um problema relacionado à defesa do consumidor.",
+        answer: true,
+        explanation: "Informações falsas ou capazes de induzir o consumidor ao erro podem caracterizar publicidade enganosa."
+      },
+      {
+        text: "Uma cobrança que o consumidor considera indevida nunca pode ser questionada.",
+        answer: false,
+        explanation: "O consumidor pode pedir esclarecimentos e contestar uma cobrança que considere indevida."
+      },
+      {
+        text: "Em compras realizadas pela internet, o consumidor pode ter direito de arrependimento.",
+        answer: true,
+        explanation: "Nas contratações feitas fora do estabelecimento comercial, o CDC prevê, em regra, direito de arrependimento dentro do prazo legal."
+      },
+      {
+        text: "Uma loja física é sempre obrigada a trocar um produto sem defeito apenas porque o consumidor mudou de ideia.",
+        answer: false,
+        explanation: "A troca por simples mudança de ideia em loja física depende, em geral, da política oferecida pela loja."
+      },
+      {
+        text: "O consumidor deve receber informações claras sobre características, preço e riscos relevantes de um produto.",
+        answer: true,
+        explanation: "A informação clara e adequada é um direito básico do consumidor."
+      },
+      {
+        text: "O preço de um produto pode ser escondido até o momento do pagamento.",
+        answer: false,
+        explanation: "Preços e condições de pagamento devem ser informados de forma clara ao consumidor."
+      },
+      {
+        text: "Guardar nota fiscal, contrato ou comprovante pode ajudar na solução de uma reclamação.",
+        answer: true,
+        explanation: "Documentos e outros registros ajudam a demonstrar a compra, a oferta e o problema relatado."
+      },
+      {
+        text: "O Código de Defesa do Consumidor trata somente de produtos e não se aplica a serviços.",
+        answer: false,
+        explanation: "O CDC alcança relações de consumo envolvendo tanto produtos quanto serviços."
+      },
+      {
+        text: "O fornecedor pode omitir riscos relevantes de um produto porque cabe ao consumidor descobri-los sozinho.",
+        answer: false,
+        explanation: "O consumidor deve receber informação adequada sobre riscos relevantes à saúde e à segurança."
+      },
+      {
+        text: "Em determinadas situações, o consumidor pode exigir que uma oferta anunciada seja cumprida.",
+        answer: true,
+        explanation: "A oferta suficientemente precisa vincula o fornecedor, observadas as circunstâncias do caso."
+      },
+      {
+        text: "É permitido ameaçar ou constranger o consumidor durante a cobrança de uma dívida.",
+        answer: false,
+        explanation: "A cobrança não pode expor o consumidor ao ridículo nem envolver ameaça ou constrangimento."
+      },
+      {
+        text: "A garantia legal de um produto pode existir mesmo sem um certificado de garantia contratual.",
+        answer: true,
+        explanation: "A garantia legal decorre da lei e não depende de um documento oferecido pelo fornecedor."
+      },
+      {
+        text: "O PROCON pode fiscalizar o cumprimento de normas de proteção ao consumidor.",
+        answer: true,
+        explanation: "A fiscalização das relações de consumo faz parte da atuação administrativa dos órgãos de defesa do consumidor."
+      },
+      {
+        text: "O PROCON pode prender diretamente um fornecedor sempre que recebe uma reclamação.",
+        answer: false,
+        explanation: "O PROCON exerce funções administrativas e não realiza prisões por conta própria."
+      },
+      {
+        text: "Uma empresa pode alterar unilateralmente um contrato de consumo sem informar o cliente em nenhuma situação.",
+        answer: false,
+        explanation: "Alterações contratuais devem respeitar o dever de informação e não podem criar desequilíbrio abusivo."
+      },
+      {
+        text: "Comparar ofertas e ler as condições antes de contratar são atitudes úteis de consumo consciente.",
+        answer: true,
+        explanation: "Informação e comparação ajudam o consumidor a tomar decisões mais seguras."
+      },
+      {
+        text: "Se um serviço apresentar problema, o consumidor não pode pedir esclarecimentos ao fornecedor.",
+        answer: false,
+        explanation: "O consumidor pode contatar o fornecedor, relatar o problema e buscar uma solução adequada."
+      },
+      {
+        text: "Bancos, operadoras de telefonia e empresas de energia podem participar de relações de consumo.",
+        answer: true,
+        explanation: "Serviços financeiros, de telecomunicações e de fornecimento essencial podem envolver relações de consumo."
+      },
+      {
+        text: "Uma promoção pode apresentar condições importantes apenas em letras ilegíveis.",
+        answer: false,
+        explanation: "Condições relevantes devem ser apresentadas de forma clara, legível e compreensível."
+      },
+      {
+        text: "Tentar resolver o problema diretamente com a empresa e guardar o protocolo pode ser útil antes ou durante uma reclamação.",
+        answer: true,
+        explanation: "O contato e o protocolo registram a tentativa de solução e podem ajudar no atendimento do caso."
+      },
+      {
+        text: "Direitos do consumidor e deveres dos fornecedores ajudam a equilibrar as relações de consumo.",
+        answer: true,
+        explanation: "As regras de proteção buscam reduzir vulnerabilidades e promover equilíbrio entre consumidores e fornecedores."
+      },
+      {
+        text: "Uma informação importante pode ser escondida do consumidor se o contrato for muito longo.",
+        answer: false,
+        explanation: "O tamanho do contrato não elimina o dever de apresentar informações importantes com clareza."
+      }
+    ];
+
+    const TOTAL_CASES = 10;
+    const BASE_POINTS = 100;
+    const screens = {
+      start: document.getElementById("startScreen"),
+      intro: document.getElementById("introScreen"),
+      game: document.getElementById("gameScreen"),
+      final: document.getElementById("finalScreen")
+    };
+
+    const ui = {
+      startButton: document.getElementById("startButton"),
+      briefingButton: document.getElementById("briefingButton"),
+      restartButton: document.getElementById("restartButton"),
+      soundButton: document.getElementById("soundButton"),
+      trueButton: document.getElementById("trueButton"),
+      falseButton: document.getElementById("falseButton"),
+      nextButton: document.getElementById("nextButton"),
+      caseValue: document.getElementById("caseValue"),
+      scoreValue: document.getElementById("scoreValue"),
+      correctValue: document.getElementById("correctValue"),
+      wrongValue: document.getElementById("wrongValue"),
+      comboBadge: document.getElementById("comboBadge"),
+      progressBar: document.getElementById("progressBar"),
+      caseTag: document.getElementById("caseTag"),
+      questionText: document.getElementById("questionText"),
+      instructionText: document.getElementById("instructionText"),
+      answerButtons: document.getElementById("answerButtons"),
+      feedback: document.getElementById("feedback"),
+      feedbackTitle: document.getElementById("feedbackTitle"),
+      pointsEarned: document.getElementById("pointsEarned"),
+      feedbackText: document.getElementById("feedbackText"),
+      consumer: document.getElementById("consumer"),
+      speechPing: document.getElementById("speechPing"),
+      office: document.getElementById("office"),
+      effectLayer: document.getElementById("effectLayer"),
+      finalScore: document.getElementById("finalScore"),
+      finalCorrect: document.getElementById("finalCorrect"),
+      finalWrong: document.getElementById("finalWrong"),
+      finalPercent: document.getElementById("finalPercent"),
+      rankLabel: document.getElementById("rankLabel"),
+      reviewButton: document.getElementById("reviewButton"),
+      reviewPanel: document.getElementById("reviewPanel"),
+      reviewList: document.getElementById("reviewList"),
+      confetti: document.getElementById("confetti"),
+      liveRegion: document.getElementById("liveRegion")
+    };
+
+    let selectedQuestions = [];
+    let currentIndex = 0;
+    let score = 0;
+    let correct = 0;
+    let wrong = 0;
+    let combo = 0;
+    let missedQuestions = [];
+    let answerLocked = false;
+    let activeScreen = "start";
+    let soundEnabled = true;
+    let audioContext = null;
+
+    function showScreen(name) {
+      Object.entries(screens).forEach(([key, element]) => {
+        element.hidden = key !== name;
+      });
+      activeScreen = name;
+      window.scrollTo({ top: 0, behavior: "auto" });
+    }
+
+    function shuffle(items) {
+      const copy = [...items];
+      for (let index = copy.length - 1; index > 0; index -= 1) {
+        const randomIndex = Math.floor(Math.random() * (index + 1));
+        [copy[index], copy[randomIndex]] = [copy[randomIndex], copy[index]];
+      }
+      return copy;
+    }
+
+    function padScore(value) {
+      return String(value).padStart(4, "0");
+    }
+
+    function drawCoverArt() {
+      const canvas = document.getElementById("coverCanvas");
+      if (!canvas || typeof canvas.getContext !== "function") return;
+      const context = canvas.getContext("2d");
+      if (!context) return;
+      context.imageSmoothingEnabled = false;
+
+      const colors = {
+        ink: "#101733", blue: "#2463eb", blueDark: "#14378e", cyan: "#55d9e8",
+        skyLight: "#a9eef1", paper: "#fff8df", paperDark: "#e4cf99", yellow: "#ffd84a",
+        green: "#31b86b", greenDark: "#17663f", red: "#d83a4e", redDark: "#7f1e36",
+        road: "#283654", roadLight: "#425377", sidewalk: "#d6b477", skin: "#d78c5f",
+        hair: "#30232a", white: "#fffdf2", trunk: "#794632"
+      };
+      const rect = (x, y, width, height, color) => {
+        context.fillStyle = color;
+        context.fillRect(x, y, width, height);
+      };
+      const outlined = (x, y, width, height, fill, border = colors.ink, size = 4) => {
+        rect(x, y, width, height, border);
+        rect(x + size, y + size, width - size * 2, height - size * 2, fill);
+      };
+
+      // Céu, horizonte e nuvens em blocos grandes.
+      rect(0, 0, 640, 200, colors.cyan);
+      rect(0, 58, 640, 54, colors.skyLight);
+      rect(32, 22, 62, 12, colors.white); rect(46, 12, 36, 10, colors.white);
+      rect(518, 28, 70, 11, colors.white); rect(538, 18, 34, 10, colors.white);
+      rect(586, 8, 22, 22, colors.yellow); rect(580, 14, 34, 10, colors.yellow);
+
+      // Silhueta distante da cidade.
+      const skyline = [
+        [0, 77, 44, 35, "#607ca8"], [48, 66, 36, 46, "#4e6b99"], [88, 83, 30, 29, "#7189ad"],
+        [500, 74, 38, 38, "#5b77a4"], [542, 61, 48, 51, "#4b6796"], [594, 79, 46, 33, "#6d86ac"]
+      ];
+      skyline.forEach(([x, y, width, height, color]) => {
+        rect(x, y, width, height, color);
+        for (let wx = x + 7; wx < x + width - 4; wx += 12) {
+          for (let wy = y + 8; wy < y + height - 4; wy += 12) rect(wx, wy, 5, 5, "#b9d8d8");
+        }
+      });
+
+      // Prédio do PROCON com fachada, janelas e porta de vidro.
+      rect(132, 27, 376, 91, colors.ink);
+      rect(138, 33, 364, 85, colors.paperDark);
+      rect(146, 40, 348, 78, colors.paper);
+      rect(132, 25, 376, 10, colors.blueDark);
+      rect(126, 21, 388, 7, colors.blue);
+
+      outlined(205, 38, 230, 38, colors.blue);
+      rect(211, 44, 218, 7, "#3677f2");
+      context.fillStyle = colors.white;
+      context.font = "bold 23px 'Courier New', monospace";
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.fillText("PROCON", 320, 59);
+
+      outlined(151, 82, 98, 36, colors.cyan);
+      outlined(391, 82, 98, 36, colors.cyan);
+      rect(198, 86, 5, 28, "#9ceaf0"); rect(438, 86, 5, 28, "#9ceaf0");
+      rect(245, 80, 150, 38, colors.paperDark);
+      outlined(278, 79, 84, 57, "#53cfe0");
+      rect(318, 83, 5, 49, colors.ink);
+      rect(286, 88, 27, 34, "#8be5ea"); rect(328, 88, 26, 34, "#8be5ea");
+      rect(257, 119, 126, 6, colors.ink); rect(268, 125, 104, 6, "#71809a"); rect(280, 131, 80, 5, colors.ink);
+
+      // Totem de atendimento e bandeira.
+      outlined(515, 49, 70, 35, colors.blueDark);
+      context.fillStyle = colors.white;
+      context.font = "bold 9px 'Courier New', monospace";
+      context.fillText("ABERTO", 550, 66);
+      rect(548, 84, 5, 49, colors.ink);
+      rect(553, 88, 31, 17, colors.green);
+      rect(558, 92, 21, 9, colors.yellow);
+      rect(566, 94, 6, 5, colors.blue);
+
+      // Calçada com ladrilhos e faixa de acesso.
+      rect(0, 112, 640, 47, colors.sidewalk);
+      for (let x = 0; x < 640; x += 32) {
+        rect(x, 112, 2, 47, "#b78b5c");
+        if ((x / 32) % 2 === 0) rect(x + 2, 136, 30, 2, "#e3c793");
+      }
+      rect(0, 156, 640, 5, colors.ink);
+      rect(0, 161, 640, 39, colors.road);
+      rect(0, 165, 640, 4, colors.roadLight);
+      for (let x = 26; x < 190; x += 26) rect(x, 175, 16, 20, colors.white);
+      for (let x = 238; x < 400; x += 47) rect(x, 179, 28, 5, colors.yellow);
+
+      // Árvore, canteiro e poste urbano.
+      rect(69, 83, 10, 65, colors.trunk);
+      rect(60, 136, 30, 8, colors.trunk);
+      outlined(42, 132, 64, 25, colors.greenDark);
+      rect(45, 62, 26, 27, colors.greenDark); rect(68, 51, 31, 36, colors.green); rect(36, 79, 52, 29, colors.green);
+      rect(51, 58, 25, 20, "#57cc83"); rect(82, 68, 23, 23, colors.greenDark);
+      rect(600, 55, 6, 94, colors.ink); rect(586, 52, 34, 7, colors.ink);
+      rect(590, 59, 26, 18, colors.yellow); rect(595, 63, 16, 10, colors.white);
+
+      const drawPerson = (x, y, shirt, badge = false) => {
+        rect(x - 6, y + 53, 42, 6, "rgba(16,23,51,.30)");
+        rect(x + 2, y + 39, 10, 17, colors.blueDark); rect(x + 20, y + 39, 10, 17, colors.blueDark);
+        outlined(x, y + 18, 34, 28, shirt, colors.ink, 3);
+        rect(x - 5, y + 23, 7, 22, colors.skin); rect(x + 32, y + 23, 7, 22, colors.skin);
+        outlined(x + 5, y, 24, 22, colors.skin, colors.ink, 3);
+        rect(x + 3, y - 3, 28, 9, colors.hair); rect(x + 6, y + 7, 4, 4, colors.ink); rect(x + 22, y + 7, 4, 4, colors.ink);
+        rect(x + 13, y + 14, 8, 3, colors.redDark);
+        if (badge) { rect(x + 14, y + 24, 7, 9, colors.yellow); rect(x + 16, y + 26, 3, 5, colors.blueDark); }
+      };
+      drawPerson(112, 101, colors.red);
+      drawPerson(468, 101, colors.blue, true);
+
+      // Veículo e bicicleta dão movimento visual à rua.
+      outlined(421, 169, 93, 25, colors.red, colors.ink, 4);
+      rect(437, 160, 48, 13, colors.redDark); rect(444, 163, 17, 8, "#8be5ea"); rect(465, 163, 15, 8, "#8be5ea");
+      rect(435, 189, 17, 9, colors.ink); rect(486, 189, 17, 9, colors.ink);
+      rect(530, 176, 24, 24, "transparent");
+      context.strokeStyle = colors.ink;
+      context.lineWidth = 4;
+      context.strokeRect(530, 174, 18, 18); context.strokeRect(570, 174, 18, 18);
+      context.beginPath(); context.moveTo(539, 183); context.lineTo(559, 165); context.lineTo(579, 183); context.lineTo(550, 183); context.lineTo(563, 174); context.stroke();
+
+      // Moldura interna e pequenos brilhos finalizam o painel.
+      context.strokeStyle = "rgba(255,255,255,.30)";
+      context.lineWidth = 4;
+      context.strokeRect(5, 5, 630, 190);
+      rect(14, 14, 5, 5, colors.white); rect(621, 14, 5, 5, colors.white);
+    }
+
+    function initAudio() {
+      if (!soundEnabled) return null;
+      if (!audioContext) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return null;
+        audioContext = new AudioCtx();
+      }
+      if (audioContext.state === "suspended") audioContext.resume();
+      return audioContext;
+    }
+
+    function playTone(frequency, duration = 0.08, type = "square", volume = 0.035, delay = 0) {
+      const context = initAudio();
+      if (!context) return;
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      const start = context.currentTime + delay;
+      oscillator.type = type;
+      oscillator.frequency.setValueAtTime(frequency, start);
+      gain.gain.setValueAtTime(volume, start);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start(start);
+      oscillator.stop(start + duration);
+    }
+
+    function playSound(name) {
+      if (!soundEnabled) return;
+      if (name === "select") {
+        playTone(330, .05, "square", .025);
+        playTone(440, .05, "square", .025, .05);
+      } else if (name === "correct") {
+        playTone(523, .1, "square", .035);
+        playTone(659, .1, "square", .035, .1);
+        playTone(784, .16, "square", .04, .2);
+      } else if (name === "wrong") {
+        playTone(180, .12, "sawtooth", .035);
+        playTone(125, .22, "sawtooth", .03, .12);
+      } else if (name === "finish") {
+        [392, 523, 659, 784].forEach((note, index) => playTone(note, .18, "square", .032, index * .11));
+      }
+    }
+
+    function startGame() {
+      selectedQuestions = shuffle(questions).slice(0, TOTAL_CASES);
+      currentIndex = 0;
+      score = 0;
+      correct = 0;
+      wrong = 0;
+      combo = 0;
+      missedQuestions = [];
+      answerLocked = false;
+      ui.confetti.replaceChildren();
+      ui.reviewPanel.hidden = true;
+      ui.reviewButton.hidden = true;
+      ui.reviewList.replaceChildren();
+      showScreen("game");
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const question = selectedQuestions[currentIndex];
+      answerLocked = false;
+      ui.caseValue.textContent = `${currentIndex + 1}/${TOTAL_CASES}`;
+      ui.caseTag.textContent = `CASO ${String(currentIndex + 1).padStart(2, "0")}`;
+      ui.questionText.textContent = question.text;
+      ui.instructionText.textContent = "A AFIRMAÇÃO ESTÁ CORRETA?";
+      ui.scoreValue.textContent = padScore(score);
+      ui.correctValue.textContent = correct;
+      ui.wrongValue.textContent = wrong;
+      ui.progressBar.style.width = `${((currentIndex + 1) / TOTAL_CASES) * 100}%`;
+      ui.feedback.hidden = true;
+      ui.feedback.className = "feedback";
+      ui.answerButtons.hidden = false;
+      ui.instructionText.hidden = false;
+      ui.trueButton.disabled = false;
+      ui.falseButton.disabled = false;
+      ui.trueButton.className = "answer-button true";
+      ui.falseButton.className = "answer-button false";
+      ui.consumer.className = "character consumer";
+      ui.office.classList.remove("fx-correct", "fx-wrong");
+      ui.effectLayer.replaceChildren();
+      ui.effectLayer.className = "effect-layer";
+      ui.consumer.dataset.variant = String(currentIndex % 4);
+      ui.speechPing.textContent = "?";
+      ui.comboBadge.classList.remove("show");
+      ui.comboBadge.textContent = `COMBO x${combo}`;
+      if (combo >= 2) ui.comboBadge.classList.add("show");
+      ui.liveRegion.textContent = `Caso ${currentIndex + 1} de ${TOTAL_CASES}. ${question.text}`;
+    }
+
+    function comboBonus(sequence) {
+      if (sequence < 2) return 0;
+      return Math.min((sequence - 1) * 25, 100);
+    }
+
+    function answerQuestion(playerAnswer) {
+      if (answerLocked || activeScreen !== "game") return;
+      answerLocked = true;
+
+      const question = selectedQuestions[currentIndex];
+      const isCorrect = playerAnswer === question.answer;
+      ui.trueButton.disabled = true;
+      ui.falseButton.disabled = true;
+
+      const correctButton = question.answer ? ui.trueButton : ui.falseButton;
+      const chosenButton = playerAnswer ? ui.trueButton : ui.falseButton;
+      correctButton.classList.add("reveal-correct");
+      ui.office.classList.remove("fx-correct", "fx-wrong");
+      void ui.office.offsetWidth;
+      ui.office.classList.add(isCorrect ? "fx-correct" : "fx-wrong");
+      burstEffect(isCorrect);
+
+      if (isCorrect) {
+        combo += 1;
+        correct += 1;
+        const earned = BASE_POINTS + comboBonus(combo);
+        score += earned;
+        ui.feedback.classList.add("correct");
+        ui.feedbackTitle.textContent = "✓ CORRETO!";
+        ui.pointsEarned.textContent = `+${earned} PONTOS`;
+        ui.consumer.classList.add("correct");
+        ui.speechPing.textContent = "!";
+        ui.comboBadge.textContent = `COMBO x${combo}`;
+        playSound("correct");
+        showScoreFloat(earned);
+        if (combo >= 2) {
+          ui.comboBadge.textContent = `COMBO x${combo}`;
+          ui.comboBadge.classList.remove("show");
+          void ui.comboBadge.offsetWidth;
+          ui.comboBadge.classList.add("show");
+        }
+      } else {
+        combo = 0;
+        wrong += 1;
+        missedQuestions.push(question);
+        ui.feedback.classList.add("wrong");
+        ui.feedbackTitle.textContent = "✕ NÃO FOI DESSA VEZ";
+        ui.pointsEarned.textContent = "+0 PONTOS";
+        chosenButton.classList.add("selected-wrong");
+        ui.consumer.classList.add("wrong");
+        ui.speechPing.textContent = "…";
+        ui.comboBadge.classList.remove("show");
+        ui.comboBadge.textContent = "COMBO x0";
+        playSound("wrong");
+      }
+
+      ui.feedbackText.textContent = question.explanation;
+      ui.scoreValue.textContent = padScore(score);
+      ui.correctValue.textContent = correct;
+      ui.wrongValue.textContent = wrong;
+      ui.instructionText.textContent = "RESPOSTA REGISTRADA • CONFIRA A EXPLICAÇÃO";
+      ui.nextButton.textContent = currentIndex === TOTAL_CASES - 1 ? "VER RESULTADO FINAL" : "PRÓXIMO CASO";
+      ui.feedback.hidden = false;
+      ui.liveRegion.textContent = `${ui.feedbackTitle.textContent} ${ui.pointsEarned.textContent}. ${question.explanation}`;
+
+      if (window.innerWidth <= 850) {
+        setTimeout(() => ui.feedback.scrollIntoView({ behavior: "smooth", block: "nearest" }), 100);
+      }
+    }
+
+    function showScoreFloat(amount) {
+      const float = document.createElement("span");
+      float.className = "score-float";
+      float.textContent = `+${amount}`;
+      ui.office.appendChild(float);
+      setTimeout(() => float.remove(), 850);
+    }
+
+    function burstEffect(isCorrect) {
+      ui.effectLayer.replaceChildren();
+      ui.effectLayer.className = `effect-layer ${isCorrect ? "correct" : "wrong"}`;
+      const fragment = document.createDocumentFragment();
+      for (let index = 0; index < 12; index += 1) fragment.appendChild(document.createElement("i"));
+      ui.effectLayer.appendChild(fragment);
+      setTimeout(() => ui.effectLayer.replaceChildren(), 780);
+    }
+
+    function nextCase() {
+      if (!answerLocked || activeScreen !== "game") return;
+      playSound("select");
+      if (currentIndex >= TOTAL_CASES - 1) {
+        showFinal();
+        return;
+      }
+      currentIndex += 1;
+      renderQuestion();
+      if (window.innerWidth <= 850) window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function getRank(totalCorrect) {
+      if (totalCorrect <= 3) return "ESTAGIÁRIO EM TREINAMENTO";
+      if (totalCorrect <= 6) return "FISCAL INICIANTE";
+      if (totalCorrect <= 8) return "DEFENSOR DO CONSUMIDOR";
+      if (totalCorrect === 9) return "ESPECIALISTA DO PROCON";
+      return "LENDÁRIO FISCAL DO CONSUMIDOR";
+    }
+
+    function createConfetti() {
+      const colors = ["#ffd84a", "#55d9e8", "#d83a4e", "#31b86b", "#2463eb"];
+      const fragment = document.createDocumentFragment();
+      for (let index = 0; index < 42; index += 1) {
+        const piece = document.createElement("i");
+        piece.style.left = `${Math.random() * 100}%`;
+        piece.style.background = colors[index % colors.length];
+        piece.style.animationDelay = `${Math.random() * 2.2}s`;
+        piece.style.animationDuration = `${2.2 + Math.random() * 1.5}s`;
+        fragment.appendChild(piece);
+      }
+      ui.confetti.appendChild(fragment);
+    }
+
+    function renderReview() {
+      ui.reviewList.replaceChildren();
+      ui.reviewPanel.hidden = true;
+      ui.reviewButton.textContent = "REVISAR ERROS";
+      ui.reviewButton.setAttribute("aria-expanded", "false");
+      ui.reviewButton.hidden = missedQuestions.length === 0;
+
+      missedQuestions.forEach((question, index) => {
+        const item = document.createElement("article");
+        const title = document.createElement("strong");
+        const explanation = document.createElement("p");
+        item.className = "review-item";
+        title.textContent = `${index + 1}. ${question.text}`;
+        explanation.textContent = question.explanation;
+        item.appendChild(title);
+        item.appendChild(explanation);
+        ui.reviewList.appendChild(item);
+      });
+    }
+
+    function showFinal() {
+      const percent = Math.round((correct / TOTAL_CASES) * 100);
+      ui.finalScore.textContent = padScore(score);
+      ui.finalCorrect.textContent = correct;
+      ui.finalWrong.textContent = wrong;
+      ui.finalPercent.textContent = `${percent}%`;
+      ui.rankLabel.textContent = getRank(correct);
+      renderReview();
+      showScreen("final");
+      createConfetti();
+      playSound("finish");
+      ui.liveRegion.textContent = `Missão concluída. ${getRank(correct)}. ${correct} acertos, ${wrong} erros e ${score} pontos.`;
+      setTimeout(() => ui.restartButton.focus(), 250);
+    }
+
+    ui.startButton.addEventListener("click", () => {
+      initAudio();
+      playSound("select");
+      showScreen("intro");
+      setTimeout(() => ui.briefingButton.focus(), 120);
+    });
+
+    ui.briefingButton.addEventListener("click", () => {
+      playSound("select");
+      startGame();
+    });
+
+    ui.restartButton.addEventListener("click", () => {
+      playSound("select");
+      startGame();
+    });
+
+    ui.trueButton.addEventListener("click", () => answerQuestion(true));
+    ui.falseButton.addEventListener("click", () => answerQuestion(false));
+    ui.nextButton.addEventListener("click", nextCase);
+
+    ui.reviewButton.addEventListener("click", () => {
+      const willOpen = ui.reviewPanel.hidden;
+      ui.reviewPanel.hidden = !willOpen;
+      ui.reviewButton.textContent = willOpen ? "FECHAR REVISÃO" : "REVISAR ERROS";
+      ui.reviewButton.setAttribute("aria-expanded", String(willOpen));
+      if (willOpen) ui.reviewPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+
+    ui.soundButton.addEventListener("click", () => {
+      soundEnabled = !soundEnabled;
+      ui.soundButton.setAttribute("aria-pressed", String(soundEnabled));
+      ui.soundButton.setAttribute("aria-label", soundEnabled ? "Desligar som" : "Ligar som");
+      ui.soundButton.textContent = soundEnabled ? "♫" : "×";
+      if (soundEnabled) playSound("select");
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.repeat) return;
+      if (event.key === "Enter" && event.target?.tagName === "BUTTON") return;
+      const key = event.key.toLowerCase();
+
+      if (activeScreen === "start" && event.key === "Enter") {
+        ui.startButton.click();
+      } else if (activeScreen === "intro" && event.key === "Enter") {
+        ui.briefingButton.click();
+      } else if (activeScreen === "game") {
+        if (!answerLocked && key === "v") answerQuestion(true);
+        if (!answerLocked && key === "f") answerQuestion(false);
+        if (answerLocked && event.key === "Enter") nextCase();
+      } else if (activeScreen === "final" && event.key === "Enter") {
+        ui.restartButton.click();
+      }
+    });
+
+  </script>
+</body>
+</html>
