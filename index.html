@@ -195,6 +195,7 @@
     }
 
     .start-card { width: min(880px, 100%); }
+    .intro-card { width: min(980px, 100%); }
 
     .start-card::before,
     .intro-card::before,
@@ -363,6 +364,14 @@
     .next-button:active,
     .restart-button:active { transform: translate(4px, 4px); box-shadow: inset -3px -3px 0 var(--orange), 2px 2px 0 var(--shadow); }
 
+    .primary-button:disabled {
+      cursor: not-allowed;
+      filter: grayscale(.8);
+      opacity: .55;
+      transform: none;
+      box-shadow: inset -6px -6px 0 #9d9d9d, 6px 6px 0 var(--shadow);
+    }
+
     .key-help {
       margin: 22px 0 0;
       color: #5d6882;
@@ -427,6 +436,40 @@
 
     .rule b { display: block; color: var(--red); font-size: 20px; margin-bottom: 5px; }
 
+    .level-picker {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin: 24px 0 20px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .level-button {
+      min-height: 150px;
+      padding: 18px 14px 15px;
+      text-align: left;
+      color: var(--ink);
+      background: #fff;
+      border: 4px solid var(--ink);
+      box-shadow: 6px 6px 0 #9aa8c8;
+      cursor: pointer;
+      transition: transform .1s, box-shadow .1s, background .1s;
+    }
+    .level-button:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 #7382a6; }
+    .level-button.selected {
+      color: #fff;
+      background: var(--blue);
+      box-shadow: inset -6px -6px 0 var(--blue-dark), 7px 7px 0 var(--shadow);
+      outline: 4px solid var(--yellow);
+      outline-offset: -9px;
+    }
+    .level-number { display: block; color: var(--red); font-size: 11px; margin-bottom: 9px; }
+    .level-button.selected .level-number { color: var(--yellow); }
+    .level-name { display: block; font-size: clamp(13px, 2vw, 18px); line-height: 1.2; margin-bottom: 10px; }
+    .level-description { display: block; font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.4; font-weight: 700; opacity: .76; }
+    .level-status { min-height: 20px; margin: 0 0 15px; color: var(--blue-dark); font-family: Arial, Helvetica, sans-serif; font-size: 13px; font-weight: 800; position: relative; z-index: 2; }
+
     .game-screen { background: #34426a; }
 
     .hud {
@@ -472,6 +515,24 @@
 
     .case-progress { height: 7px; background: #151d3a; border-bottom: 3px solid var(--shadow); }
     .case-progress > span { display: block; width: 10%; height: 100%; background: var(--cyan); transition: width .35s steps(5); box-shadow: 3px 0 0 var(--white); }
+
+    .mission-strip {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px clamp(10px, 2vw, 22px) 0;
+      color: #d8e4ff;
+      background: #34426a;
+      font-size: 10px;
+      letter-spacing: .06em;
+    }
+    .mission-badge {
+      border: 3px solid var(--shadow);
+      background: var(--ink-2);
+      padding: 7px 10px;
+      box-shadow: inset -4px -4px 0 #1d294d;
+    }
+    .mission-badge strong { color: var(--yellow); }
 
     .game-layout {
       padding: clamp(10px, 2vw, 22px);
@@ -747,7 +808,7 @@
       box-shadow: inset 0 9px 0 #a96d43, inset 0 -9px 0 #5d362e;
     }
     .counter::before {
-      content: "ATENDIMENTO";
+      content: var(--counter-label, "ATENDIMENTO");
       position: absolute;
       left: 50%;
       top: 33%;
@@ -1359,6 +1420,102 @@
     .coffee-mug { left: 39%; bottom: 33%; }
     .papers { left: 47%; bottom: 33%; }
 
+    /* Cada conjunto de casos leva o fiscal a um estabelecimento diferente. */
+    .office[data-scenario] .window { display: none; }
+    .scene-decor {
+      display: block;
+      position: absolute;
+      z-index: 2;
+      left: 6%;
+      top: 6%;
+      width: 47%;
+      height: 36%;
+      overflow: hidden;
+      border: 6px solid var(--shadow);
+      box-shadow: inset 0 0 0 4px rgba(255,255,255,.22), 6px 6px 0 rgba(16,23,51,.18);
+    }
+    .scene-decor::after {
+      content: attr(data-label);
+      position: absolute;
+      left: 8px;
+      top: 8px;
+      padding: 5px 7px;
+      border: 3px solid var(--shadow);
+      background: var(--paper);
+      color: var(--blue-dark);
+      font-size: 8px;
+      box-shadow: 3px 3px 0 rgba(16,23,51,.22);
+    }
+    .scene-decor i { position: absolute; display: block; }
+
+    .office[data-scenario="supermercado"] { --counter-label: "CAIXA / FISCALIZAÇÃO"; }
+    .office[data-scenario="supermercado"] .wall-pattern {
+      background: linear-gradient(90deg, rgba(36,99,235,.08) 2px, transparent 2px) 0 0 / 42px 42px, #f1d28c;
+    }
+    .office[data-scenario="supermercado"] .scene-decor {
+      background: repeating-linear-gradient(0deg, #72422f 0 8px, transparent 8px 51px), #f6d993;
+    }
+    .office[data-scenario="supermercado"] .scene-decor i {
+      width: 19%; height: 33%; bottom: 13%; border: 4px solid var(--shadow); background: var(--red);
+      box-shadow: inset -6px -6px 0 var(--red-dark);
+    }
+    .office[data-scenario="supermercado"] .scene-decor i:nth-child(1) { left: 8%; background: var(--yellow); box-shadow: inset -6px -6px 0 var(--orange); }
+    .office[data-scenario="supermercado"] .scene-decor i:nth-child(2) { left: 31%; bottom: 42%; background: var(--green); box-shadow: inset -6px -6px 0 var(--green-dark); }
+    .office[data-scenario="supermercado"] .scene-decor i:nth-child(3) { left: 54%; background: var(--cyan); box-shadow: inset -6px -6px 0 #2699ae; }
+    .office[data-scenario="supermercado"] .scene-decor i:nth-child(4) { right: 5%; bottom: 42%; background: var(--blue); box-shadow: inset -6px -6px 0 var(--blue-dark); }
+
+    .office[data-scenario="eletronicos"] { --counter-label: "ASSISTÊNCIA TÉCNICA"; }
+    .office[data-scenario="eletronicos"] .wall-pattern { background: linear-gradient(#b6c6dd 2px, transparent 2px) 0 0 / 100% 42px, #dbe4f0; }
+    .office[data-scenario="eletronicos"] .scene-decor { background: #273556; }
+    .office[data-scenario="eletronicos"] .scene-decor i {
+      width: 37%; height: 31%; border: 4px solid #0b1026; background: #2463eb; box-shadow: inset -6px -6px 0 #14378e;
+    }
+    .office[data-scenario="eletronicos"] .scene-decor i::after { content: ""; position: absolute; left: 42%; bottom: -12px; width: 16%; height: 12px; background: var(--shadow); }
+    .office[data-scenario="eletronicos"] .scene-decor i:nth-child(1) { left: 8%; top: 22%; }
+    .office[data-scenario="eletronicos"] .scene-decor i:nth-child(2) { right: 8%; top: 22%; background: var(--cyan); box-shadow: inset -6px -6px 0 #2699ae; }
+    .office[data-scenario="eletronicos"] .scene-decor i:nth-child(3) { left: 12%; bottom: 7%; width: 21%; height: 16%; background: var(--yellow); box-shadow: inset -5px -5px 0 var(--orange); }
+    .office[data-scenario="eletronicos"] .scene-decor i:nth-child(4) { right: 12%; bottom: 7%; width: 21%; height: 16%; background: var(--green); box-shadow: inset -5px -5px 0 var(--green-dark); }
+
+    .office[data-scenario="banco"] { --counter-label: "ATENDIMENTO BANCÁRIO"; }
+    .office[data-scenario="banco"] .wall-pattern { background: linear-gradient(90deg, rgba(20,55,142,.15) 2px, transparent 2px) 0 0 / 58px 58px, #c9d7e9; }
+    .office[data-scenario="banco"] .scene-decor { background: #e8eef7; }
+    .office[data-scenario="banco"] .scene-decor i { bottom: 9%; width: 20%; height: 58%; border: 4px solid var(--shadow); background: #60769f; box-shadow: inset -6px -6px 0 #3b4c70; }
+    .office[data-scenario="banco"] .scene-decor i::before { content: ""; position: absolute; left: 20%; right: 20%; top: 18%; height: 14%; background: var(--cyan); border: 3px solid var(--shadow); }
+    .office[data-scenario="banco"] .scene-decor i:nth-child(1) { left: 8%; }
+    .office[data-scenario="banco"] .scene-decor i:nth-child(2) { left: 32%; }
+    .office[data-scenario="banco"] .scene-decor i:nth-child(3) { left: 56%; }
+    .office[data-scenario="banco"] .scene-decor i:nth-child(4) { right: 1%; height: 29%; background: var(--blue); box-shadow: inset -6px -6px 0 var(--blue-dark); }
+
+    .office[data-scenario="online"] { --counter-label: "CENTRO DE ENTREGAS"; }
+    .office[data-scenario="online"] .wall-pattern { background: linear-gradient(120deg, rgba(121,70,50,.09) 25%, transparent 25%) 0 0 / 44px 44px, #d9cab0; }
+    .office[data-scenario="online"] .scene-decor { background: #a8b7c8; }
+    .office[data-scenario="online"] .scene-decor i {
+      width: 31%; height: 34%; border: 4px solid var(--shadow); background: #c98c4f; box-shadow: inset -7px -7px 0 #996239;
+    }
+    .office[data-scenario="online"] .scene-decor i::before { content: "↥"; position: absolute; inset: 7px; color: #70442f; font-size: 20px; text-align: center; }
+    .office[data-scenario="online"] .scene-decor i:nth-child(1) { left: 6%; bottom: 8%; }
+    .office[data-scenario="online"] .scene-decor i:nth-child(2) { left: 36%; bottom: 8%; height: 48%; }
+    .office[data-scenario="online"] .scene-decor i:nth-child(3) { right: 4%; bottom: 8%; }
+    .office[data-scenario="online"] .scene-decor i:nth-child(4) { right: 6%; top: 9%; width: 23%; height: 20%; background: var(--blue); box-shadow: inset -5px -5px 0 var(--blue-dark); }
+
+    .office[data-scenario="telefonia"] { --counter-label: "LOJA DE TELEFONIA"; }
+    .office[data-scenario="telefonia"] .wall-pattern { background: radial-gradient(circle at 20% 15%, rgba(85,217,232,.38), transparent 25%), #d8e1f4; }
+    .office[data-scenario="telefonia"] .scene-decor { background: linear-gradient(135deg, var(--blue), #6a55ce); }
+    .office[data-scenario="telefonia"] .scene-decor i {
+      top: 17%; width: 18%; height: 66%; border: 4px solid var(--shadow); border-radius: 4px; background: #f7fbff; box-shadow: inset 0 -9px 0 #b9c7e7;
+    }
+    .office[data-scenario="telefonia"] .scene-decor i::before { content: ""; position: absolute; left: 18%; right: 18%; top: 15%; height: 46%; background: var(--cyan); box-shadow: inset -4px -4px 0 #2699ae; }
+    .office[data-scenario="telefonia"] .scene-decor i:nth-child(1) { left: 7%; }
+    .office[data-scenario="telefonia"] .scene-decor i:nth-child(2) { left: 30%; }
+    .office[data-scenario="telefonia"] .scene-decor i:nth-child(3) { left: 53%; }
+    .office[data-scenario="telefonia"] .scene-decor i:nth-child(4) { right: 6%; }
+
+    .office[data-scenario="supermercado"] .procon-sign { background: var(--green); box-shadow: inset -6px -6px 0 var(--green-dark), 5px 5px 0 rgba(0,0,0,.2); }
+    .office[data-scenario="eletronicos"] .procon-sign { background: #425377; box-shadow: inset -6px -6px 0 #24314f, 5px 5px 0 rgba(0,0,0,.2); }
+    .office[data-scenario="banco"] .procon-sign { background: var(--blue-dark); }
+    .office[data-scenario="online"] .procon-sign { background: #a85821; box-shadow: inset -6px -6px 0 #70442f, 5px 5px 0 rgba(0,0,0,.2); }
+    .office[data-scenario="telefonia"] .procon-sign { background: #6a55ce; box-shadow: inset -6px -6px 0 #3f318f, 5px 5px 0 rgba(0,0,0,.2); }
+
     .dialog-wrap { display: flex; flex-direction: column; min-width: 0; }
 
     .case-tag {
@@ -1420,6 +1577,19 @@
     .question-text::before { content: "“"; color: var(--blue); }
     .question-text::after { content: "”"; color: var(--blue); }
 
+    .case-hint {
+      margin: 14px 0 0;
+      padding: 10px 12px;
+      border-left: 5px solid var(--yellow);
+      background: #e8efff;
+      color: #34446d;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 12px;
+      line-height: 1.4;
+      font-weight: 700;
+    }
+    .case-hint[hidden] { display: none; }
+
     .instruction {
       color: #69728a;
       font-size: 10px;
@@ -1478,6 +1648,7 @@
     .feedback.wrong .feedback-title { color: var(--red-dark); }
     .points-earned { color: var(--blue-dark); font-size: 13px; white-space: nowrap; }
     .feedback-text { margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; line-height: 1.46; color: #334064; }
+    .feedback-reference { margin: 10px 0 0; color: var(--blue-dark); font-size: 10px; line-height: 1.35; letter-spacing: .03em; }
     .next-button { width: 100%; margin-top: 15px; padding: 12px; }
 
     .score-float {
@@ -1522,6 +1693,8 @@
       position: relative;
       z-index: 1;
     }
+
+    .final-level { margin: -12px 0 20px; color: #586884; font-family: Arial, Helvetica, sans-serif; font-size: 13px; font-weight: 800; position: relative; z-index: 1; }
 
     .result-grid {
       display: grid;
@@ -1660,6 +1833,8 @@
     @media (max-width: 850px) {
       .ticker { display: none; }
       .topbar { justify-content: space-between; }
+      .level-picker { grid-template-columns: 1fr; }
+      .level-button { min-height: 0; }
       .game-layout { grid-template-columns: 1fr; }
       .office { min-height: 390px; }
       .dialog-box { min-height: 380px; }
@@ -1669,6 +1844,7 @@
       .speech-ping { left: 28%; bottom: 58%; }
       .effect-layer { left: 23%; bottom: 55%; }
       .hud { grid-template-columns: repeat(4, 1fr); }
+      .mission-strip { padding-top: 7px; }
       .combo-badge { position: absolute; z-index: 30; top: 89px; left: 50%; transform: translateX(-50%) scale(0); }
       .combo-badge.show { animation: combo-pop-mobile .35s steps(3) forwards; }
       @keyframes combo-pop-mobile { 0% { transform: translateX(-50%) scale(0); } 100% { transform: translateX(-50%) scale(1); } }
@@ -1691,10 +1867,14 @@
       .hud-label { font-size: 7px; }
       .hud-value { font-size: 14px; }
       .game-layout { padding: 7px; gap: 12px; }
+      .mission-strip { align-items: stretch; gap: 5px; padding: 6px 7px 0; font-size: 8px; }
+      .mission-badge { flex: 1; padding: 6px; line-height: 1.35; }
       .office { min-height: 310px; border-width: 4px; }
       .room-light, .file-cabinet, .pixel-plant { display: none; }
       .window { height: 31%; border-width: 5px; }
       .procon-sign { top: 7%; border-width: 4px; padding: 10px 5px; }
+      .scene-decor { left: 5%; top: 6%; width: 49%; height: 34%; border-width: 4px; }
+      .scene-decor::after { display: none; }
       .notice-board { display: none; }
       .character { transform: scale(.63); bottom: 22%; }
       .consumer { --char-scale: .63; left: 9%; transform-origin: bottom left; }
@@ -1746,9 +1926,9 @@
           <span class="tiny-label">ARQUIVO 01 • TREINAMENTO OFICIAL</span>
           <h1>MISSÃO<br>PROCON</h1>
           <p class="mission-line">DEFENDA. ORIENTE. RESOLVA.</p>
-          <p class="start-copy">Você foi convocado para o plantão de atendimento. Analise dez casos, identifique direitos básicos do consumidor e conquiste sua credencial de fiscal.</p>
+          <p class="start-copy">Você foi convocado para uma operação em cinco estabelecimentos. Investigue situações reais, identifique infrações aos direitos do consumidor e conquiste sua credencial de fiscal.</p>
           <button class="primary-button" id="startButton" type="button">INICIAR FISCALIZAÇÃO</button>
-          <p class="key-help">CONTROLES: <kbd>V</kbd> VERDADEIRO &nbsp; <kbd>F</kbd> FALSO &nbsp; <kbd>ENTER</kbd> CONTINUAR</p>
+          <p class="key-help">CONTROLES: <kbd>V</kbd> É INFRAÇÃO &nbsp; <kbd>F</kbd> NÃO É &nbsp; <kbd>ENTER</kbd> CONTINUAR</p>
         </div>
       </section>
 
@@ -1756,14 +1936,32 @@
         <div class="intro-card">
           <div class="intro-icon" aria-hidden="true">!</div>
           <span class="tiny-label">BRIEFING DA MISSÃO</span>
-          <h2>ATENÇÃO, NOVO FISCAL!</h2>
-          <p class="intro-copy">Dez consumidores estão a caminho. Decida se cada afirmação é verdadeira ou falsa. Você recebe 100 pontos por acerto e bônus por sequência.</p>
+          <h2>ESCOLHA SEU NÍVEL</h2>
+          <p class="intro-copy">O conteúdo e a linguagem mudam conforme a escolarização. Em toda missão você visitará cinco cenários e decidirá se cada situação é uma infração ao consumidor.</p>
+          <div class="level-picker" id="levelPicker" role="group" aria-label="Nível de escolarização">
+            <button class="level-button" type="button" data-level="fundamental" aria-pressed="false">
+              <span class="level-number">NÍVEL 1 • +100</span>
+              <strong class="level-name">FUNDAMENTAL II</strong>
+              <span class="level-description">Frases diretas, situações do cotidiano e uma pista em cada caso.</span>
+            </button>
+            <button class="level-button" type="button" data-level="medio" aria-pressed="false">
+              <span class="level-number">NÍVEL 2 • +125</span>
+              <strong class="level-name">ENSINO MÉDIO</strong>
+              <span class="level-description">Casos com mais detalhes, prazos, ofertas e contratos.</span>
+            </button>
+            <button class="level-button" type="button" data-level="tecnico" aria-pressed="false">
+              <span class="level-number">NÍVEL 3 • +150</span>
+              <strong class="level-name">TÉCNICO / SUPERIOR</strong>
+              <span class="level-description">Análise avançada com conceitos e artigos do CDC.</span>
+            </button>
+          </div>
+          <p class="level-status" id="levelStatus" aria-live="polite">Selecione uma opção para liberar a missão.</p>
           <div class="rules" aria-label="Regras da partida">
             <div class="rule"><b>10</b> CASOS</div>
-            <div class="rule"><b>+100</b> POR ACERTO</div>
+            <div class="rule"><b>5</b> CENÁRIOS</div>
             <div class="rule"><b>COMBO</b> BÔNUS</div>
           </div>
-          <button class="primary-button" id="briefingButton" type="button">ABRIR O POSTO</button>
+          <button class="primary-button" id="briefingButton" type="button" disabled>COMEÇAR OPERAÇÃO</button>
         </div>
       </section>
 
@@ -1776,16 +1974,21 @@
           <div class="combo-badge" id="comboBadge" aria-live="polite">COMBO x2</div>
         </div>
         <div class="case-progress" aria-hidden="true"><span id="progressBar"></span></div>
+        <div class="mission-strip" aria-label="Dados da operação">
+          <span class="mission-badge">NÍVEL: <strong id="levelBadge">FUNDAMENTAL II</strong></span>
+          <span class="mission-badge">LOCAL: <strong id="locationBadge">SUPERMERCADO</strong></span>
+        </div>
 
         <div class="game-layout">
-          <div class="office" id="office" aria-label="Posto de atendimento do PROCON em estilo pixel art">
+          <div class="office" id="office" data-scenario="supermercado" aria-label="Fiscalização em supermercado, em estilo pixel art">
             <div class="wall-pattern"></div>
             <div class="room-light" aria-hidden="true"></div>
             <div class="window" aria-hidden="true">
               <div class="sun"></div><div class="cloud"></div>
               <div class="city"><i class="tower tower-a"></i><i class="tower tower-b"></i><i class="tower tower-c"></i><i class="tower tower-d"></i><i class="tower tower-e"></i></div>
             </div>
-            <div class="procon-sign">PROCON<small>POSTO DE ATENDIMENTO</small></div>
+            <div class="scene-decor" id="sceneDecor" data-label="CORREDOR DE PRODUTOS" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+            <div class="procon-sign"><span id="locationName">SUPERMERCADO</span><small id="locationSubtitle">OPERAÇÃO PROCON</small></div>
             <div class="notice-board" aria-hidden="true"><i></i><i></i></div>
             <div class="wall-clock" aria-hidden="true"></div>
             <div class="floor"></div>
@@ -1814,14 +2017,15 @@
           </div>
 
           <div class="dialog-wrap">
-            <div class="case-tag" id="caseTag">CASO 01</div>
+            <div class="case-tag" id="caseTag">SUPERMERCADO • CASO 01</div>
             <section class="dialog-box" id="dialogBox" aria-labelledby="speakerLabel">
-              <p class="speaker" id="speakerLabel">RELATO DO CONSUMIDOR</p>
+              <p class="speaker" id="speakerLabel">FALA DO RESPONSÁVEL</p>
               <blockquote class="question-text" id="questionText"></blockquote>
-              <p class="instruction" id="instructionText">A AFIRMAÇÃO ESTÁ CORRETA?</p>
+              <p class="case-hint" id="caseHint" hidden></p>
+              <p class="instruction" id="instructionText">ESSA SITUAÇÃO É UMA INFRAÇÃO?</p>
               <div class="answer-buttons" id="answerButtons">
-                <button class="answer-button true" id="trueButton" type="button" data-answer="true">VERDADEIRO <span class="button-key">TECLA V</span></button>
-                <button class="answer-button false" id="falseButton" type="button" data-answer="false">FALSO <span class="button-key">TECLA F</span></button>
+                <button class="answer-button true" id="trueButton" type="button" data-answer="true">É INFRAÇÃO <span class="button-key">TECLA V</span></button>
+                <button class="answer-button false" id="falseButton" type="button" data-answer="false">NÃO É INFRAÇÃO <span class="button-key">TECLA F</span></button>
               </div>
               <div class="feedback" id="feedback" aria-live="assertive" hidden>
                 <div class="feedback-heading">
@@ -1829,6 +2033,7 @@
                   <span class="points-earned" id="pointsEarned"></span>
                 </div>
                 <p class="feedback-text" id="feedbackText"></p>
+                <p class="feedback-reference" id="feedbackReference"></p>
                 <button class="next-button" id="nextButton" type="button">PRÓXIMO CASO</button>
               </div>
             </section>
@@ -1843,6 +2048,7 @@
           <span class="tiny-label">MISSÃO CONCLUÍDA</span>
           <h2>RELATÓRIO FINAL</h2>
           <div class="rank-label" id="rankLabel">DEFENSOR DO CONSUMIDOR</div>
+          <p class="final-level" id="finalLevel">Nível: Fundamental II • 5 cenários fiscalizados</p>
           <div class="result-grid" aria-label="Resultado final">
             <div class="result-item"><span>PONTOS</span><strong id="finalScore">0000</strong></div>
             <div class="result-item"><span>ACERTOS</span><strong id="finalCorrect">0</strong></div>
@@ -1851,7 +2057,7 @@
           </div>
           <div class="final-actions">
             <button class="review-button" id="reviewButton" type="button" hidden>REVISAR ERROS</button>
-            <button class="restart-button" id="restartButton" type="button">JOGAR NOVAMENTE</button>
+            <button class="restart-button" id="restartButton" type="button">ESCOLHER OUTRO NÍVEL</button>
           </div>
           <section class="review-panel" id="reviewPanel" aria-labelledby="reviewTitle" hidden>
             <h3 id="reviewTitle">CASOS PARA REVISAR</h3>
@@ -1868,142 +2074,71 @@
   <script>
     "use strict";
 
-    // Edite ou acrescente novos itens mantendo apenas estes três campos.
+    // Banco pedagógico: 3 níveis × 5 cenários × 3 casos. answer=true significa que há infração.
     const questions = [
-      {
-        text: "O PROCON atua na proteção e na orientação dos consumidores.",
-        answer: true,
-        explanation: "O PROCON orienta consumidores e atua na proteção de seus direitos nas relações de consumo."
-      },
-      {
-        text: "O PROCON existe apenas para defender os interesses das empresas.",
-        answer: false,
-        explanation: "O órgão busca proteger o consumidor e contribuir para relações de consumo mais equilibradas."
-      },
-      {
-        text: "Um consumidor pode procurar o PROCON para registrar problemas relacionados a produtos ou serviços.",
-        answer: true,
-        explanation: "Reclamações sobre produtos e serviços estão entre as situações que podem ser levadas ao PROCON."
-      },
-      {
-        text: "O PROCON substitui completamente o Poder Judiciário em qualquer conflito de consumo.",
-        answer: false,
-        explanation: "O PROCON atua na esfera administrativa; determinadas questões podem precisar ser levadas ao Judiciário."
-      },
-      {
-        text: "Propaganda enganosa pode ser um problema relacionado à defesa do consumidor.",
-        answer: true,
-        explanation: "Informações falsas ou capazes de induzir o consumidor ao erro podem caracterizar publicidade enganosa."
-      },
-      {
-        text: "Uma cobrança que o consumidor considera indevida nunca pode ser questionada.",
-        answer: false,
-        explanation: "O consumidor pode pedir esclarecimentos e contestar uma cobrança que considere indevida."
-      },
-      {
-        text: "Em compras realizadas pela internet, o consumidor pode ter direito de arrependimento.",
-        answer: true,
-        explanation: "Nas contratações feitas fora do estabelecimento comercial, o CDC prevê, em regra, direito de arrependimento dentro do prazo legal."
-      },
-      {
-        text: "Uma loja física é sempre obrigada a trocar um produto sem defeito apenas porque o consumidor mudou de ideia.",
-        answer: false,
-        explanation: "A troca por simples mudança de ideia em loja física depende, em geral, da política oferecida pela loja."
-      },
-      {
-        text: "O consumidor deve receber informações claras sobre características, preço e riscos relevantes de um produto.",
-        answer: true,
-        explanation: "A informação clara e adequada é um direito básico do consumidor."
-      },
-      {
-        text: "O preço de um produto pode ser escondido até o momento do pagamento.",
-        answer: false,
-        explanation: "Preços e condições de pagamento devem ser informados de forma clara ao consumidor."
-      },
-      {
-        text: "Guardar nota fiscal, contrato ou comprovante pode ajudar na solução de uma reclamação.",
-        answer: true,
-        explanation: "Documentos e outros registros ajudam a demonstrar a compra, a oferta e o problema relatado."
-      },
-      {
-        text: "O Código de Defesa do Consumidor trata somente de produtos e não se aplica a serviços.",
-        answer: false,
-        explanation: "O CDC alcança relações de consumo envolvendo tanto produtos quanto serviços."
-      },
-      {
-        text: "O fornecedor pode omitir riscos relevantes de um produto porque cabe ao consumidor descobri-los sozinho.",
-        answer: false,
-        explanation: "O consumidor deve receber informação adequada sobre riscos relevantes à saúde e à segurança."
-      },
-      {
-        text: "Em determinadas situações, o consumidor pode exigir que uma oferta anunciada seja cumprida.",
-        answer: true,
-        explanation: "A oferta suficientemente precisa vincula o fornecedor, observadas as circunstâncias do caso."
-      },
-      {
-        text: "É permitido ameaçar ou constranger o consumidor durante a cobrança de uma dívida.",
-        answer: false,
-        explanation: "A cobrança não pode expor o consumidor ao ridículo nem envolver ameaça ou constrangimento."
-      },
-      {
-        text: "A garantia legal de um produto pode existir mesmo sem um certificado de garantia contratual.",
-        answer: true,
-        explanation: "A garantia legal decorre da lei e não depende de um documento oferecido pelo fornecedor."
-      },
-      {
-        text: "O PROCON pode fiscalizar o cumprimento de normas de proteção ao consumidor.",
-        answer: true,
-        explanation: "A fiscalização das relações de consumo faz parte da atuação administrativa dos órgãos de defesa do consumidor."
-      },
-      {
-        text: "O PROCON pode prender diretamente um fornecedor sempre que recebe uma reclamação.",
-        answer: false,
-        explanation: "O PROCON exerce funções administrativas e não realiza prisões por conta própria."
-      },
-      {
-        text: "Uma empresa pode alterar unilateralmente um contrato de consumo sem informar o cliente em nenhuma situação.",
-        answer: false,
-        explanation: "Alterações contratuais devem respeitar o dever de informação e não podem criar desequilíbrio abusivo."
-      },
-      {
-        text: "Comparar ofertas e ler as condições antes de contratar são atitudes úteis de consumo consciente.",
-        answer: true,
-        explanation: "Informação e comparação ajudam o consumidor a tomar decisões mais seguras."
-      },
-      {
-        text: "Se um serviço apresentar problema, o consumidor não pode pedir esclarecimentos ao fornecedor.",
-        answer: false,
-        explanation: "O consumidor pode contatar o fornecedor, relatar o problema e buscar uma solução adequada."
-      },
-      {
-        text: "Bancos, operadoras de telefonia e empresas de energia podem participar de relações de consumo.",
-        answer: true,
-        explanation: "Serviços financeiros, de telecomunicações e de fornecimento essencial podem envolver relações de consumo."
-      },
-      {
-        text: "Uma promoção pode apresentar condições importantes apenas em letras ilegíveis.",
-        answer: false,
-        explanation: "Condições relevantes devem ser apresentadas de forma clara, legível e compreensível."
-      },
-      {
-        text: "Tentar resolver o problema diretamente com a empresa e guardar o protocolo pode ser útil antes ou durante uma reclamação.",
-        answer: true,
-        explanation: "O contato e o protocolo registram a tentativa de solução e podem ajudar no atendimento do caso."
-      },
-      {
-        text: "Direitos do consumidor e deveres dos fornecedores ajudam a equilibrar as relações de consumo.",
-        answer: true,
-        explanation: "As regras de proteção buscam reduzir vulnerabilidades e promover equilíbrio entre consumidores e fornecedores."
-      },
-      {
-        text: "Uma informação importante pode ser escondida do consumidor se o contrato for muito longo.",
-        answer: false,
-        explanation: "O tamanho do contrato não elimina o dever de apresentar informações importantes com clareza."
-      }
+      { id: "f-sup-1", level: "fundamental", scenario: "supermercado", owner: "GERENTE DO SUPERMERCADO", text: "Na prateleira o arroz custa R$ 8,90, mas no caixa cobramos R$ 11,90 e não deixamos o cliente pagar o menor preço.", answer: true, hint: "Compare a oferta mostrada com o valor cobrado.", explanation: "O preço deve ser claro e a oferta anunciada vincula o fornecedor. Diante da diferença, o consumidor não deve ser obrigado a pagar o valor maior.", reference: "CDC: arts. 6º, III, 30 e 35 • informação e cumprimento da oferta" },
+      { id: "f-sup-2", level: "fundamental", scenario: "supermercado", owner: "GERENTE DO SUPERMERCADO", text: "Nossa equipe confere as datas todos os dias e retira das prateleiras os alimentos vencidos antes de abrir a loja.", answer: false, hint: "Pergunte se algum produto vencido continuou à venda.", explanation: "A atitude descrita protege o consumidor. Retirar produtos vencidos antes da venda é uma prática correta de segurança.", reference: "CDC: arts. 8º e 10 • proteção da saúde e segurança" },
+      { id: "f-sup-3", level: "fundamental", scenario: "supermercado", owner: "GERENTE DO SUPERMERCADO", text: "Só vendemos um pacote de arroz se o cliente também comprar uma garrafa de óleo.", answer: true, hint: "O cliente pode ser obrigado a levar outro produto?", explanation: "Condicionar um produto à compra de outro é venda casada, uma prática abusiva.", reference: "CDC: art. 39, I • proibição de venda casada" },
+      { id: "f-ele-1", level: "fundamental", scenario: "eletronicos", owner: "DONO DA LOJA", text: "O celular apresentou defeito em cinco dias, mas mandamos o cliente procurar somente a fábrica e recusamos qualquer atendimento.", answer: true, hint: "A loja que vendeu pode simplesmente abandonar o cliente?", explanation: "A loja faz parte da cadeia de fornecimento e não pode afastar sua responsabilidade pelo defeito apenas enviando o consumidor à fábrica.", reference: "CDC: art. 18 • responsabilidade solidária por vício do produto" },
+      { id: "f-ele-2", level: "fundamental", scenario: "eletronicos", owner: "DONO DA LOJA", text: "O fone comprado na loja física funciona bem. O cliente mudou de ideia, mas nossa política nunca prometeu troca por gosto ou cor.", answer: false, hint: "Existe defeito ou promessa de troca?", explanation: "Em loja física, a troca de produto sem defeito por simples mudança de ideia depende da política ou da promessa feita pela loja.", reference: "CDC: oferta vincula o fornecedor; arrependimento legal se aplica, em regra, a compras fora da loja" },
+      { id: "f-ele-3", level: "fundamental", scenario: "eletronicos", owner: "DONO DA LOJA", text: "Todos os aparelhos têm etiqueta legível com preço à vista e parcelado antes de o cliente decidir comprar.", answer: false, hint: "A informação está clara antes da compra?", explanation: "Informar previamente os preços e as condições de pagamento é a conduta correta.", reference: "CDC: arts. 6º, III, e 31 • informação clara e adequada" },
+      { id: "f-ban-1", level: "fundamental", scenario: "banco", owner: "GERENTE DO BANCO", text: "Antes do empréstimo mostramos os juros, o número de parcelas e o total que será pago, e entregamos uma cópia ao cliente.", answer: false, hint: "O cliente recebeu as informações antes de assinar?", explanation: "A descrição mostra transparência na contratação do crédito, como exige a proteção do consumidor.", reference: "CDC: art. 52 • informações obrigatórias no crédito" },
+      { id: "f-ban-2", level: "fundamental", scenario: "banco", owner: "GERENTE DO BANCO", text: "Pressionamos uma pessoa idosa a contratar crédito na hora e dizemos que ela perderá o benefício se pedir tempo para pensar.", answer: true, hint: "Há pressão ou ameaça para fechar o contrato?", explanation: "Pressionar, assediar ou explorar a vulnerabilidade do consumidor para oferecer crédito é prática proibida.", reference: "CDC: arts. 39, IV, e 54-C, IV • proteção contra assédio e pressão" },
+      { id: "f-ban-3", level: "fundamental", scenario: "banco", owner: "COBRADOR DA FINANCEIRA", text: "Para receber uma dívida, contamos o problema em voz alta para toda a fila e envergonhamos o cliente.", answer: true, hint: "A cobrança respeitou a dignidade da pessoa?", explanation: "A cobrança não pode expor o consumidor ao ridículo nem causar constrangimento ou ameaça.", reference: "CDC: art. 42 • cobrança sem constrangimento" },
+      { id: "f-onl-1", level: "fundamental", scenario: "online", owner: "GERENTE DO SITE", text: "A compra foi feita pela internet. Quatro dias após receber o produto, o cliente quis desistir, mas recusamos sem analisar o pedido.", answer: true, hint: "Conte quantos dias se passaram desde o recebimento.", explanation: "Em compras fora do estabelecimento, o consumidor pode desistir em até sete dias, contados da assinatura ou do recebimento.", reference: "CDC: art. 49 • direito de arrependimento" },
+      { id: "f-onl-2", level: "fundamental", scenario: "online", owner: "GERENTE DO SITE", text: "O cliente desistiu da compra online no prazo de sete dias. Recebemos a devolução e restituímos também o valor do frete.", answer: false, hint: "A loja respeitou o prazo e devolveu os valores?", explanation: "A conduta está correta: no arrependimento válido, os valores pagos devem ser restituídos, inclusive o frete.", reference: "CDC: art. 49 • restituição no direito de arrependimento" },
+      { id: "f-onl-3", level: "fundamental", scenario: "online", owner: "GERENTE DO SITE", text: "Anunciamos um celular com 128 GB, mas enviamos um modelo de 64 GB e afirmamos que o consumidor é obrigado a aceitar.", answer: true, hint: "O produto entregue é igual ao anunciado?", explanation: "O produto deve corresponder à oferta. O consumidor pode exigir solução adequada quando a oferta não é cumprida.", reference: "CDC: arts. 30 e 35 • oferta vincula o fornecedor" },
+      { id: "f-tel-1", level: "fundamental", scenario: "telefonia", owner: "GERENTE DA OPERADORA", text: "Colocamos um pacote pago de jogos na conta sem o cliente pedir ou autorizar.", answer: true, hint: "O consumidor escolheu contratar esse serviço?", explanation: "Fornecer ou cobrar serviço não solicitado é prática abusiva.", reference: "CDC: art. 39, III • serviço não solicitado" },
+      { id: "f-tel-2", level: "fundamental", scenario: "telefonia", owner: "GERENTE DA OPERADORA", text: "O cliente pediu a mudança de plano. Confirmamos o novo preço, registramos a autorização e enviamos o resumo do contrato.", answer: false, hint: "A mudança foi autorizada e explicada?", explanation: "Com consentimento e informação clara, a alteração descrita não indica infração.", reference: "CDC: arts. 6º, III, e 46 • informação e conhecimento do contrato" },
+      { id: "f-tel-3", level: "fundamental", scenario: "telefonia", owner: "GERENTE DA OPERADORA", text: "Oferecemos canais simples de cancelamento, registramos o protocolo e explicamos quando o serviço terminará.", answer: false, hint: "A empresa dificultou ou facilitou o pedido?", explanation: "A conduta facilita o exercício do direito do consumidor e registra o atendimento.", reference: "CDC: dever de informação e boa-fé no atendimento" },
+
+      { id: "m-sup-1", level: "medio", scenario: "supermercado", owner: "GERENTE DO SUPERMERCADO", text: "A etiqueta mostra R$ 5,99, mas o sistema cobra R$ 7,49. Mesmo após a conferência, o caixa exige o valor maior.", answer: true, explanation: "A informação de preço integra a oferta. Confirmada a divergência, exigir o valor maior viola o dever de informação e o cumprimento da oferta.", reference: "CDC: arts. 6º, III, 30 e 35" },
+      { id: "m-sup-2", level: "medio", scenario: "supermercado", owner: "GERENTE DO SUPERMERCADO", text: "A embalagem informa 1 kg, mas a fiscalização comprova que o produto contém apenas 850 g, sem aviso ao consumidor.", answer: true, explanation: "A diferença de quantidade é vício do produto e pode gerar substituição, abatimento, complementação ou restituição, conforme o caso.", reference: "CDC: art. 19 • vício de quantidade" },
+      { id: "m-sup-3", level: "medio", scenario: "supermercado", owner: "GERENTE DO SUPERMERCADO", text: "A promoção informa com destaque o período, os produtos participantes, o limite por pessoa e a quantidade disponível.", answer: false, explanation: "Condições relevantes claras e visíveis permitem decisão consciente e reduzem o risco de publicidade enganosa.", reference: "CDC: arts. 30, 31 e 37 • oferta e publicidade" },
+      { id: "m-ele-1", level: "medio", scenario: "eletronicos", owner: "DONO DA LOJA", text: "A assistência ficou 35 dias com o notebook defeituoso. Mesmo assim, recusamos troca, restituição ou abatimento do preço.", answer: true, explanation: "Não sanado o vício no prazo legal de 30 dias, o consumidor pode escolher entre as alternativas previstas no CDC.", reference: "CDC: art. 18, §1º" },
+      { id: "m-ele-2", level: "medio", scenario: "eletronicos", owner: "DONO DA LOJA", text: "Nosso contrato diz que a garantia legal não existe e que somente uma garantia estendida paga permite reclamar de defeitos.", answer: true, explanation: "A garantia legal independe de termo expresso. O contrato não pode eliminá-la nem condicionar seu exercício à compra de garantia adicional.", reference: "CDC: arts. 24 e 25 • garantia legal e vedação de exoneração" },
+      { id: "m-ele-3", level: "medio", scenario: "eletronicos", owner: "DONO DA LOJA", text: "Oferecemos garantia estendida separadamente, explicamos que é opcional e não dizemos que ela substitui a garantia legal.", answer: false, explanation: "A oferta opcional e transparente não caracteriza, por si só, infração. O consumidor deve poder escolher livremente.", reference: "CDC: dever de informação e proibição de venda casada" },
+      { id: "m-ban-1", level: "medio", scenario: "banco", owner: "GERENTE DO BANCO", text: "A propaganda destaca uma parcela pequena, mas esconde juros, encargos e o total da dívida até depois da assinatura.", answer: true, explanation: "Na oferta de crédito, custo, juros, parcelas e total a pagar precisam ser informados previamente e com clareza.", reference: "CDC: arts. 52 e 54-B • informação no crédito" },
+      { id: "m-ban-2", level: "medio", scenario: "banco", owner: "GERENTE DO BANCO", text: "O cliente antecipou as últimas parcelas e aplicamos a redução proporcional dos juros e demais acréscimos.", answer: false, explanation: "A liquidação antecipada com redução proporcional é justamente o direito assegurado ao consumidor.", reference: "CDC: art. 52, §2º • liquidação antecipada" },
+      { id: "m-ban-3", level: "medio", scenario: "banco", owner: "GERENTE DO BANCO", text: "O seguro é opcional, aparece separado do empréstimo e só é incluído depois de consentimento específico do cliente.", answer: false, explanation: "A contratação separada, informada e voluntária evita venda casada e cobrança de serviço não solicitado.", reference: "CDC: arts. 39, I e III • contratação livre" },
+      { id: "m-onl-1", level: "medio", scenario: "online", owner: "GERENTE DO SITE", text: "Confirmamos por e-mail uma oferta com estoque disponível, mas depois cancelamos apenas porque o desconto anunciado ficou caro para a empresa.", answer: true, explanation: "A oferta suficientemente precisa obriga o fornecedor. O simples arrependimento comercial da empresa não afasta as opções do consumidor.", reference: "CDC: arts. 30 e 35 • cumprimento da oferta" },
+      { id: "m-onl-2", level: "medio", scenario: "online", owner: "GERENTE DO SITE", text: "No arrependimento dentro de sete dias, devolvemos somente um vale-compras e recusamos restituir o dinheiro.", answer: true, explanation: "Exercido validamente o arrependimento, os valores pagos devem ser restituídos, e o consumidor não pode ser obrigado a aceitar apenas crédito na loja.", reference: "CDC: art. 49, parágrafo único" },
+      { id: "m-onl-3", level: "medio", scenario: "online", owner: "GERENTE DO SITE", text: "Recebemos o pedido de arrependimento no sexto dia, orientamos a devolução sem custo e providenciamos o estorno integral.", answer: false, explanation: "A empresa respeitou o prazo e as consequências do direito de arrependimento.", reference: "CDC: art. 49" },
+      { id: "m-tel-1", level: "medio", scenario: "telefonia", owner: "GERENTE DA OPERADORA", text: "Uma falha interrompeu totalmente o serviço. Restabelecemos a linha, registramos o caso e concedemos o crédito correspondente ao período sem uso.", answer: false, explanation: "A situação descreve providências para reparar a falha e ajustar a cobrança, sem indicar recusa de atendimento.", reference: "CDC: arts. 20 e 22 • qualidade e adequação do serviço" },
+      { id: "m-tel-2", level: "medio", scenario: "telefonia", owner: "GERENTE DA OPERADORA", text: "Trocamos o plano por outro mais caro sem pedido, consentimento ou aviso e cobramos a diferença na fatura.", answer: true, explanation: "Alterar e cobrar serviço sem consentimento e informação viola a transparência e pode configurar prática abusiva.", reference: "CDC: arts. 39, III, 46 e 51, X" },
+      { id: "m-tel-3", level: "medio", scenario: "telefonia", owner: "GERENTE DA OPERADORA", text: "Antes da contratação, mostramos preço, franquia, velocidade, fidelização e multa de forma legível, e o cliente confirmou o plano.", answer: false, explanation: "A descrição respeita o dever de informação prévia e permite uma escolha consciente.", reference: "CDC: arts. 6º, III, 31 e 46" },
+
+      { id: "t-sup-1", level: "tecnico", scenario: "supermercado", owner: "RESPONSÁVEL PELO SUPERMERCADO", text: "Produtos de quantidades diferentes exibem só o preço total; o preço por unidade de medida fica ausente, impedindo comparação objetiva.", answer: true, explanation: "A apresentação incompleta dificulta a comparação e contraria a informação adequada e ostensiva sobre preço e quantidade.", reference: "CDC: arts. 6º, III, e 31 • legislação de afixação de preços" },
+      { id: "t-sup-2", level: "tecnico", scenario: "supermercado", owner: "RESPONSÁVEL PELO SUPERMERCADO", text: "Confirmado vício de quantidade, recusamos completar o peso, substituir, abater o preço ou restituir, mandando o consumidor tratar apenas com o fabricante.", answer: true, explanation: "Os fornecedores respondem solidariamente pelo vício de quantidade e o consumidor dispõe das alternativas legais.", reference: "CDC: art. 19" },
+      { id: "t-sup-3", level: "tecnico", scenario: "supermercado", owner: "RESPONSÁVEL PELO SUPERMERCADO", text: "Ao confirmar divergência entre a gôndola e o caixa, corrigimos o sistema e aplicamos ao consumidor o preço anunciado mais favorável.", answer: false, explanation: "A conduta respeita a oferta apresentada e corrige a falha de informação de preço.", reference: "CDC: arts. 30 e 35" },
+      { id: "t-ele-1", level: "tecnico", scenario: "eletronicos", owner: "RESPONSÁVEL PELA LOJA", text: "Um vício oculto apareceu meses depois. Rejeitamos a reclamação contando o prazo desde a compra, sem considerar a data em que o defeito ficou evidente.", answer: true, explanation: "Tratando-se de vício oculto, o prazo decadencial começa quando o defeito se evidencia, e não necessariamente na data da compra.", reference: "CDC: art. 26, §3º" },
+      { id: "t-ele-2", level: "tecnico", scenario: "eletronicos", owner: "RESPONSÁVEL PELA LOJA", text: "Em documento separado e com manifestação expressa, consumidor e fornecedor ajustaram prazo de 45 dias para sanar o vício.", answer: false, explanation: "O prazo de 30 dias pode ser reduzido ou ampliado entre sete e 180 dias por convenção válida; em contrato de adesão, a cláusula deve ser separada e expressa.", reference: "CDC: art. 18, §2º" },
+      { id: "t-ele-3", level: "tecnico", scenario: "eletronicos", owner: "RESPONSÁVEL PELA LOJA", text: "Mesmo sendo produto essencial e estando comprovado o vício, obrigamos o consumidor a esperar 30 dias, sem permitir uso imediato das alternativas legais.", answer: true, explanation: "Em produto essencial, ou quando o reparo compromete qualidade, valor ou características, o consumidor pode usar imediatamente as alternativas do §1º.", reference: "CDC: art. 18, §3º" },
+      { id: "t-ban-1", level: "tecnico", scenario: "banco", owner: "RESPONSÁVEL PELO BANCO", text: "Por atraso, aplicamos multa de mora de 2% sobre o valor da prestação e informamos previamente essa condição.", answer: false, explanation: "A multa moratória de até 2% da prestação é o limite previsto no CDC; isoladamente, a situação narrada não indica infração.", reference: "CDC: art. 52, §1º" },
+      { id: "t-ban-2", level: "tecnico", scenario: "banco", owner: "RESPONSÁVEL PELO BANCO", text: "Na liquidação antecipada do débito, cobramos todas as parcelas futuras sem reduzir proporcionalmente juros e acréscimos.", answer: true, explanation: "A antecipação total ou parcial assegura redução proporcional dos juros e demais acréscimos.", reference: "CDC: art. 52, §2º" },
+      { id: "t-ban-3", level: "tecnico", scenario: "banco", owner: "RESPONSÁVEL PELO BANCO", text: "Antes de conceder crédito, avaliamos responsavelmente as condições do consumidor e informamos custo efetivo, consequências do atraso e identidade do agente financiador.", answer: false, explanation: "A prática descrita atende aos deveres de crédito responsável e informação prévia.", reference: "CDC: arts. 54-B e 54-D • prevenção do superendividamento" },
+      { id: "t-onl-1", level: "tecnico", scenario: "online", owner: "RESPONSÁVEL PELO COMÉRCIO ELETRÔNICO", text: "No arrependimento válido, restituímos o produto, mas retivemos o frete de ida como custo obrigatório do consumidor.", answer: true, explanation: "A restituição deve abranger os valores pagos. A retenção do frete de ida transfere ao consumidor custo incompatível com o exercício do arrependimento.", reference: "CDC: art. 49, parágrafo único" },
+      { id: "t-onl-2", level: "tecnico", scenario: "online", owner: "RESPONSÁVEL PELO COMÉRCIO ELETRÔNICO", text: "Descumprida oferta já aceita, recusamos cumprimento, equivalente ou restituição atualizada, deixando o consumidor sem qualquer opção.", answer: true, explanation: "Diante da recusa de cumprimento da oferta, a escolha entre as alternativas legais pertence ao consumidor.", reference: "CDC: art. 35" },
+      { id: "t-onl-3", level: "tecnico", scenario: "online", owner: "RESPONSÁVEL PELO COMÉRCIO ELETRÔNICO", text: "Recebido o arrependimento de uma compra online financiada em contrato conexo, comunicamos a instituição e providenciamos a resolução do crédito sem ônus.", answer: false, explanation: "A providência é compatível com a proteção do consumidor nos contratos de crédito conexos à compra principal.", reference: "CDC: art. 54-F" },
+      { id: "t-tel-1", level: "tecnico", scenario: "telefonia", owner: "RESPONSÁVEL PELA OPERADORA", text: "O contrato autoriza a operadora, sozinha, a alterar o preço a qualquer momento, sem critério objetivo nem possibilidade de oposição do consumidor.", answer: true, explanation: "Cláusula que permite variação unilateral do preço ou modificação desequilibrada do contrato pode ser abusiva e nula.", reference: "CDC: art. 51, X e XIII" },
+      { id: "t-tel-2", level: "tecnico", scenario: "telefonia", owner: "RESPONSÁVEL PELA OPERADORA", text: "Após interrupção comprovada, restabelecemos o serviço, recalculamos a cobrança do período afetado e oferecemos canal de contestação com protocolo.", answer: false, explanation: "A conduta busca adequar o serviço e a cobrança, além de preservar registro e possibilidade de contestação.", reference: "CDC: arts. 20 e 22" },
+      { id: "t-tel-3", level: "tecnico", scenario: "telefonia", owner: "RESPONSÁVEL PELA OPERADORA", text: "A contratação registra consentimento, entrega cópia acessível e destaca preço, reajuste, fidelização e consequências do cancelamento.", answer: false, explanation: "Consentimento verificável, acesso ao contrato e destaque das condições relevantes cumprem deveres de transparência.", reference: "CDC: arts. 6º, III, 46 e 54, §§3º e 4º" }
     ];
 
     const TOTAL_CASES = 10;
-    const BASE_POINTS = 100;
+    const SCENARIO_ORDER = ["supermercado", "eletronicos", "banco", "online", "telefonia"];
+    const LEVELS = {
+      fundamental: { label: "FUNDAMENTAL II", basePoints: 100 },
+      medio: { label: "ENSINO MÉDIO", basePoints: 125 },
+      tecnico: { label: "TÉCNICO / SUPERIOR", basePoints: 150 }
+    };
+    const SCENARIOS = {
+      supermercado: { label: "SUPERMERCADO", subtitle: "FISCALIZAÇÃO DE PREÇOS", decor: "CORREDOR DE PRODUTOS" },
+      eletronicos: { label: "ELETRÔNICOS", subtitle: "GARANTIA E ASSISTÊNCIA", decor: "MOSTRUÁRIO DA LOJA" },
+      banco: { label: "BANCO", subtitle: "CRÉDITO RESPONSÁVEL", decor: "TERMINAIS BANCÁRIOS" },
+      online: { label: "COMPRAS ONLINE", subtitle: "OFERTAS E ENTREGAS", decor: "CENTRO DE ENTREGAS" },
+      telefonia: { label: "TELEFONIA", subtitle: "PLANOS E SERVIÇOS", decor: "MOSTRUÁRIO DE PLANOS" }
+    };
     const screens = {
       start: document.getElementById("startScreen"),
       intro: document.getElementById("introScreen"),
@@ -2014,6 +2149,8 @@
     const ui = {
       startButton: document.getElementById("startButton"),
       briefingButton: document.getElementById("briefingButton"),
+      levelButtons: [...document.querySelectorAll(".level-button")],
+      levelStatus: document.getElementById("levelStatus"),
       restartButton: document.getElementById("restartButton"),
       soundButton: document.getElementById("soundButton"),
       trueButton: document.getElementById("trueButton"),
@@ -2025,23 +2162,32 @@
       wrongValue: document.getElementById("wrongValue"),
       comboBadge: document.getElementById("comboBadge"),
       progressBar: document.getElementById("progressBar"),
+      levelBadge: document.getElementById("levelBadge"),
+      locationBadge: document.getElementById("locationBadge"),
       caseTag: document.getElementById("caseTag"),
+      speakerLabel: document.getElementById("speakerLabel"),
       questionText: document.getElementById("questionText"),
+      caseHint: document.getElementById("caseHint"),
       instructionText: document.getElementById("instructionText"),
       answerButtons: document.getElementById("answerButtons"),
       feedback: document.getElementById("feedback"),
       feedbackTitle: document.getElementById("feedbackTitle"),
       pointsEarned: document.getElementById("pointsEarned"),
       feedbackText: document.getElementById("feedbackText"),
+      feedbackReference: document.getElementById("feedbackReference"),
       consumer: document.getElementById("consumer"),
       speechPing: document.getElementById("speechPing"),
       office: document.getElementById("office"),
+      sceneDecor: document.getElementById("sceneDecor"),
+      locationName: document.getElementById("locationName"),
+      locationSubtitle: document.getElementById("locationSubtitle"),
       effectLayer: document.getElementById("effectLayer"),
       finalScore: document.getElementById("finalScore"),
       finalCorrect: document.getElementById("finalCorrect"),
       finalWrong: document.getElementById("finalWrong"),
       finalPercent: document.getElementById("finalPercent"),
       rankLabel: document.getElementById("rankLabel"),
+      finalLevel: document.getElementById("finalLevel"),
       reviewButton: document.getElementById("reviewButton"),
       reviewPanel: document.getElementById("reviewPanel"),
       reviewList: document.getElementById("reviewList"),
@@ -2050,6 +2196,7 @@
     };
 
     let selectedQuestions = [];
+    let selectedLevel = null;
     let currentIndex = 0;
     let score = 0;
     let correct = 0;
@@ -2076,6 +2223,37 @@
         [copy[index], copy[randomIndex]] = [copy[randomIndex], copy[index]];
       }
       return copy;
+    }
+
+    function chooseLevel(level) {
+      if (!LEVELS[level]) return;
+      selectedLevel = level;
+      ui.levelButtons.forEach((button) => {
+        const isSelected = button.dataset.level === level;
+        button.classList.toggle("selected", isSelected);
+        button.setAttribute("aria-pressed", String(isSelected));
+      });
+      ui.briefingButton.disabled = false;
+      ui.levelStatus.textContent = `${LEVELS[level].label} selecionado • ${LEVELS[level].basePoints} pontos por acerto + bônus de combo.`;
+      playSound("select");
+    }
+
+    function resetLevelSelection() {
+      selectedLevel = null;
+      ui.levelButtons.forEach((button) => {
+        button.classList.remove("selected");
+        button.setAttribute("aria-pressed", "false");
+      });
+      ui.briefingButton.disabled = true;
+      ui.levelStatus.textContent = "Selecione uma opção para liberar a missão.";
+    }
+
+    function buildBalancedRound(level) {
+      const scenarioSequence = shuffle(SCENARIO_ORDER);
+      return scenarioSequence.flatMap((scenario) => {
+        const pool = questions.filter((question) => question.level === level && question.scenario === scenario);
+        return shuffle(pool).slice(0, 2);
+      });
     }
 
     function padScore(value) {
@@ -2254,7 +2432,8 @@
     }
 
     function startGame() {
-      selectedQuestions = shuffle(questions).slice(0, TOTAL_CASES);
+      if (!selectedLevel) return;
+      selectedQuestions = buildBalancedRound(selectedLevel);
       currentIndex = 0;
       score = 0;
       correct = 0;
@@ -2272,11 +2451,23 @@
 
     function renderQuestion() {
       const question = selectedQuestions[currentIndex];
+      const scenario = SCENARIOS[question.scenario];
+      const level = LEVELS[selectedLevel];
       answerLocked = false;
       ui.caseValue.textContent = `${currentIndex + 1}/${TOTAL_CASES}`;
-      ui.caseTag.textContent = `CASO ${String(currentIndex + 1).padStart(2, "0")}`;
+      ui.caseTag.textContent = `${scenario.label} • CASO ${String(currentIndex + 1).padStart(2, "0")}`;
+      ui.speakerLabel.textContent = question.owner;
       ui.questionText.textContent = question.text;
-      ui.instructionText.textContent = "A AFIRMAÇÃO ESTÁ CORRETA?";
+      ui.caseHint.hidden = !(selectedLevel === "fundamental" && question.hint);
+      ui.caseHint.textContent = question.hint ? `PISTA: ${question.hint}` : "";
+      ui.instructionText.textContent = "ESSA SITUAÇÃO É UMA INFRAÇÃO?";
+      ui.levelBadge.textContent = level.label;
+      ui.locationBadge.textContent = scenario.label;
+      ui.locationName.textContent = scenario.label;
+      ui.locationSubtitle.textContent = scenario.subtitle;
+      ui.sceneDecor.dataset.label = scenario.decor;
+      ui.office.dataset.scenario = question.scenario;
+      ui.office.setAttribute("aria-label", `Fiscalização em ${scenario.label.toLowerCase()}, em estilo pixel art`);
       ui.scoreValue.textContent = padScore(score);
       ui.correctValue.textContent = correct;
       ui.wrongValue.textContent = wrong;
@@ -2298,7 +2489,7 @@
       ui.comboBadge.classList.remove("show");
       ui.comboBadge.textContent = `COMBO x${combo}`;
       if (combo >= 2) ui.comboBadge.classList.add("show");
-      ui.liveRegion.textContent = `Caso ${currentIndex + 1} de ${TOTAL_CASES}. ${question.text}`;
+      ui.liveRegion.textContent = `Caso ${currentIndex + 1} de ${TOTAL_CASES}, ${scenario.label}. ${question.text}`;
     }
 
     function comboBonus(sequence) {
@@ -2326,7 +2517,7 @@
       if (isCorrect) {
         combo += 1;
         correct += 1;
-        const earned = BASE_POINTS + comboBonus(combo);
+        const earned = LEVELS[selectedLevel].basePoints + comboBonus(combo);
         score += earned;
         ui.feedback.classList.add("correct");
         ui.feedbackTitle.textContent = "✓ CORRETO!";
@@ -2358,6 +2549,7 @@
       }
 
       ui.feedbackText.textContent = question.explanation;
+      ui.feedbackReference.textContent = `BASE EDUCATIVA: ${question.reference}`;
       ui.scoreValue.textContent = padScore(score);
       ui.correctValue.textContent = correct;
       ui.wrongValue.textContent = wrong;
@@ -2433,11 +2625,15 @@
         const item = document.createElement("article");
         const title = document.createElement("strong");
         const explanation = document.createElement("p");
+        const reference = document.createElement("p");
         item.className = "review-item";
-        title.textContent = `${index + 1}. ${question.text}`;
+        title.textContent = `${index + 1}. ${SCENARIOS[question.scenario].label} — ${question.text}`;
         explanation.textContent = question.explanation;
+        reference.className = "feedback-reference";
+        reference.textContent = question.reference;
         item.appendChild(title);
         item.appendChild(explanation);
+        item.appendChild(reference);
         ui.reviewList.appendChild(item);
       });
     }
@@ -2449,6 +2645,7 @@
       ui.finalWrong.textContent = wrong;
       ui.finalPercent.textContent = `${percent}%`;
       ui.rankLabel.textContent = getRank(correct);
+      ui.finalLevel.textContent = `Nível: ${LEVELS[selectedLevel].label} • 5 cenários fiscalizados`;
       renderReview();
       showScreen("final");
       createConfetti();
@@ -2460,18 +2657,26 @@
     ui.startButton.addEventListener("click", () => {
       initAudio();
       playSound("select");
+      resetLevelSelection();
       showScreen("intro");
-      setTimeout(() => ui.briefingButton.focus(), 120);
+      setTimeout(() => ui.levelButtons[0].focus(), 120);
+    });
+
+    ui.levelButtons.forEach((button) => {
+      button.addEventListener("click", () => chooseLevel(button.dataset.level));
     });
 
     ui.briefingButton.addEventListener("click", () => {
+      if (!selectedLevel) return;
       playSound("select");
       startGame();
     });
 
     ui.restartButton.addEventListener("click", () => {
       playSound("select");
-      startGame();
+      resetLevelSelection();
+      showScreen("intro");
+      setTimeout(() => ui.levelButtons[0].focus(), 120);
     });
 
     ui.trueButton.addEventListener("click", () => answerQuestion(true));
@@ -2501,7 +2706,9 @@
 
       if (activeScreen === "start" && event.key === "Enter") {
         ui.startButton.click();
-      } else if (activeScreen === "intro" && event.key === "Enter") {
+      } else if (activeScreen === "intro" && ["1", "2", "3"].includes(event.key)) {
+        chooseLevel(["fundamental", "medio", "tecnico"][Number(event.key) - 1]);
+      } else if (activeScreen === "intro" && event.key === "Enter" && selectedLevel) {
         ui.briefingButton.click();
       } else if (activeScreen === "game") {
         if (!answerLocked && key === "v") answerQuestion(true);
