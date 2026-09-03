@@ -2,7 +2,7 @@
 
 Jogo educativo em pixel art sobre o PROCON e os direitos básicos do consumidor no Brasil.
 
-O jogador participa de uma operação de fiscalização, ouve o responsável por cada estabelecimento e decide se a situação apresentada é ou não uma infração aos direitos do consumidor. Cada resposta apresenta explicação e base educativa imediatas.
+O jogador controla o fiscal do PROCON, entra em estabelecimentos reais, conversa com o responsável por cada local e decide se a resposta apresentada revela ou não uma infração aos direitos do consumidor. Cada decisão apresenta explicação e base educativa imediatas.
 
 ## Como jogar
 
@@ -19,10 +19,11 @@ Também é possível abrir o arquivo `index.html` diretamente em qualquer navega
 
 ## Recursos
 
-- 45 casos educativos, organizados por escolarização.
+- 90 casos educativos, organizados por escolarização.
 - Três níveis: Fundamental II, Ensino Médio e Técnico/Superior.
 - Cinco cenários visuais: supermercado, loja de eletrônicos, banco, compras online e telefonia.
-- Dez casos por partida, sempre com dois casos de cada cenário.
+- 25 casos por partida, sempre com cinco perguntas em cada estabelecimento.
+- Entrada animada do fiscal, responsável do local e rota visual com cinco visitas.
 - Pistas no nível Fundamental e pontuação progressiva conforme o nível.
 - Pontuação, sequência de acertos e bônus de combo.
 - Feedback imediato com explicação e referência ao tema correspondente no CDC.
@@ -40,4 +41,10 @@ Também é possível abrir o arquivo `index.html` diretamente em qualquer navega
 ## Aviso educativo
 
 O conteúdo tem finalidade exclusivamente educativa e não substitui orientação jurídica nem a análise de um caso concreto pelo PROCON ou por profissional qualificado.
+
+## Referências oficiais
+
+- [Código de Defesa do Consumidor — texto compilado](https://www.planalto.gov.br/ccivil_03/leis/l8078compilado.htm)
+- [Decreto nº 7.962/2013 — comércio eletrônico](https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2013/decreto/d7962.htm)
+- [Banco Central — liquidação antecipada de dívidas](https://www.bcb.gov.br/meubc/faqs/s/liquidacao-antecipada)
 

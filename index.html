@@ -534,6 +534,30 @@
     }
     .mission-badge strong { color: var(--yellow); }
 
+    .route-bar {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5px;
+      padding: 7px clamp(10px, 2vw, 22px) 0;
+      background: #34426a;
+    }
+    .route-stop {
+      min-width: 0;
+      padding: 7px 5px;
+      overflow: hidden;
+      border: 3px solid #1d294d;
+      background: #293657;
+      color: #8494ba;
+      text-align: center;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 8px;
+      letter-spacing: .04em;
+    }
+    .route-stop.done { color: #bff4cf; border-color: var(--green-dark); background: #244e3e; }
+    .route-stop.active { color: var(--ink); border-color: var(--shadow); background: var(--yellow); box-shadow: inset -4px -4px 0 var(--orange); }
+    .route-stop b { margin-right: 4px; }
+
     .game-layout {
       padding: clamp(10px, 2vw, 22px);
       display: grid;
@@ -1516,6 +1540,80 @@
     .office[data-scenario="online"] .procon-sign { background: #a85821; box-shadow: inset -6px -6px 0 #70442f, 5px 5px 0 rgba(0,0,0,.2); }
     .office[data-scenario="telefonia"] .procon-sign { background: #6a55ce; box-shadow: inset -6px -6px 0 #3f318f, 5px 5px 0 rgba(0,0,0,.2); }
 
+    /* Agora o local é do fornecedor: o fiscal azul chega pela esquerda e o dono responde à direita. */
+    .office[data-scenario] .notice-board,
+    .office[data-scenario] .computer,
+    .office[data-scenario] .keyboard,
+    .office[data-scenario] .pixel-plant,
+    .office[data-scenario] .coffee-mug,
+    .office[data-scenario] .papers { display: none; }
+
+    .office .consumer.owner {
+      left: auto;
+      right: 11%;
+      animation: none;
+    }
+    .office .agent.inspector {
+      --inspector-scale: .88;
+      z-index: 7;
+      left: 12%;
+      right: auto;
+      transform: scale(var(--inspector-scale));
+      transform-origin: bottom center;
+    }
+    .office.new-visit .agent.inspector { animation: inspector-arrives 1s steps(8) both; }
+    .office.new-visit .inspector-label { animation: inspector-label-in 1.5s steps(5) both; }
+    .office.new-visit .visit-banner { animation: visit-banner 2.1s steps(7) both; }
+    .speech-ping { left: auto; right: 25%; }
+    .effect-layer { left: auto; right: 21%; }
+
+    .inspector-label {
+      position: absolute;
+      z-index: 8;
+      left: 10%;
+      bottom: 25.5%;
+      padding: 6px 8px;
+      border: 3px solid var(--shadow);
+      background: var(--blue);
+      color: #fff;
+      box-shadow: inset -4px -4px 0 var(--blue-dark), 3px 3px 0 rgba(16,23,51,.25);
+      font-size: 8px;
+      white-space: nowrap;
+    }
+    .owner-label {
+      position: absolute;
+      z-index: 8;
+      right: 8%;
+      bottom: 25.5%;
+      padding: 6px 8px;
+      border: 3px solid var(--shadow);
+      background: var(--red);
+      color: #fff;
+      box-shadow: inset -4px -4px 0 var(--red-dark), 3px 3px 0 rgba(16,23,51,.25);
+      font-size: 8px;
+      white-space: nowrap;
+    }
+
+    .visit-banner {
+      position: absolute;
+      z-index: 25;
+      left: 50%;
+      top: 48%;
+      width: min(78%, 430px);
+      padding: 14px 18px;
+      border: 5px solid var(--shadow);
+      background: var(--paper);
+      color: var(--ink);
+      box-shadow: inset -6px -6px 0 var(--paper-2), 8px 8px 0 rgba(16,23,51,.35);
+      text-align: center;
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(.7);
+      pointer-events: none;
+    }
+    .visit-banner span { display: block; color: var(--red); font-size: 9px; margin-bottom: 6px; }
+    .visit-banner strong { display: block; color: var(--blue-dark); font-size: clamp(15px, 2.5vw, 23px); }
+    .visit-banner small { display: block; margin-top: 7px; color: #5d6882; font-family: Arial, Helvetica, sans-serif; font-size: 11px; font-weight: 800; }
+
     .dialog-wrap { display: flex; flex-direction: column; min-width: 0; }
 
     .case-tag {
@@ -1829,6 +1927,19 @@
     @keyframes steam { 50% { transform: translateY(-6px); opacity: .35; } }
     @keyframes office-flash { 0% { opacity: 0; } 35% { opacity: 1; } 100% { opacity: 0; } }
     @keyframes pixel-burst { from { transform: translate(0, 0) scale(1.35); opacity: 1; } to { transform: translate(var(--x), var(--y)) scale(.2) rotate(90deg); opacity: 0; } }
+    @keyframes inspector-arrives {
+      from { transform: translateX(-260px) scale(var(--inspector-scale)); }
+      to { transform: translateX(0) scale(var(--inspector-scale)); }
+    }
+    @keyframes inspector-label-in {
+      0%, 45% { opacity: 0; transform: translateY(10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes visit-banner {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(.7); }
+      12%, 70% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -70%) scale(1); }
+    }
 
     @media (max-width: 850px) {
       .ticker { display: none; }
@@ -1841,8 +1952,14 @@
       .character { bottom: 26%; transform: scale(.82); }
       .consumer { --char-scale: .82; left: 14%; z-index: 5; }
       .agent { right: 10%; bottom: 28%; transform: scale(.76); }
+      .office .consumer.owner { left: auto; right: 13%; }
+      .office .agent.inspector { --inspector-scale: .76; left: 14%; right: auto; }
+      .inspector-label { left: 12%; bottom: 25%; }
+      .owner-label { right: 10%; bottom: 25%; }
       .speech-ping { left: 28%; bottom: 58%; }
       .effect-layer { left: 23%; bottom: 55%; }
+      .office .speech-ping { left: auto; right: 27%; }
+      .office .effect-layer { left: auto; right: 23%; }
       .hud { grid-template-columns: repeat(4, 1fr); }
       .mission-strip { padding-top: 7px; }
       .combo-badge { position: absolute; z-index: 30; top: 89px; left: 50%; transform: translateX(-50%) scale(0); }
@@ -1869,21 +1986,30 @@
       .game-layout { padding: 7px; gap: 12px; }
       .mission-strip { align-items: stretch; gap: 5px; padding: 6px 7px 0; font-size: 8px; }
       .mission-badge { flex: 1; padding: 6px; line-height: 1.35; }
+      .route-bar { gap: 3px; padding: 5px 7px 0; }
+      .route-stop { padding: 6px 2px; border-width: 2px; font-size: 6px; }
+      .route-stop b { display: block; margin: 0 0 2px; }
       .office { min-height: 310px; border-width: 4px; }
       .room-light, .file-cabinet, .pixel-plant { display: none; }
       .window { height: 31%; border-width: 5px; }
-      .procon-sign { top: 7%; border-width: 4px; padding: 10px 5px; }
+      .procon-sign { top: 7%; right: 4%; width: 38%; border-width: 4px; padding: 9px 4px; font-size: 10px; }
+      .procon-sign small { font-size: 6px; line-height: 1.35; }
       .scene-decor { left: 5%; top: 6%; width: 49%; height: 34%; border-width: 4px; }
       .scene-decor::after { display: none; }
       .notice-board { display: none; }
       .character { transform: scale(.63); bottom: 22%; }
       .consumer { --char-scale: .63; left: 9%; transform-origin: bottom left; }
       .agent { right: 5%; transform: scale(.58); bottom: 25%; transform-origin: bottom right; }
+      .office .consumer.owner { left: auto; right: 8%; transform-origin: bottom right; }
+      .office .agent.inspector { --inspector-scale: .58; left: 8%; right: auto; transform-origin: bottom left; }
+      .inspector-label { left: 4%; bottom: 20.5%; padding: 4px 5px; font-size: 6px; }
+      .owner-label { right: 4%; bottom: 20.5%; padding: 4px 5px; font-size: 6px; }
       .computer { transform: scale(.7); transform-origin: bottom right; right: 17%; bottom: 35%; }
       .papers { transform: scale(.72); left: 42%; bottom: 35%; }
       .keyboard { transform: scale(.65) skewX(-9deg); transform-origin: bottom right; right: 5%; }
       .coffee-mug { transform: scale(.7); left: 34%; }
       .speech-ping { transform: scale(.76); left: 28%; bottom: 58%; }
+      .office .speech-ping { left: auto; right: 25%; }
       .counter::before { padding: 7px 9px; border-width: 3px; }
       .dialog-box { min-height: 430px; padding: 28px 20px 22px; border-width: 4px; }
       .question-text { font-size: 20px; }
@@ -1926,7 +2052,7 @@
           <span class="tiny-label">ARQUIVO 01 • TREINAMENTO OFICIAL</span>
           <h1>MISSÃO<br>PROCON</h1>
           <p class="mission-line">DEFENDA. ORIENTE. RESOLVA.</p>
-          <p class="start-copy">Você foi convocado para uma operação em cinco estabelecimentos. Investigue situações reais, identifique infrações aos direitos do consumidor e conquiste sua credencial de fiscal.</p>
+          <p class="start-copy">Você é o fiscal do PROCON. Entre em cinco estabelecimentos, interrogue os responsáveis e julgue 25 situações de consumo durante a operação.</p>
           <button class="primary-button" id="startButton" type="button">INICIAR FISCALIZAÇÃO</button>
           <p class="key-help">CONTROLES: <kbd>V</kbd> É INFRAÇÃO &nbsp; <kbd>F</kbd> NÃO É &nbsp; <kbd>ENTER</kbd> CONTINUAR</p>
         </div>
@@ -1937,7 +2063,7 @@
           <div class="intro-icon" aria-hidden="true">!</div>
           <span class="tiny-label">BRIEFING DA MISSÃO</span>
           <h2>ESCOLHA SEU NÍVEL</h2>
-          <p class="intro-copy">O conteúdo e a linguagem mudam conforme a escolarização. Em toda missão você visitará cinco cenários e decidirá se cada situação é uma infração ao consumidor.</p>
+          <p class="intro-copy">O conteúdo e a linguagem mudam conforme a escolarização. O fiscal entra em cada estabelecimento, ouve cinco respostas do responsável e decide se há infração ao consumidor.</p>
           <div class="level-picker" id="levelPicker" role="group" aria-label="Nível de escolarização">
             <button class="level-button" type="button" data-level="fundamental" aria-pressed="false">
               <span class="level-number">NÍVEL 1 • +100</span>
@@ -1957,7 +2083,7 @@
           </div>
           <p class="level-status" id="levelStatus" aria-live="polite">Selecione uma opção para liberar a missão.</p>
           <div class="rules" aria-label="Regras da partida">
-            <div class="rule"><b>10</b> CASOS</div>
+            <div class="rule"><b>25</b> CASOS</div>
             <div class="rule"><b>5</b> CENÁRIOS</div>
             <div class="rule"><b>COMBO</b> BÔNUS</div>
           </div>
@@ -1967,7 +2093,7 @@
 
       <section class="screen game-screen" id="gameScreen" hidden>
         <div class="hud" aria-label="Placar da partida">
-          <div class="hud-item"><span class="hud-label">CASO</span><strong class="hud-value" id="caseValue">1/10</strong></div>
+          <div class="hud-item"><span class="hud-label">CASO</span><strong class="hud-value" id="caseValue">1/25</strong></div>
           <div class="hud-item"><span class="hud-label">PONTOS</span><strong class="hud-value" id="scoreValue">0000</strong></div>
           <div class="hud-item"><span class="hud-label">ACERTOS</span><strong class="hud-value" id="correctValue">0</strong></div>
           <div class="hud-item"><span class="hud-label">ERROS</span><strong class="hud-value" id="wrongValue">0</strong></div>
@@ -1978,6 +2104,7 @@
           <span class="mission-badge">NÍVEL: <strong id="levelBadge">FUNDAMENTAL II</strong></span>
           <span class="mission-badge">LOCAL: <strong id="locationBadge">SUPERMERCADO</strong></span>
         </div>
+        <div class="route-bar" id="routeBar" aria-label="Rota da fiscalização"></div>
 
         <div class="game-layout">
           <div class="office" id="office" data-scenario="supermercado" aria-label="Fiscalização em supermercado, em estilo pixel art">
@@ -1995,20 +2122,28 @@
             <div class="file-cabinet" aria-hidden="true"><i></i><i></i><i></i></div>
             <div class="pixel-plant" aria-hidden="true"></div>
 
-            <div class="character consumer" id="consumer" data-variant="0" aria-hidden="true">
+            <div class="visit-banner" id="visitBanner" aria-hidden="true">
+              <span id="visitStep">VISITA 1 DE 5</span>
+              <strong id="visitName">CHEGANDO AO SUPERMERCADO</strong>
+              <small>O fiscal do PROCON entrou no estabelecimento.</small>
+            </div>
+
+            <div class="character consumer owner" id="owner" data-variant="0" aria-hidden="true">
               <span class="character-shadow"></span>
               <div class="head"></div><div class="hair"></div>
               <span class="eye left"></span><span class="eye right"></span><span class="mouth"></span>
               <div class="body"><span class="collar"></span></div><div class="legs"></div>
             </div>
             <div class="speech-ping" id="speechPing" aria-hidden="true">?</div>
+            <div class="owner-label" aria-hidden="true">RESPONSÁVEL</div>
 
-            <div class="character agent" aria-hidden="true">
+            <div class="character agent inspector" id="inspector" aria-hidden="true">
               <span class="character-shadow"></span>
               <div class="head"></div><div class="hair"></div>
               <span class="eye left"></span><span class="eye right"></span><span class="mouth"></span>
               <div class="body"><span class="collar"></span></div><span class="agent-badge"></span><div class="legs"></div>
             </div>
+            <div class="inspector-label" aria-hidden="true">FISCAL PROCON</div>
 
             <div class="counter"></div><div class="counter-top"></div>
             <div class="computer" aria-hidden="true"></div><div class="papers" aria-hidden="true"></div>
@@ -2125,7 +2260,59 @@
       { id: "t-tel-3", level: "tecnico", scenario: "telefonia", owner: "RESPONSÁVEL PELA OPERADORA", text: "A contratação registra consentimento, entrega cópia acessível e destaca preço, reajuste, fidelização e consequências do cancelamento.", answer: false, explanation: "Consentimento verificável, acesso ao contrato e destaque das condições relevantes cumprem deveres de transparência.", reference: "CDC: arts. 6º, III, 46 e 54, §§3º e 4º" }
     ];
 
-    const TOTAL_CASES = 10;
+    // Segunda coleção: amplia cada cenário para seis casos por nível (90 casos no total).
+    questions.push(...[
+      { id: "f-sup-4", level: "fundamental", scenario: "supermercado", owner: "GERENTE DO SUPERMERCADO", text: "Encontramos iogurtes vencidos, mas deixamos todos na geladeira para vender até o estoque acabar.", answer: true, hint: "Produto vencido pode continuar sendo oferecido?", explanation: "Produto vencido pode colocar a saúde em risco e não deve permanecer à venda.", reference: "CDC: arts. 8º e 10 • saúde e segurança" },
+      { id: "f-sup-5", level: "fundamental", scenario: "supermercado", owner: "GERENTE DO SUPERMERCADO", text: "A balança foi conferida e mostra ao cliente o peso do produto sem contar o peso da embalagem.", answer: false, hint: "A quantidade mostrada corresponde ao produto?", explanation: "A pesagem transparente e sem incluir a embalagem é uma prática correta.", reference: "CDC: arts. 6º, III, e 19 • informação e quantidade" },
+      { id: "f-sup-6", level: "fundamental", scenario: "supermercado", owner: "GERENTE DO SUPERMERCADO", text: "Ao receber aviso de risco em um lote, retiramos os produtos, colocamos cartazes e orientamos quem já comprou.", answer: false, hint: "A loja ignorou o risco ou protegeu os clientes?", explanation: "Retirar o lote e informar os consumidores é a atitude de segurança esperada.", reference: "CDC: art. 10 • comunicação de periculosidade" },
+      { id: "f-ele-4", level: "fundamental", scenario: "eletronicos", owner: "DONO DA LOJA", text: "Anunciamos uma televisão em promoção, ainda temos estoque, mas recusamos vender pelo preço anunciado.", answer: true, hint: "A loja precisa respeitar uma oferta clara?", explanation: "Uma oferta clara obriga o fornecedor. Havendo estoque anunciado, recusar o preço pode violar o direito do consumidor.", reference: "CDC: arts. 30 e 35 • cumprimento da oferta" },
+      { id: "f-ele-5", level: "fundamental", scenario: "eletronicos", owner: "DONO DA LOJA", text: "Antes da venda, explicamos claramente que o videogame é usado, mostramos seu estado e informamos a garantia.", answer: false, hint: "O cliente recebeu a informação antes de escolher?", explanation: "Vender produto usado não é proibido quando o estado e as condições são apresentados com clareza.", reference: "CDC: arts. 6º, III, e 31 • informação clara" },
+      { id: "f-ele-6", level: "fundamental", scenario: "eletronicos", owner: "DONO DA LOJA", text: "Um carregador começou a soltar faíscas. Bloqueamos a venda, avisamos os clientes e procuramos o fornecedor.", answer: false, hint: "A loja continuou vendendo o item perigoso?", explanation: "Bloquear a venda e alertar os consumidores é a resposta correta diante de risco.", reference: "CDC: arts. 8º e 10 • prevenção de riscos" },
+      { id: "f-ban-4", level: "fundamental", scenario: "banco", owner: "GERENTE DO BANCO", text: "Incluímos um seguro pago no cartão sem o cliente pedir e cobramos a primeira mensalidade.", answer: true, hint: "O cliente autorizou o serviço cobrado?", explanation: "Cobrar por serviço não solicitado é prática abusiva.", reference: "CDC: art. 39, III • serviço não solicitado" },
+      { id: "f-ban-5", level: "fundamental", scenario: "banco", owner: "GERENTE DO BANCO", text: "Entregamos uma cópia legível do contrato e explicamos onde o cliente pode tirar dúvidas.", answer: false, hint: "O cliente consegue conhecer e guardar o contrato?", explanation: "Dar acesso ao contrato e esclarecer dúvidas respeita o dever de informação.", reference: "CDC: arts. 6º, III, e 46" },
+      { id: "f-ban-6", level: "fundamental", scenario: "banco", owner: "GERENTE DO BANCO", text: "Dizemos que o empréstimo não tem custo, mas depois acrescentamos uma tarifa escondida.", answer: true, hint: "O preço verdadeiro foi contado antes da contratação?", explanation: "Esconder custos pode induzir o consumidor ao erro e viola o dever de informação.", reference: "CDC: arts. 6º, III, 37 e 52" },
+      { id: "f-onl-4", level: "fundamental", scenario: "online", owner: "GERENTE DO SITE", text: "Nosso site vende produtos, mas esconde o nome, o endereço e qualquer forma de contato da empresa.", answer: true, hint: "O comprador consegue identificar quem está vendendo?", explanation: "O comércio eletrônico deve mostrar claramente quem é o fornecedor e como encontrá-lo.", reference: "Decreto 7.962/2013: art. 2º • identificação do fornecedor" },
+      { id: "f-onl-5", level: "fundamental", scenario: "online", owner: "GERENTE DO SITE", text: "Informamos o prazo antes do pagamento, enviamos o rastreio e entregamos o produto correto na data prometida.", answer: false, hint: "A oferta e o prazo foram cumpridos?", explanation: "A situação descreve cumprimento da oferta e informação adequada.", reference: "CDC: arts. 30 e 35 • cumprimento da oferta" },
+      { id: "f-onl-6", level: "fundamental", scenario: "online", owner: "GERENTE DO SITE", text: "O site mostra 'última unidade' para todos os produtos, mesmo quando há muito estoque, só para apressar a compra.", answer: true, hint: "A mensagem sobre o estoque é verdadeira?", explanation: "Criar falsa urgência com informação enganosa pode levar o consumidor a uma decisão que não tomaria.", reference: "CDC: art. 37 • publicidade enganosa" },
+      { id: "f-tel-4", level: "fundamental", scenario: "telefonia", owner: "GERENTE DA OPERADORA", text: "Quando o cliente reclama de uma cobrança, recusamos registrar o atendimento e não fornecemos protocolo.", answer: true, hint: "A empresa permitiu acompanhar a reclamação?", explanation: "O atendimento deve ser adequado e permitir que a reclamação seja acompanhada.", reference: "CDC: arts. 6º, III, e 22 • atendimento adequado" },
+      { id: "f-tel-5", level: "fundamental", scenario: "telefonia", owner: "GERENTE DA OPERADORA", text: "A fatura separa o valor do plano, dos serviços extras autorizados e dos impostos, sem cobranças escondidas.", answer: false, hint: "Os valores estão claros e foram autorizados?", explanation: "Uma fatura clara e sem cobranças não solicitadas respeita o consumidor.", reference: "CDC: arts. 6º, III, e 31" },
+      { id: "f-tel-6", level: "fundamental", scenario: "telefonia", owner: "GERENTE DA OPERADORA", text: "A propaganda e o contrato informam o mesmo plano de 500 Mb, com preço e limites destacados antes da assinatura.", answer: false, hint: "A oferta combina com o contrato?", explanation: "Informação coerente e destacada permite uma escolha consciente.", reference: "CDC: arts. 30, 31 e 46" },
+
+      { id: "m-sup-4", level: "medio", scenario: "supermercado", owner: "GERENTE DO SUPERMERCADO", text: "A fiscalização encontrou alimento vencido exposto para venda, e a gerência decidiu mantê-lo na prateleira com desconto.", answer: true, explanation: "Desconto não torna seguro um alimento vencido. Produtos que oferecem risco não devem ser colocados no mercado.", reference: "CDC: arts. 8º e 10" },
+      { id: "m-sup-5", level: "medio", scenario: "supermercado", owner: "GERENTE DO SUPERMERCADO", text: "Na venda a peso, descontamos a tara da embalagem, deixamos o visor da balança visível e entregamos comprovante da pesagem.", answer: false, explanation: "A prática garante informação verificável e cobrança apenas pela quantidade do produto.", reference: "CDC: arts. 6º, III, e 19" },
+      { id: "m-sup-6", level: "medio", scenario: "supermercado", owner: "GERENTE DO SUPERMERCADO", text: "Recebemos comunicado de recall, isolamos o lote, divulgamos o alerta e orientamos os compradores sobre a devolução.", answer: false, explanation: "A conduta reduz riscos e facilita a proteção de quem já adquiriu o item.", reference: "CDC: art. 10, §§1º e 2º" },
+      { id: "m-ele-4", level: "medio", scenario: "eletronicos", owner: "DONO DA LOJA", text: "A publicidade informa modelo, preço e período da promoção. Com estoque disponível, recusamos a oferta depois que o cliente chegou.", answer: true, explanation: "A oferta suficientemente precisa integra a contratação e deve ser cumprida, salvo impossibilidade devidamente tratada pelas opções legais.", reference: "CDC: arts. 30 e 35" },
+      { id: "m-ele-5", level: "medio", scenario: "eletronicos", owner: "DONO DA LOJA", text: "Recebemos o produto com vício, concluímos o reparo em 20 dias e devolvemos o aparelho funcionando, sem custo ao consumidor.", answer: false, explanation: "O vício foi sanado dentro do prazo legal e sem transferir custo ao consumidor.", reference: "CDC: art. 18, §1º" },
+      { id: "m-ele-6", level: "medio", scenario: "eletronicos", owner: "DONO DA LOJA", text: "O aparelho é recondicionado. Essa condição, o estado, o preço e a garantia aparecem em destaque antes da compra.", answer: false, explanation: "Produto recondicionado pode ser comercializado, desde que sua condição real seja informada com clareza e os direitos legais sejam preservados.", reference: "CDC: arts. 6º, III, 24 e 31" },
+      { id: "m-ban-4", level: "medio", scenario: "banco", owner: "GERENTE DO BANCO", text: "Enviamos cartão de crédito não solicitado e depois cobramos anuidade, embora o consumidor nunca tenha aceitado a contratação.", answer: true, explanation: "Fornecer e cobrar serviço não solicitado é prática abusiva; produto enviado sem pedido não cria obrigação de pagamento.", reference: "CDC: art. 39, III e parágrafo único" },
+      { id: "m-ban-5", level: "medio", scenario: "banco", owner: "GERENTE DO BANCO", text: "Na renegociação, apresentamos saldo, juros, número de parcelas e total a pagar, permitindo que o cliente leve a proposta para analisar.", answer: false, explanation: "A proposta transparente e sem pressão favorece decisão consciente e crédito responsável.", reference: "CDC: arts. 52, 54-B e 54-D" },
+      { id: "m-ban-6", level: "medio", scenario: "banco", owner: "COBRADOR DA FINANCEIRA", text: "Para pressionar o pagamento, ligamos ao empregador do cliente e revelamos a dívida aos colegas de trabalho.", answer: true, explanation: "A cobrança não pode expor o consumidor ao ridículo nem interferir de forma constrangedora em seu trabalho.", reference: "CDC: art. 42" },
+      { id: "m-onl-4", level: "medio", scenario: "online", owner: "GERENTE DO SITE", text: "Programamos um contador de estoque falso e reiniciamos o prazo da promoção a cada acesso para criar urgência inexistente.", answer: true, explanation: "Informação falsa sobre estoque ou duração da oferta pode caracterizar publicidade enganosa.", reference: "CDC: art. 37, §§1º e 3º" },
+      { id: "m-onl-5", level: "medio", scenario: "online", owner: "GERENTE DO SITE", text: "Antes da compra, mostramos frete, prazo, disponibilidade e restrições; depois entregamos exatamente conforme a confirmação.", answer: false, explanation: "A conduta atende à transparência exigida no comércio eletrônico e cumpre as condições da oferta.", reference: "Decreto 7.962/2013: arts. 2º e 6º" },
+      { id: "m-onl-6", level: "medio", scenario: "online", owner: "GERENTE DO SITE", text: "O site exibe CNPJ, endereço, contatos, características essenciais, despesas adicionais e condições completas antes do pagamento.", answer: false, explanation: "Essas são informações essenciais para identificação do fornecedor e decisão segura no comércio eletrônico.", reference: "Decreto 7.962/2013: art. 2º" },
+      { id: "m-tel-4", level: "medio", scenario: "telefonia", owner: "GERENTE DA OPERADORA", text: "A fatura inclui um serviço premium nunca solicitado e a operadora se recusa a retirar a cobrança após a contestação.", answer: true, explanation: "Cobrar serviço não contratado é prática abusiva, e a contestação deve receber tratamento adequado.", reference: "CDC: art. 39, III • direitos do consumidor de telecomunicações" },
+      { id: "m-tel-5", level: "medio", scenario: "telefonia", owner: "GERENTE DA OPERADORA", text: "A fidelização foi aceita em troca de benefício real; prazo e multa proporcional foram destacados antes da contratação.", answer: false, explanation: "A situação descreve informação prévia e consentimento, sem indicar imposição escondida.", reference: "CDC: arts. 6º, III, 46 e 54" },
+      { id: "m-tel-6", level: "medio", scenario: "telefonia", owner: "GERENTE DA OPERADORA", text: "Ao terminar a fidelização, criamos automaticamente um novo período de permanência sem autorização do cliente.", answer: true, explanation: "Renovar obrigação de permanência sem consentimento pode impor vantagem e restrição não contratadas.", reference: "CDC: arts. 39, III, e 51, IV e XIII" },
+
+      { id: "t-sup-4", level: "tecnico", scenario: "supermercado", owner: "RESPONSÁVEL PELO SUPERMERCADO", text: "Mesmo após ciência formal de periculosidade descoberta depois da venda, omitimos o alerta e mantivemos o lote disponível.", answer: true, explanation: "O fornecedor que descobre periculosidade posterior deve comunicar autoridades e consumidores; manter a oferta amplia o risco.", reference: "CDC: art. 10, §§1º e 3º" },
+      { id: "t-sup-5", level: "tecnico", scenario: "supermercado", owner: "RESPONSÁVEL PELO SUPERMERCADO", text: "Mantemos rastreabilidade dos lotes, condições adequadas de armazenamento e informação ostensiva sobre alergênicos e riscos conhecidos.", answer: false, explanation: "As medidas descritas concretizam deveres de segurança, prevenção e informação.", reference: "CDC: arts. 6º, I e III, 8º e 31" },
+      { id: "t-sup-6", level: "tecnico", scenario: "supermercado", owner: "RESPONSÁVEL PELO SUPERMERCADO", text: "Comprovado vício de quantidade, oferecemos ao consumidor, à sua escolha, complementação, substituição, abatimento ou restituição.", answer: false, explanation: "As alternativas apresentadas correspondem às opções legais para vício de quantidade.", reference: "CDC: art. 19" },
+      { id: "t-ele-4", level: "tecnico", scenario: "eletronicos", owner: "RESPONSÁVEL PELA LOJA", text: "Inserimos cláusula segundo a qual loja, fabricante e importador nunca respondem por vícios, ainda que o produto esteja na garantia legal.", answer: true, explanation: "É vedada cláusula que exonere ou atenue a responsabilidade legal por vícios na relação de consumo.", reference: "CDC: arts. 24, 25 e 51, I" },
+      { id: "t-ele-5", level: "tecnico", scenario: "eletronicos", owner: "RESPONSÁVEL PELA LOJA", text: "O vício foi sanado sem custo em 22 dias, preservando qualidade, características e valor do produto.", answer: false, explanation: "O reparo ocorreu dentro do prazo e sem as circunstâncias que autorizariam uso imediato das alternativas do §1º.", reference: "CDC: art. 18, §§1º e 3º" },
+      { id: "t-ele-6", level: "tecnico", scenario: "eletronicos", owner: "RESPONSÁVEL PELA ASSISTÊNCIA", text: "No reparo, instalamos peça usada e inferior, fora das especificações do fabricante, sem autorização do consumidor.", answer: true, explanation: "No serviço de reparação, os componentes devem ser originais adequados e novos, ou manter as especificações, salvo autorização do consumidor.", reference: "CDC: art. 21" },
+      { id: "t-ban-4", level: "tecnico", scenario: "banco", owner: "RESPONSÁVEL PELO BANCO", text: "Concluímos o crédito, mas impedimos o consumidor de acessar ou conservar uma cópia do contrato e de suas condições.", answer: true, explanation: "O consumidor precisa conhecer previamente e conservar o conteúdo contratual; impedir acesso compromete transparência e consentimento.", reference: "CDC: arts. 46, 52 e 54-B" },
+      { id: "t-ban-5", level: "tecnico", scenario: "banco", owner: "RESPONSÁVEL PELO BANCO", text: "A oferta apresenta taxa de juros e Custo Efetivo Total, discriminando tarifas, tributos, seguro opcional e soma final do financiamento.", answer: false, explanation: "A discriminação dos custos permite comparar propostas e atende aos deveres de informação no crédito.", reference: "CDC: arts. 52 e 54-B • regulamentação do CET" },
+      { id: "t-ban-6", level: "tecnico", scenario: "banco", owner: "RESPONSÁVEL PELO BANCO", text: "Assediamos consumidor em vulnerabilidade agravada com ofertas repetidas de crédito e afirmamos que a contratação deve ser imediata.", answer: true, explanation: "A oferta de crédito não pode assediar ou pressionar consumidor, especialmente pessoa vulnerável ou em situação agravada.", reference: "CDC: art. 54-C, IV" },
+      { id: "t-onl-4", level: "tecnico", scenario: "online", owner: "RESPONSÁVEL PELO COMÉRCIO ELETRÔNICO", text: "Ocultamos cláusulas limitativas no resumo e, após a contratação, não disponibilizamos contrato que o consumidor possa guardar.", answer: true, explanation: "O comércio eletrônico deve destacar limitações no resumo e fornecer contrato em meio que permita conservação e reprodução.", reference: "Decreto 7.962/2013: art. 4º, I e IV" },
+      { id: "t-onl-5", level: "tecnico", scenario: "online", owner: "RESPONSÁVEL PELO COMÉRCIO ELETRÔNICO", text: "Antes da confirmação, permitimos corrigir erros e exibimos fornecedor, riscos, preço total, frete, disponibilidade, prazo e restrições.", answer: false, explanation: "As ferramentas e informações descritas atendem aos principais deveres da contratação eletrônica.", reference: "Decreto 7.962/2013: arts. 2º e 4º, II" },
+      { id: "t-onl-6", level: "tecnico", scenario: "online", owner: "RESPONSÁVEL PELO COMÉRCIO ELETRÔNICO", text: "Enviamos produto sem pedido e depois emitimos cobrança, alegando que o silêncio do destinatário vale como aceitação.", answer: true, explanation: "Produto enviado sem solicitação equipara-se a amostra grátis, inexistindo obrigação de pagamento.", reference: "CDC: art. 39, III e parágrafo único" },
+      { id: "t-tel-4", level: "tecnico", scenario: "telefonia", owner: "RESPONSÁVEL PELA OPERADORA", text: "Interrupções recorrentes tornam o serviço inadequado, mas recusamos reexecução, abatimento, restituição ou correção da cobrança.", answer: true, explanation: "Diante de serviço inadequado, a recusa de todas as alternativas legais e de ajuste da cobrança viola os direitos do consumidor.", reference: "CDC: arts. 20 e 22" },
+      { id: "t-tel-5", level: "tecnico", scenario: "telefonia", owner: "RESPONSÁVEL PELA OPERADORA", text: "Franquia, redução de velocidade, cobertura, reajuste e limites técnicos são apresentados de forma destacada antes do consentimento.", answer: false, explanation: "A informação prévia, clara e ostensiva permite avaliar adequação e custo do serviço.", reference: "CDC: arts. 6º, III, 31 e 46" },
+      { id: "t-tel-6", level: "tecnico", scenario: "telefonia", owner: "RESPONSÁVEL PELA OPERADORA", text: "O contrato permite alterar unilateralmente franquia, qualidade e conteúdo do plano depois da adesão, sem critério ou opção ao cliente.", answer: true, explanation: "Cláusula que autoriza modificação unilateral do conteúdo ou da qualidade pode ser abusiva e nula.", reference: "CDC: art. 51, XIII" }
+    ]);
+
+    const TOTAL_CASES = 25;
+    const CASES_PER_SCENARIO = 5;
     const SCENARIO_ORDER = ["supermercado", "eletronicos", "banco", "online", "telefonia"];
     const LEVELS = {
       fundamental: { label: "FUNDAMENTAL II", basePoints: 100 },
@@ -2164,6 +2351,7 @@
       progressBar: document.getElementById("progressBar"),
       levelBadge: document.getElementById("levelBadge"),
       locationBadge: document.getElementById("locationBadge"),
+      routeBar: document.getElementById("routeBar"),
       caseTag: document.getElementById("caseTag"),
       speakerLabel: document.getElementById("speakerLabel"),
       questionText: document.getElementById("questionText"),
@@ -2175,9 +2363,13 @@
       pointsEarned: document.getElementById("pointsEarned"),
       feedbackText: document.getElementById("feedbackText"),
       feedbackReference: document.getElementById("feedbackReference"),
-      consumer: document.getElementById("consumer"),
+      owner: document.getElementById("owner"),
+      inspector: document.getElementById("inspector"),
       speechPing: document.getElementById("speechPing"),
       office: document.getElementById("office"),
+      visitBanner: document.getElementById("visitBanner"),
+      visitStep: document.getElementById("visitStep"),
+      visitName: document.getElementById("visitName"),
       sceneDecor: document.getElementById("sceneDecor"),
       locationName: document.getElementById("locationName"),
       locationSubtitle: document.getElementById("locationSubtitle"),
@@ -2196,6 +2388,7 @@
     };
 
     let selectedQuestions = [];
+    let routeSequence = [];
     let selectedLevel = null;
     let currentIndex = 0;
     let score = 0;
@@ -2252,8 +2445,19 @@
       const scenarioSequence = shuffle(SCENARIO_ORDER);
       return scenarioSequence.flatMap((scenario) => {
         const pool = questions.filter((question) => question.level === level && question.scenario === scenario);
-        return shuffle(pool).slice(0, 2);
+        return shuffle(pool).slice(0, CASES_PER_SCENARIO);
       });
+    }
+
+    function renderRoute(activeVisit) {
+      const fragment = document.createDocumentFragment();
+      routeSequence.forEach((scenarioKey, index) => {
+        const stop = document.createElement("span");
+        stop.className = `route-stop${index < activeVisit ? " done" : ""}${index === activeVisit ? " active" : ""}`;
+        stop.textContent = `${String(index + 1).padStart(2, "0")} ${SCENARIOS[scenarioKey].label}`;
+        fragment.appendChild(stop);
+      });
+      ui.routeBar.replaceChildren(fragment);
     }
 
     function padScore(value) {
@@ -2434,6 +2638,7 @@
     function startGame() {
       if (!selectedLevel) return;
       selectedQuestions = buildBalancedRound(selectedLevel);
+      routeSequence = selectedQuestions.filter((_, index) => index % CASES_PER_SCENARIO === 0).map((question) => question.scenario);
       currentIndex = 0;
       score = 0;
       correct = 0;
@@ -2453,10 +2658,13 @@
       const question = selectedQuestions[currentIndex];
       const scenario = SCENARIOS[question.scenario];
       const level = LEVELS[selectedLevel];
+      const visitIndex = Math.floor(currentIndex / CASES_PER_SCENARIO);
+      const localQuestion = (currentIndex % CASES_PER_SCENARIO) + 1;
+      const isNewVisit = localQuestion === 1;
       answerLocked = false;
       ui.caseValue.textContent = `${currentIndex + 1}/${TOTAL_CASES}`;
-      ui.caseTag.textContent = `${scenario.label} • CASO ${String(currentIndex + 1).padStart(2, "0")}`;
-      ui.speakerLabel.textContent = question.owner;
+      ui.caseTag.textContent = `${scenario.label} • PERGUNTA ${localQuestion}/${CASES_PER_SCENARIO}`;
+      ui.speakerLabel.textContent = `RESPOSTA DO RESPONSÁVEL • ${question.owner}`;
       ui.questionText.textContent = question.text;
       ui.caseHint.hidden = !(selectedLevel === "fundamental" && question.hint);
       ui.caseHint.textContent = question.hint ? `PISTA: ${question.hint}` : "";
@@ -2467,7 +2675,10 @@
       ui.locationSubtitle.textContent = scenario.subtitle;
       ui.sceneDecor.dataset.label = scenario.decor;
       ui.office.dataset.scenario = question.scenario;
-      ui.office.setAttribute("aria-label", `Fiscalização em ${scenario.label.toLowerCase()}, em estilo pixel art`);
+      ui.office.setAttribute("aria-label", `O fiscal do PROCON conversa com o responsável de ${scenario.label.toLowerCase()}, em estilo pixel art`);
+      ui.visitStep.textContent = `VISITA ${visitIndex + 1} DE ${routeSequence.length}`;
+      ui.visitName.textContent = `CHEGANDO: ${scenario.label}`;
+      renderRoute(visitIndex);
       ui.scoreValue.textContent = padScore(score);
       ui.correctValue.textContent = correct;
       ui.wrongValue.textContent = wrong;
@@ -2480,16 +2691,20 @@
       ui.falseButton.disabled = false;
       ui.trueButton.className = "answer-button true";
       ui.falseButton.className = "answer-button false";
-      ui.consumer.className = "character consumer";
-      ui.office.classList.remove("fx-correct", "fx-wrong");
+      ui.owner.className = "character consumer owner";
+      ui.office.classList.remove("fx-correct", "fx-wrong", "new-visit");
+      if (isNewVisit) {
+        void ui.office.offsetWidth;
+        ui.office.classList.add("new-visit");
+      }
       ui.effectLayer.replaceChildren();
       ui.effectLayer.className = "effect-layer";
-      ui.consumer.dataset.variant = String(currentIndex % 4);
+      ui.owner.dataset.variant = String((visitIndex + currentIndex) % 4);
       ui.speechPing.textContent = "?";
       ui.comboBadge.classList.remove("show");
       ui.comboBadge.textContent = `COMBO x${combo}`;
       if (combo >= 2) ui.comboBadge.classList.add("show");
-      ui.liveRegion.textContent = `Caso ${currentIndex + 1} de ${TOTAL_CASES}, ${scenario.label}. ${question.text}`;
+      ui.liveRegion.textContent = `${isNewVisit ? `O fiscal entrou em ${scenario.label}. ` : ""}Caso ${currentIndex + 1} de ${TOTAL_CASES}. ${question.text}`;
     }
 
     function comboBonus(sequence) {
@@ -2522,7 +2737,7 @@
         ui.feedback.classList.add("correct");
         ui.feedbackTitle.textContent = "✓ CORRETO!";
         ui.pointsEarned.textContent = `+${earned} PONTOS`;
-        ui.consumer.classList.add("correct");
+        ui.owner.classList.add("correct");
         ui.speechPing.textContent = "!";
         ui.comboBadge.textContent = `COMBO x${combo}`;
         playSound("correct");
@@ -2541,7 +2756,7 @@
         ui.feedbackTitle.textContent = "✕ NÃO FOI DESSA VEZ";
         ui.pointsEarned.textContent = "+0 PONTOS";
         chosenButton.classList.add("selected-wrong");
-        ui.consumer.classList.add("wrong");
+        ui.owner.classList.add("wrong");
         ui.speechPing.textContent = "…";
         ui.comboBadge.classList.remove("show");
         ui.comboBadge.textContent = "COMBO x0";
@@ -2554,7 +2769,8 @@
       ui.correctValue.textContent = correct;
       ui.wrongValue.textContent = wrong;
       ui.instructionText.textContent = "RESPOSTA REGISTRADA • CONFIRA A EXPLICAÇÃO";
-      ui.nextButton.textContent = currentIndex === TOTAL_CASES - 1 ? "VER RESULTADO FINAL" : "PRÓXIMO CASO";
+      const endsVisit = (currentIndex + 1) % CASES_PER_SCENARIO === 0;
+      ui.nextButton.textContent = currentIndex === TOTAL_CASES - 1 ? "VER RESULTADO FINAL" : endsVisit ? "IR PARA O PRÓXIMO LOCAL" : "PRÓXIMA PERGUNTA";
       ui.feedback.hidden = false;
       ui.liveRegion.textContent = `${ui.feedbackTitle.textContent} ${ui.pointsEarned.textContent}. ${question.explanation}`;
 
@@ -2593,10 +2809,10 @@
     }
 
     function getRank(totalCorrect) {
-      if (totalCorrect <= 3) return "ESTAGIÁRIO EM TREINAMENTO";
-      if (totalCorrect <= 6) return "FISCAL INICIANTE";
-      if (totalCorrect <= 8) return "DEFENSOR DO CONSUMIDOR";
-      if (totalCorrect === 9) return "ESPECIALISTA DO PROCON";
+      if (totalCorrect <= 9) return "ESTAGIÁRIO EM TREINAMENTO";
+      if (totalCorrect <= 15) return "FISCAL INICIANTE";
+      if (totalCorrect <= 20) return "DEFENSOR DO CONSUMIDOR";
+      if (totalCorrect <= 23) return "ESPECIALISTA DO PROCON";
       return "LENDÁRIO FISCAL DO CONSUMIDOR";
     }
 
@@ -2645,7 +2861,8 @@
       ui.finalWrong.textContent = wrong;
       ui.finalPercent.textContent = `${percent}%`;
       ui.rankLabel.textContent = getRank(correct);
-      ui.finalLevel.textContent = `Nível: ${LEVELS[selectedLevel].label} • 5 cenários fiscalizados`;
+      ui.finalLevel.textContent = `Nível: ${LEVELS[selectedLevel].label} • 5 locais visitados • ${TOTAL_CASES} respostas analisadas`;
+      renderRoute(routeSequence.length);
       renderReview();
       showScreen("final");
       createConfetti();
