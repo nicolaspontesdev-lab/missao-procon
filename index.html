@@ -2097,6 +2097,12 @@
       .game-screen.investigating .question-text { font-size: 20px; }
       .game-screen.investigating .answer-button { min-height: 54px; padding: 9px; }
     }
+
+    .audio-controls { display: flex; align-items: center; gap: 10px; flex: none; }
+    .audio-control { display: grid; grid-template-columns: auto 70px; align-items: center; gap: 7px; color: var(--cyan); font-size: 10px; }
+    .audio-control input { width: 70px; accent-color: var(--yellow); cursor: pointer; }
+    .audio-control button { min-width: 80px; height: 36px; font-size: 10px; }
+    @media(max-width:1000px) { .audio-control { grid-template-columns: auto; } .audio-control input { width: 80px; } }
   </style>
 </head>
 <body>
@@ -2112,7 +2118,10 @@
           </div>
         </div>
         <div class="ticker" aria-hidden="true"><span>ORIENTAR • INFORMAR • PROTEGER • EQUILIBRAR AS RELAÇÕES DE CONSUMO •&nbsp;</span></div>
-        <button class="sound-button" id="soundButton" type="button" aria-label="Desligar som" aria-pressed="true" title="Ligar ou desligar som">♫</button>
+        <div class="audio-controls" role="group" aria-label="Controles de áudio">
+          <div class="audio-control"><button class="sound-button" id="musicButton" type="button" aria-label="Desligar música" aria-pressed="true">♫ MÚSICA</button><input id="musicVolume" type="range" min="0" max="100" value="25" aria-label="Volume da música"></div>
+          <div class="audio-control"><button class="sound-button" id="soundButton" type="button" aria-label="Desligar efeitos sonoros" aria-pressed="true">♪ EFEITOS</button><input id="effectsVolume" type="range" min="0" max="100" value="60" aria-label="Volume dos efeitos sonoros"></div>
+        </div>
       </header>
 
       <section class="screen start-screen" id="startScreen">
@@ -2475,6 +2484,16 @@
     let activeScreen = "start";
     let soundEnabled = true;
     let audioContext = null;
+    let effectsGain = null;
+    let musicGain = null;
+    let musicEnabled = true;
+    let musicTimer = null;
+    let musicStep = 0;
+    let nextMusicTime = 0;
+    let audioStarted = false;
+    const musicButton = document.getElementById('musicButton');
+    const musicVolume = document.getElementById('musicVolume');
+    const effectsVolume = document.getElementById('effectsVolume');
 
 
     const INVESTIGATIONS = {"f-sup-1": ["O preço do arroz precisa ser conferido.", "Escolhi o arroz pelo preço exposto na prateleira.", "Etiqueta da prateleira", "ARROZ • R$ 8,90", "Registro do caixa", "O caixa cobra R$ 11,90. A gerência não permite pagar R$ 8,90."], "f-ele-2": ["Um cliente quer devolver um fone.", "Comprei na loja física e mudei de ideia. O fone funciona bem.", "Condições da compra", "Compra presencial. Não houve promessa de troca por preferência pessoal ou cor.", "Inspecionar o fone", "O produto não apresenta defeito."], "f-ban-1": ["Confira como o empréstimo foi oferecido.", "Recebi uma cópia das condições antes de contratar.", "Proposta de crédito", "Juros, número de parcelas e total a pagar foram apresentados antes da assinatura.", "Registro de atendimento", "O banco entregou uma cópia ao cliente."], "f-onl-3": ["Confira o celular entregue ao comprador.", "Recebi um modelo diferente do anunciado. A loja diz que preciso aceitá-lo.", "Anúncio do produto", "CELULAR • Capacidade anunciada: 128 GB.", "Inspecionar a entrega", "Modelo recebido: 64 GB."], "f-tel-1": ["Um pacote apareceu na conta do cliente.", "Não pedi nem autorizei um pacote de jogos.", "Conferir a fatura", "Existe uma cobrança por um pacote de jogos.", "Registro de contratação", "A operadora incluiu o pacote sem solicitação ou autorização."], "m-sup-2": ["Verifique a quantidade de um produto.", "A embalagem informa um quilo. Quero conferir o conteúdo.", "Ler a embalagem", "Peso informado: 1 kg. Não há aviso de quantidade diferente.", "Conferir a pesagem", "A fiscalização comprova apenas 850 g do produto."], "m-ele-5": ["Confira o atendimento de uma assistência.", "Entreguei um produto com defeito e recebi o aparelho funcionando.", "Ordem de serviço", "O reparo foi concluído em 20 dias.", "Comprovante de retirada", "Produto devolvido funcionando, sem custo ao consumidor."], "m-ban-3": ["Investigue a oferta de um seguro.", "Pude escolher se queria contratar o seguro junto do empréstimo.", "Proposta do banco", "Seguro opcional, apresentado separadamente do empréstimo.", "Registro de autorização", "O seguro só foi incluído após o consentimento específico do cliente."], "m-onl-2": ["Investigue a resposta a uma devolução.", "Desisti da compra online dentro de sete dias.", "Pedido de arrependimento", "Pedido registrado dentro do prazo de sete dias.", "Resposta da loja", "A loja oferece somente vale-compras e recusa devolver o dinheiro."], "m-tel-2": ["O valor do plano mudou. Confira os registros.", "Não pedi nem autorizei um plano mais caro. Também não fui avisado.", "Comparar a fatura", "A fatura cobra a diferença de um plano mais caro.", "Registro da mudança", "A operadora trocou o plano sem pedido, consentimento ou aviso."], "t-sup-3": ["Confira uma divergência de preços.", "O preço da gôndola era diferente do registrado no caixa.", "Conferência da oferta", "A equipe confirmou a divergência entre gôndola e caixa.", "Registro da correção", "Sistema corrigido. Foi aplicado ao consumidor o preço anunciado mais favorável."], "t-ele-2": ["Examine o prazo combinado para o reparo.", "Concordei expressamente com um prazo de 45 dias.", "Termo de acordo", "Prazo para sanar o vício: 45 dias.", "Conferir a assinatura", "A convenção está em documento separado, com manifestação expressa do consumidor e do fornecedor."], "t-ban-2": ["Confira o cálculo de uma quitação antecipada.", "Quero quitar a dívida antes do vencimento das parcelas futuras.", "Cálculo da quitação", "O banco cobra a soma de todas as parcelas futuras.", "Conferir os encargos", "Não foi aplicada redução proporcional de juros e acréscimos."], "t-onl-4": ["Verifique o acesso às condições da compra.", "Após contratar, não consigo guardar uma cópia do contrato.", "Resumo da contratação", "As cláusulas limitativas foram ocultadas no resumo.", "Área de documentos", "Após a contratação, não há contrato disponível para conservação pelo consumidor."], "t-tel-2": ["Confira as providências após uma interrupção.", "Houve uma interrupção comprovada. O serviço foi restabelecido.", "Conferir a cobrança", "A operadora recalculou a cobrança do período afetado.", "Protocolo de atendimento", "Há canal de contestação com protocolo para acompanhar o caso."]};
@@ -2528,7 +2547,7 @@
             ui.caseHint.hidden = !(selectedLevel === 'fundamental' && question.hint);
           }
           ui.liveRegion.textContent = `${title}. ${content}. ${collectedClues.size} de 3 ${collectedClues.size === 1 ? "pista coletada" : "pistas coletadas"}.`;
-          if (isNew) playSound('select');
+          if (isNew) playSound(ready ? 'dossier' : index === 0 ? 'voice' : 'paper');
         });
         actions.appendChild(button);
       });
@@ -2727,11 +2746,14 @@
     }
 
     function initAudio() {
-      if (!soundEnabled) return null;
+
       if (!audioContext) {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (!AudioCtx) return null;
         audioContext = new AudioCtx();
+        effectsGain = audioContext.createGain(); effectsGain.connect(audioContext.destination);
+        musicGain = audioContext.createGain(); musicGain.connect(audioContext.destination);
+        updateAudioLevels();
       }
       if (audioContext.state === "suspended") audioContext.resume();
       return audioContext;
@@ -2748,13 +2770,90 @@
       gain.gain.setValueAtTime(volume, start);
       gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
       oscillator.connect(gain);
-      gain.connect(context.destination);
+      gain.connect(effectsGain);
       oscillator.start(start);
       oscillator.stop(start + duration);
     }
 
+    // Original procedural 16-bit loop. Audio begins only after player interaction.
+    function updateAudioLevels() {
+      if (!audioContext) return;
+      const now = audioContext.currentTime;
+      musicGain.gain.setTargetAtTime(musicEnabled && !document.hidden ? Number(musicVolume.value) / 100 : 0, now, .04);
+      effectsGain.gain.setTargetAtTime(soundEnabled && !document.hidden ? Number(effectsVolume.value) / 100 : 0, now, .02);
+    }
+
+    function musicNote(midi, start, duration, volume, type = 'triangle') {
+      const oscillator = audioContext.createOscillator();
+      const envelope = audioContext.createGain();
+      oscillator.type = type;
+      oscillator.frequency.value = 440 * Math.pow(2, (midi - 69) / 12);
+      envelope.gain.setValueAtTime(0, start);
+      envelope.gain.linearRampToValueAtTime(volume, start + .012);
+      envelope.gain.exponentialRampToValueAtTime(.0001, start + duration);
+      oscillator.connect(envelope); envelope.connect(musicGain);
+      oscillator.start(start); oscillator.stop(start + duration + .02);
+      oscillator.onended = () => { oscillator.disconnect(); envelope.disconnect(); };
+    }
+
+    function scheduleMusic() {
+      if (!audioContext || audioContext.state !== 'running' || !musicEnabled || document.hidden) return;
+      if (nextMusicTime < audioContext.currentTime) nextMusicTime = audioContext.currentTime + .03;
+      const scenario = selectedQuestions[currentIndex]?.scenario;
+      const shifts = { supermercado: 0, eletronicos: 5, banco: -2, online: 7, telefonia: 2 };
+      const shift = activeScreen === 'game' ? (shifts[scenario] || 0) : 0;
+      const roots = activeScreen === 'final' ? [48, 53, 55, 48] : [45, 41, 48, 43];
+      const melody = [0, 7, 12, 7, 3, 7, 10, 7, 0, 7, 12, 15, 12, 7, 3, 7];
+      while (nextMusicTime < audioContext.currentTime + .15) {
+        const step = musicStep % 64;
+        const root = roots[Math.floor(step / 16)] + shift;
+        if (step % 4 === 0) musicNote(root, nextMusicTime, .44, .12);
+        if (step % 2 === 0) musicNote(root + 12 + melody[step % 16], nextMusicTime, .21, .048, 'square');
+        if (step % 8 === 4) musicNote(root + 19, nextMusicTime, .3, .04);
+        musicStep++; nextMusicTime += .205;
+      }
+    }
+
+    function startMusic() {
+      audioStarted = true;
+      const context = initAudio(); if (!context) return;
+      if (musicTimer === null) musicTimer = setInterval(scheduleMusic, 70);
+      updateAudioLevels(); scheduleMusic();
+    }
+
+    function paperSound() {
+      const context = initAudio(); if (!context) return;
+      const buffer = context.createBuffer(1, Math.floor(context.sampleRate * .13), context.sampleRate);
+      const samples = buffer.getChannelData(0);
+      for (let i = 0; i < samples.length; i++) samples[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / samples.length, 2);
+      const source = context.createBufferSource(); source.buffer = buffer;
+      const filter = context.createBiquadFilter(); filter.type = 'highpass'; filter.frequency.value = 1700;
+      const gain = context.createGain(); gain.gain.value = .055;
+      source.connect(filter); filter.connect(gain); gain.connect(effectsGain); source.start();
+      source.onended = () => { source.disconnect(); filter.disconnect(); gain.disconnect(); };
+    }
+
+    musicButton.addEventListener('click', () => {
+      musicEnabled = !musicEnabled;
+      musicButton.setAttribute('aria-pressed', String(musicEnabled));
+      musicButton.setAttribute('aria-label', musicEnabled ? 'Desligar música' : 'Ligar música');
+      musicButton.textContent = musicEnabled ? '♫ MÚSICA' : '× MÚSICA';
+      startMusic();
+    });
+    musicVolume.addEventListener('input', () => { startMusic(); updateAudioLevels(); });
+    effectsVolume.addEventListener('input', () => { initAudio(); updateAudioLevels(); });
+    document.addEventListener('visibilitychange', () => {
+      if (!audioContext) return;
+      updateAudioLevels();
+      if (!document.hidden && audioStarted) { nextMusicTime = audioContext.currentTime + .05; scheduleMusic(); }
+    });
+
     function playSound(name) {
       if (!soundEnabled) return;
+      if (name === 'paper') { paperSound(); playTone(640, .06, 'triangle', .025, .1); return; }
+      if (name === 'voice') { [310, 390, 350].forEach((note, i) => playTone(note, .065, 'triangle', .055, i * .075)); return; }
+      if (name === 'dossier') { [523, 659, 784, 1047].forEach((note, i) => playTone(note, .1, 'triangle', .065, i * .09)); return; }
+      if (name === 'arrival') { playTone(262, .12, 'triangle', .06); playTone(392, .18, 'triangle', .05, .13); return; }
       if (name === "select") {
         playTone(330, .05, "square", .025);
         playTone(440, .05, "square", .025, .05);
@@ -2831,6 +2930,7 @@
       if (isNewVisit) {
         void ui.office.offsetWidth;
         ui.office.classList.add("new-visit");
+        playSound("arrival");
       }
       ui.effectLayer.replaceChildren();
       ui.effectLayer.className = "effect-layer";
@@ -3009,7 +3109,7 @@
     }
 
     ui.startButton.addEventListener("click", () => {
-      initAudio();
+      startMusic();
       playSound("select");
       resetLevelSelection();
       showScreen("intro");
@@ -3048,8 +3148,9 @@
     ui.soundButton.addEventListener("click", () => {
       soundEnabled = !soundEnabled;
       ui.soundButton.setAttribute("aria-pressed", String(soundEnabled));
-      ui.soundButton.setAttribute("aria-label", soundEnabled ? "Desligar som" : "Ligar som");
-      ui.soundButton.textContent = soundEnabled ? "♫" : "×";
+      ui.soundButton.setAttribute("aria-label", soundEnabled ? "Desligar efeitos sonoros" : "Ligar efeitos sonoros");
+      ui.soundButton.textContent = soundEnabled ? "♪ EFEITOS" : "× EFEITOS";
+      initAudio(); updateAudioLevels();
       if (soundEnabled) playSound("select");
     });
 

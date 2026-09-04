@@ -52,3 +52,7 @@ O conteúdo tem finalidade exclusivamente educativa e não substitui orientaçã
 ## Investigações interativas
 
 Cada visita começa com uma investigação, adaptada ao nível escolhido (15 dossiês no total). Clique nas três ações da barra de investigação, em qualquer ordem, para ouvir o consumidor e revelar duas evidências. Também é possível usar as teclas 1, 2 e 3. O parecer só é liberado após reunir as três pistas. Os quatro casos seguintes de cada visita mantêm o formato rápido.
+
+## Áudio
+
+Trilha original em estilo 16 bits, gerada pelo navegador e iniciada ao clicar em Iniciar fiscalização. Cada local tem uma variação musical. Há efeitos de diálogo, documentos, conclusão do dossiê e chegada ao local, além dos sinais de resposta e resultado. Os controles no topo permitem ajustar ou desligar música e efeitos separadamente. O áudio fica silencioso quando a aba está oculta. Não depende de arquivos de som nem de internet.
