@@ -2,7 +2,7 @@
 
 Jogo educativo em pixel art sobre o PROCON e os direitos básicos do consumidor no Brasil.
 
-O jogador controla o fiscal do PROCON, entra em estabelecimentos reais, conversa com o responsável por cada local e decide se a resposta apresentada revela ou não uma infração aos direitos do consumidor. Cada decisão apresenta explicação e base educativa imediatas.
+O jogador assume o papel de fiscal do PROCON, visita estabelecimentos representados no jogo, conversa com o responsável por cada local e decide se a resposta apresentada revela ou não uma infração aos direitos do consumidor. Após cada decisão, o jogo apresenta uma explicação e a respectiva referência educativa.
 
 ## Como jogar
 
@@ -12,30 +12,30 @@ Também é possível abrir o arquivo `index.html` diretamente em qualquer navega
 
 ## Controles
 
-- Mouse ou toque para usar os botões.
+- Mouse para usar os botões.
 - `V`: responder "É infração".
 - `F`: responder "Não é infração".
 - `Enter`: avançar para o próximo caso.
 
 ## Recursos
 
-- 90 casos educativos, organizados por escolarização.
+- 90 casos educativos, organizados por nível de escolaridade.
 - Três níveis: Fundamental II, Ensino Médio e Técnico/Superior.
 - Cinco cenários visuais: supermercado, loja de eletrônicos, banco, compras online e telefonia.
 - 25 casos por partida, sempre com cinco perguntas em cada estabelecimento.
-- Entrada animada do fiscal, responsável do local e rota visual com cinco visitas.
-- Pistas no nível Fundamental e pontuação progressiva conforme o nível.
+- Entrada animada do fiscal, presença do responsável pelo local e rota visual com cinco visitas.
+- Pistas no nível Fundamental II e pontuação progressiva conforme o nível.
 - Pontuação, sequência de acertos e bônus de combo.
 - Feedback imediato com explicação e referência ao tema correspondente no CDC.
 - Resultado final conforme o desempenho.
 - Efeitos sonoros gerados no navegador, com botão para ligar ou desligar.
-- Interface responsiva para computador, notebook e celular.
+- Interface para computadores e notebooks, com controles por mouse e teclado.
 - Arte em pixel art inspirada em jogos de 16 bits.
 
 ## Estrutura
 
 - `index.html`: jogo completo, com HTML, CSS e JavaScript.
-- `procon-cover-v2.png`: arte da tela de abertura.
+- A arte da tela de abertura está incorporada ao arquivo `index.html`.
 - `JOGAR MISSÃO PROCON.cmd`: atalho de inicialização para Windows.
 
 ## Aviso educativo
@@ -48,3 +48,7 @@ O conteúdo tem finalidade exclusivamente educativa e não substitui orientaçã
 - [Decreto nº 7.962/2013 — comércio eletrônico](https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2013/decreto/d7962.htm)
 - [Banco Central — liquidação antecipada de dívidas](https://www.bcb.gov.br/meubc/faqs/s/liquidacao-antecipada)
 
+
+## Investigações interativas
+
+Cada visita começa com uma investigação, adaptada ao nível escolhido (15 dossiês no total). Clique nas três ações da barra de investigação, em qualquer ordem, para ouvir o consumidor e revelar duas evidências. Também é possível usar as teclas 1, 2 e 3. O parecer só é liberado após reunir as três pistas. Os quatro casos seguintes de cada visita mantêm o formato rápido.

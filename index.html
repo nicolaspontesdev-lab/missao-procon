@@ -223,7 +223,7 @@
       display: block;
       width: min(820px, 96%);
       height: auto;
-      aspect-ratio: 895 / 439;
+      aspect-ratio: 640 / 200;
       margin: 0 auto 22px;
       position: relative;
       object-fit: contain;
@@ -2028,6 +2028,75 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
     }
+
+
+    /* Investigation: the same ink outlines, inset shadows and paper as the cabinet. */
+    .investigation-panel[hidden], .scene-actions[hidden] { display: none !important; }
+    .investigation-panel { margin: 16px 0 0; color: var(--ink); border: 4px solid var(--shadow); background: var(--paper-2); box-shadow: 4px 4px 0 #b5a273; }
+    .investigation-status { margin: 0; padding: 10px 12px; background: var(--blue-dark); color: var(--yellow); border-bottom: 4px solid var(--shadow); font-size: 11px; line-height: 1.5; }
+    #evidenceCards { padding: 9px; display: grid; gap: 8px; }
+    .evidence-card { min-height: 48px; position: relative; background: var(--paper); border: 3px solid var(--ink); padding: 10px 12px 10px 42px; box-shadow: inset -3px -3px 0 var(--paper-2); }
+    .evidence-card::before { content: attr(data-number); position: absolute; left: 10px; top: 10px; background: var(--blue-dark); color: var(--white); border: 2px solid var(--shadow); width: 21px; height: 23px; display: grid; place-items: center; font-size: 12px; }
+    .evidence-card h3 { margin: 0 0 5px; color: var(--blue-dark); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+    .evidence-card p { margin: 0; font: 700 13px/1.4 Arial, sans-serif; }
+    .evidence-card[hidden] { display: block !important; background: #dac898; border-style: dashed; box-shadow: none; }
+    .evidence-card[hidden] h3 { color: #5e553f; margin: 0; }
+    .evidence-card[hidden] p { display: none; }
+    .evidence-card[hidden]::before { content: '?'; background: #9e8e67; }
+    .scene-actions { position: absolute; bottom: 12px; left: 12px; right: 12px; z-index: 40; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; padding: 12px 8px 8px; background: var(--ink); border: 4px solid var(--shadow); box-shadow: inset 0 4px 0 #445785, 4px 4px 0 #080d2255; }
+    .scene-actions::before { content: 'EQUIPAMENTO DE FISCALIZAÇÃO'; position: absolute; top: -18px; left: 8px; padding: 4px 8px; background: var(--ink); color: var(--cyan); border: 3px solid var(--shadow); font-size: 9px; letter-spacing: .06em; }
+    .clue-button { position: relative; display: grid; grid-template-columns: 28px 1fr; align-items: center; gap: 8px; min-height: 72px; padding: 9px 8px; border: 3px solid var(--shadow); background: var(--blue-dark); color: var(--white); cursor: pointer; box-shadow: inset 3px 3px 0 #5276bd, inset -4px -4px 0 #0b245d; font-size: 11px; line-height: 1.4; text-align: left; }
+    .clue-button:hover, .clue-button:focus-visible { background: var(--blue); transform: translateY(-2px); }
+    .clue-button[aria-pressed="true"] { background: var(--green-dark); box-shadow: inset 3px 3px 0 #40966b, inset -4px -4px 0 #103f28; }
+    .clue-button[aria-pressed="true"]::after { content: '✓'; position: absolute; right: 3px; top: 1px; color: var(--yellow); font-size: 12px; }
+    .clue-button:disabled { cursor: default; transform: none; }
+    .clue-label { display: block; }
+    .clue-key { display: block; color: var(--cyan); font-size: 9px; margin-top: 3px; }
+    .clue-button[aria-pressed="true"] .clue-key { color: #a6e9bb; }
+    .clue-icon { position: relative; display: block; width: 26px; height: 30px; border: 3px solid var(--shadow); background: var(--paper); box-shadow: inset -4px -3px 0 var(--paper-2); }
+    .clue-icon::after { content: ''; position: absolute; left: 4px; top: 5px; width: 11px; height: 3px; background: var(--blue-dark); box-shadow: 0 6px 0 var(--blue-dark), 0 12px 0 var(--blue-dark); }
+    .clue-icon.person { height: 22px; background: #f2bc86; box-shadow: inset -4px 0 0 #c48558; border-top-width: 7px; margin-bottom: 7px; }
+    .clue-icon.person::after { left: -4px; top: 16px; width: 28px; height: 12px; background: var(--cyan); border: 3px solid var(--shadow); box-shadow: none; }
+    .clue-icon.inspect { background: var(--cyan); box-shadow: inset -4px -3px 0 #2497ad; width: 24px; height: 24px; margin-bottom: 5px; }
+    .clue-icon.inspect::after { width: 8px; height: 11px; top: 18px; left: 16px; background: var(--yellow); border: 2px solid var(--shadow); box-shadow: none; }
+    .answer-button:disabled { cursor: not-allowed; opacity: .6; }
+    .game-screen.investigating .dialog-box { padding: 22px; }
+    .game-screen.investigating .question-text { flex: 0; font-size: 21px; }
+    .game-screen.investigating .question-text::before, .game-screen.investigating .question-text::after { content: none; }
+    .game-screen.investigating .speaker { margin-bottom: 10px; }
+    .game-screen.investigating .instruction { margin-top: 16px; }
+    @media(min-width:1000px) {
+      .shell:has(.game-screen:not([hidden])) { width: min(1440px, calc(100% - 40px)); }
+      .game-screen.investigating .game-layout { grid-template-columns: minmax(0,1.12fr) minmax(440px,1fr); }
+      .game-screen.investigating .office { min-height: 560px; }
+    }
+
+    /* Keep scenery, tools and the case file in distinct, aligned regions. */
+    .scene-column { min-width: 0; display: flex; flex-direction: column; gap: 26px; }
+    .scene-column .office { flex: 1; }
+    .scene-column .scene-actions { position: relative; inset: auto; flex: none; width: 100%; }
+    .game-screen .game-layout { align-items: stretch; }
+    .game-screen.investigating .office { min-height: 440px; }
+    .office .procon-sign { right: 4%; top: 8%; width: 36%; padding: 12px 6px; font-size: clamp(13px,1.25vw,19px); letter-spacing: 0; overflow-wrap: anywhere; }
+    .office .procon-sign small { font-size: 8px; line-height: 1.5; letter-spacing: 0; }
+    .office .wall-clock { left: auto; right: 5%; top: 25%; width: 52px; height: 32px; }
+    .office .scene-decor { width: 49%; }
+    .office .inspector-label, .office .owner-label { bottom: 21%; z-index: 20; }
+    .office .counter::before { max-width: 90%; font-size: 12px; padding: 8px 10px; white-space: normal; text-align: center; }
+    .game-screen.investigating .case-hint { order: 0; }
+    .evidence-card { min-height: 49px; }
+    .evidence-card::before { top: 9px; }
+    .clue-button { grid-template-columns: 30px minmax(0,1fr); }
+    .clue-label { overflow-wrap: anywhere; }
+    .clue-key { line-height: 1.4; }
+    @media(min-width:1000px) {
+      .game-screen .game-layout { gap: 24px; padding: 18px; }
+      .game-screen .case-tag { margin-left: 0; }
+      .scene-column { padding-top: 33px; }
+      .game-screen.investigating .dialog-box { padding: 18px; }
+      .game-screen.investigating .question-text { font-size: 20px; }
+      .game-screen.investigating .answer-button { min-height: 54px; padding: 9px; }
+    }
   </style>
 </head>
 <body>
@@ -2048,11 +2117,11 @@
 
       <section class="screen start-screen" id="startScreen">
         <div class="start-card">
-          <img class="cover-art" src="procon-cover-v2.png" width="1790" height="878" alt="Fachada em pixel art de um posto do PROCON, com consumidor, agente, bicicleta e carro">
+          <canvas class="cover-art" id="coverCanvas" width="640" height="200" role="img" aria-label="Fachada em pixel art de um posto do PROCON"></canvas>
           <span class="tiny-label">ARQUIVO 01 • TREINAMENTO OFICIAL</span>
           <h1>MISSÃO<br>PROCON</h1>
           <p class="mission-line">DEFENDA. ORIENTE. RESOLVA.</p>
-          <p class="start-copy">Você é o fiscal do PROCON. Entre em cinco estabelecimentos, interrogue os responsáveis e julgue 25 situações de consumo durante a operação.</p>
+          <p class="start-copy">Você é o fiscal do PROCON. Investigue cinco estabelecimentos, reúna evidências e decida sobre 25 situações de consumo durante a operação.</p>
           <button class="primary-button" id="startButton" type="button">INICIAR FISCALIZAÇÃO</button>
           <p class="key-help">CONTROLES: <kbd>V</kbd> É INFRAÇÃO &nbsp; <kbd>F</kbd> NÃO É &nbsp; <kbd>ENTER</kbd> CONTINUAR</p>
         </div>
@@ -2061,9 +2130,9 @@
       <section class="screen intro-screen" id="introScreen" hidden>
         <div class="intro-card">
           <div class="intro-icon" aria-hidden="true">!</div>
-          <span class="tiny-label">BRIEFING DA MISSÃO</span>
+          <span class="tiny-label">INSTRUÇÕES DA MISSÃO</span>
           <h2>ESCOLHA SEU NÍVEL</h2>
-          <p class="intro-copy">O conteúdo e a linguagem mudam conforme a escolarização. O fiscal entra em cada estabelecimento, ouve cinco respostas do responsável e decide se há infração ao consumidor.</p>
+          <p class="intro-copy">O conteúdo e a linguagem mudam conforme a escolarização. Cada visita começa com uma investigação: ouça o consumidor e examine duas evidências no cenário. Reúna as três pistas para liberar seu parecer; depois resolva quatro casos rápidos.</p>
           <div class="level-picker" id="levelPicker" role="group" aria-label="Nível de escolarização">
             <button class="level-button" type="button" data-level="fundamental" aria-pressed="false">
               <span class="level-number">NÍVEL 1 • +100</span>
@@ -2107,6 +2176,7 @@
         <div class="route-bar" id="routeBar" aria-label="Rota da fiscalização"></div>
 
         <div class="game-layout">
+          <div class="scene-column">
           <div class="office" id="office" data-scenario="supermercado" aria-label="Fiscalização em supermercado, em estilo pixel art">
             <div class="wall-pattern"></div>
             <div class="room-light" aria-hidden="true"></div>
@@ -2149,6 +2219,10 @@
             <div class="computer" aria-hidden="true"></div><div class="papers" aria-hidden="true"></div>
             <div class="keyboard" aria-hidden="true"></div><div class="coffee-mug" aria-hidden="true"></div>
             <div class="effect-layer" id="effectLayer" aria-hidden="true"></div>
+            
+          </div>
+
+          <div class="scene-actions" id="sceneActions" role="group" aria-label="Ações de investigação" hidden></div>
           </div>
 
           <div class="dialog-wrap">
@@ -2157,7 +2231,8 @@
               <p class="speaker" id="speakerLabel">FALA DO RESPONSÁVEL</p>
               <blockquote class="question-text" id="questionText"></blockquote>
               <p class="case-hint" id="caseHint" hidden></p>
-              <p class="instruction" id="instructionText">ESSA SITUAÇÃO É UMA INFRAÇÃO?</p>
+              <section class="investigation-panel" id="investigationPanel" aria-label="Caderno de evidências" hidden><p class="investigation-status" id="investigationStatus" role="status"></p><div id="evidenceCards"></div></section>
+              <p class="instruction" id="instructionText">HÁ INFRAÇÃO NESTA SITUAÇÃO?</p>
               <div class="answer-buttons" id="answerButtons">
                 <button class="answer-button true" id="trueButton" type="button" data-answer="true">É INFRAÇÃO <span class="button-key">TECLA V</span></button>
                 <button class="answer-button false" id="falseButton" type="button" data-answer="false">NÃO É INFRAÇÃO <span class="button-key">TECLA F</span></button>
@@ -2211,16 +2286,16 @@
 
     // Banco pedagógico: 3 níveis × 5 cenários × 3 casos. answer=true significa que há infração.
     const questions = [
-      { id: "f-sup-1", level: "fundamental", scenario: "supermercado", owner: "GERENTE DO SUPERMERCADO", text: "Na prateleira o arroz custa R$ 8,90, mas no caixa cobramos R$ 11,90 e não deixamos o cliente pagar o menor preço.", answer: true, hint: "Compare a oferta mostrada com o valor cobrado.", explanation: "O preço deve ser claro e a oferta anunciada vincula o fornecedor. Diante da diferença, o consumidor não deve ser obrigado a pagar o valor maior.", reference: "CDC: arts. 6º, III, 30 e 35 • informação e cumprimento da oferta" },
+      { id: "f-sup-1", level: "fundamental", scenario: "supermercado", owner: "GERENTE DO SUPERMERCADO", text: "Na prateleira, o arroz custa R$ 8,90, mas no caixa cobramos R$ 11,90 e não deixamos o cliente pagar o menor preço.", answer: true, hint: "Compare a oferta mostrada com o valor cobrado.", explanation: "O preço deve ser claro e a oferta anunciada vincula o fornecedor. Diante da diferença, o consumidor não deve ser obrigado a pagar o valor maior.", reference: "CDC: arts. 6º, III, 30 e 35 • informação e cumprimento da oferta" },
       { id: "f-sup-2", level: "fundamental", scenario: "supermercado", owner: "GERENTE DO SUPERMERCADO", text: "Nossa equipe confere as datas todos os dias e retira das prateleiras os alimentos vencidos antes de abrir a loja.", answer: false, hint: "Pergunte se algum produto vencido continuou à venda.", explanation: "A atitude descrita protege o consumidor. Retirar produtos vencidos antes da venda é uma prática correta de segurança.", reference: "CDC: arts. 8º e 10 • proteção da saúde e segurança" },
-      { id: "f-sup-3", level: "fundamental", scenario: "supermercado", owner: "GERENTE DO SUPERMERCADO", text: "Só vendemos um pacote de arroz se o cliente também comprar uma garrafa de óleo.", answer: true, hint: "O cliente pode ser obrigado a levar outro produto?", explanation: "Condicionar um produto à compra de outro é venda casada, uma prática abusiva.", reference: "CDC: art. 39, I • proibição de venda casada" },
-      { id: "f-ele-1", level: "fundamental", scenario: "eletronicos", owner: "DONO DA LOJA", text: "O celular apresentou defeito em cinco dias, mas mandamos o cliente procurar somente a fábrica e recusamos qualquer atendimento.", answer: true, hint: "A loja que vendeu pode simplesmente abandonar o cliente?", explanation: "A loja faz parte da cadeia de fornecimento e não pode afastar sua responsabilidade pelo defeito apenas enviando o consumidor à fábrica.", reference: "CDC: art. 18 • responsabilidade solidária por vício do produto" },
-      { id: "f-ele-2", level: "fundamental", scenario: "eletronicos", owner: "DONO DA LOJA", text: "O fone comprado na loja física funciona bem. O cliente mudou de ideia, mas nossa política nunca prometeu troca por gosto ou cor.", answer: false, hint: "Existe defeito ou promessa de troca?", explanation: "Em loja física, a troca de produto sem defeito por simples mudança de ideia depende da política ou da promessa feita pela loja.", reference: "CDC: oferta vincula o fornecedor; arrependimento legal se aplica, em regra, a compras fora da loja" },
+      { id: "f-sup-3", level: "fundamental", scenario: "supermercado", owner: "GERENTE DO SUPERMERCADO", text: "Só vendemos um pacote de arroz se o cliente também comprar uma garrafa de óleo.", answer: true, hint: "O cliente pode ser obrigado a levar outro produto?", explanation: "Condicionar a venda de um produto à compra de outro é venda casada, uma prática abusiva.", reference: "CDC: art. 39, I • proibição de venda casada" },
+      { id: "f-ele-1", level: "fundamental", scenario: "eletronicos", owner: "DONO DA LOJA", text: "O celular apresentou defeito cinco dias após a compra, mas mandamos o cliente procurar somente a fábrica e recusamos qualquer atendimento.", answer: true, hint: "A loja que vendeu pode simplesmente abandonar o cliente?", explanation: "A loja faz parte da cadeia de fornecimento e não pode afastar sua responsabilidade pelo defeito apenas enviando o consumidor à fábrica.", reference: "CDC: art. 18 • responsabilidade solidária por vício do produto" },
+      { id: "f-ele-2", level: "fundamental", scenario: "eletronicos", owner: "DONO DA LOJA", text: "O fone comprado na loja física funciona bem. O cliente mudou de ideia, mas nossa política não previa troca por preferência pessoal ou cor.", answer: false, hint: "Existe defeito ou promessa de troca?", explanation: "Em loja física, a troca de produto sem defeito por simples mudança de ideia depende da política ou da promessa feita pela loja.", reference: "CDC: oferta vincula o fornecedor; arrependimento legal se aplica, em regra, a compras fora da loja" },
       { id: "f-ele-3", level: "fundamental", scenario: "eletronicos", owner: "DONO DA LOJA", text: "Todos os aparelhos têm etiqueta legível com preço à vista e parcelado antes de o cliente decidir comprar.", answer: false, hint: "A informação está clara antes da compra?", explanation: "Informar previamente os preços e as condições de pagamento é a conduta correta.", reference: "CDC: arts. 6º, III, e 31 • informação clara e adequada" },
-      { id: "f-ban-1", level: "fundamental", scenario: "banco", owner: "GERENTE DO BANCO", text: "Antes do empréstimo mostramos os juros, o número de parcelas e o total que será pago, e entregamos uma cópia ao cliente.", answer: false, hint: "O cliente recebeu as informações antes de assinar?", explanation: "A descrição mostra transparência na contratação do crédito, como exige a proteção do consumidor.", reference: "CDC: art. 52 • informações obrigatórias no crédito" },
+      { id: "f-ban-1", level: "fundamental", scenario: "banco", owner: "GERENTE DO BANCO", text: "Antes da contratação do empréstimo, mostramos os juros, o número de parcelas e o total a pagar e entregamos uma cópia dessas condições ao cliente.", answer: false, hint: "O cliente recebeu as informações antes de assinar?", explanation: "A descrição mostra transparência na contratação do crédito, como exige a proteção do consumidor.", reference: "CDC: art. 52 • informações obrigatórias no crédito" },
       { id: "f-ban-2", level: "fundamental", scenario: "banco", owner: "GERENTE DO BANCO", text: "Pressionamos uma pessoa idosa a contratar crédito na hora e dizemos que ela perderá o benefício se pedir tempo para pensar.", answer: true, hint: "Há pressão ou ameaça para fechar o contrato?", explanation: "Pressionar, assediar ou explorar a vulnerabilidade do consumidor para oferecer crédito é prática proibida.", reference: "CDC: arts. 39, IV, e 54-C, IV • proteção contra assédio e pressão" },
-      { id: "f-ban-3", level: "fundamental", scenario: "banco", owner: "COBRADOR DA FINANCEIRA", text: "Para receber uma dívida, contamos o problema em voz alta para toda a fila e envergonhamos o cliente.", answer: true, hint: "A cobrança respeitou a dignidade da pessoa?", explanation: "A cobrança não pode expor o consumidor ao ridículo nem causar constrangimento ou ameaça.", reference: "CDC: art. 42 • cobrança sem constrangimento" },
-      { id: "f-onl-1", level: "fundamental", scenario: "online", owner: "GERENTE DO SITE", text: "A compra foi feita pela internet. Quatro dias após receber o produto, o cliente quis desistir, mas recusamos sem analisar o pedido.", answer: true, hint: "Conte quantos dias se passaram desde o recebimento.", explanation: "Em compras fora do estabelecimento, o consumidor pode desistir em até sete dias, contados da assinatura ou do recebimento.", reference: "CDC: art. 49 • direito de arrependimento" },
+      { id: "f-ban-3", level: "fundamental", scenario: "banco", owner: "COBRADOR DA FINANCEIRA", text: "Para cobrar uma dívida, revelamos a situação em voz alta para toda a fila e envergonhamos o cliente.", answer: true, hint: "A cobrança respeitou a dignidade da pessoa?", explanation: "A cobrança não pode expor o consumidor ao ridículo nem causar constrangimento ou ameaça.", reference: "CDC: art. 42 • cobrança sem constrangimento" },
+      { id: "f-onl-1", level: "fundamental", scenario: "online", owner: "GERENTE DO SITE", text: "A compra foi feita pela internet. Quatro dias após receber o produto, o cliente quis desistir, mas recusamos a desistência sem analisar o pedido.", answer: true, hint: "Conte quantos dias se passaram desde o recebimento.", explanation: "Em compras fora do estabelecimento, o consumidor pode desistir em até sete dias, contados da assinatura ou do recebimento.", reference: "CDC: art. 49 • direito de arrependimento" },
       { id: "f-onl-2", level: "fundamental", scenario: "online", owner: "GERENTE DO SITE", text: "O cliente desistiu da compra online no prazo de sete dias. Recebemos a devolução e restituímos também o valor do frete.", answer: false, hint: "A loja respeitou o prazo e devolveu os valores?", explanation: "A conduta está correta: no arrependimento válido, os valores pagos devem ser restituídos, inclusive o frete.", reference: "CDC: art. 49 • restituição no direito de arrependimento" },
       { id: "f-onl-3", level: "fundamental", scenario: "online", owner: "GERENTE DO SITE", text: "Anunciamos um celular com 128 GB, mas enviamos um modelo de 64 GB e afirmamos que o consumidor é obrigado a aceitar.", answer: true, hint: "O produto entregue é igual ao anunciado?", explanation: "O produto deve corresponder à oferta. O consumidor pode exigir solução adequada quando a oferta não é cumprida.", reference: "CDC: arts. 30 e 35 • oferta vincula o fornecedor" },
       { id: "f-tel-1", level: "fundamental", scenario: "telefonia", owner: "GERENTE DA OPERADORA", text: "Colocamos um pacote pago de jogos na conta sem o cliente pedir ou autorizar.", answer: true, hint: "O consumidor escolheu contratar esse serviço?", explanation: "Fornecer ou cobrar serviço não solicitado é prática abusiva.", reference: "CDC: art. 39, III • serviço não solicitado" },
@@ -2237,14 +2312,14 @@
       { id: "m-ban-2", level: "medio", scenario: "banco", owner: "GERENTE DO BANCO", text: "O cliente antecipou as últimas parcelas e aplicamos a redução proporcional dos juros e demais acréscimos.", answer: false, explanation: "A liquidação antecipada com redução proporcional é justamente o direito assegurado ao consumidor.", reference: "CDC: art. 52, §2º • liquidação antecipada" },
       { id: "m-ban-3", level: "medio", scenario: "banco", owner: "GERENTE DO BANCO", text: "O seguro é opcional, aparece separado do empréstimo e só é incluído depois de consentimento específico do cliente.", answer: false, explanation: "A contratação separada, informada e voluntária evita venda casada e cobrança de serviço não solicitado.", reference: "CDC: arts. 39, I e III • contratação livre" },
       { id: "m-onl-1", level: "medio", scenario: "online", owner: "GERENTE DO SITE", text: "Confirmamos por e-mail uma oferta com estoque disponível, mas depois cancelamos apenas porque o desconto anunciado ficou caro para a empresa.", answer: true, explanation: "A oferta suficientemente precisa obriga o fornecedor. O simples arrependimento comercial da empresa não afasta as opções do consumidor.", reference: "CDC: arts. 30 e 35 • cumprimento da oferta" },
-      { id: "m-onl-2", level: "medio", scenario: "online", owner: "GERENTE DO SITE", text: "No arrependimento dentro de sete dias, devolvemos somente um vale-compras e recusamos restituir o dinheiro.", answer: true, explanation: "Exercido validamente o arrependimento, os valores pagos devem ser restituídos, e o consumidor não pode ser obrigado a aceitar apenas crédito na loja.", reference: "CDC: art. 49, parágrafo único" },
+      { id: "m-onl-2", level: "medio", scenario: "online", owner: "GERENTE DO SITE", text: "No arrependimento dentro de sete dias, oferecemos somente um vale-compras e recusamos restituir o dinheiro.", answer: true, explanation: "Exercido validamente o arrependimento, os valores pagos devem ser restituídos, e o consumidor não pode ser obrigado a aceitar apenas crédito na loja.", reference: "CDC: art. 49, parágrafo único" },
       { id: "m-onl-3", level: "medio", scenario: "online", owner: "GERENTE DO SITE", text: "Recebemos o pedido de arrependimento no sexto dia, orientamos a devolução sem custo e providenciamos o estorno integral.", answer: false, explanation: "A empresa respeitou o prazo e as consequências do direito de arrependimento.", reference: "CDC: art. 49" },
       { id: "m-tel-1", level: "medio", scenario: "telefonia", owner: "GERENTE DA OPERADORA", text: "Uma falha interrompeu totalmente o serviço. Restabelecemos a linha, registramos o caso e concedemos o crédito correspondente ao período sem uso.", answer: false, explanation: "A situação descreve providências para reparar a falha e ajustar a cobrança, sem indicar recusa de atendimento.", reference: "CDC: arts. 20 e 22 • qualidade e adequação do serviço" },
       { id: "m-tel-2", level: "medio", scenario: "telefonia", owner: "GERENTE DA OPERADORA", text: "Trocamos o plano por outro mais caro sem pedido, consentimento ou aviso e cobramos a diferença na fatura.", answer: true, explanation: "Alterar e cobrar serviço sem consentimento e informação viola a transparência e pode configurar prática abusiva.", reference: "CDC: arts. 39, III, 46 e 51, X" },
       { id: "m-tel-3", level: "medio", scenario: "telefonia", owner: "GERENTE DA OPERADORA", text: "Antes da contratação, mostramos preço, franquia, velocidade, fidelização e multa de forma legível, e o cliente confirmou o plano.", answer: false, explanation: "A descrição respeita o dever de informação prévia e permite uma escolha consciente.", reference: "CDC: arts. 6º, III, 31 e 46" },
 
       { id: "t-sup-1", level: "tecnico", scenario: "supermercado", owner: "RESPONSÁVEL PELO SUPERMERCADO", text: "Produtos de quantidades diferentes exibem só o preço total; o preço por unidade de medida fica ausente, impedindo comparação objetiva.", answer: true, explanation: "A apresentação incompleta dificulta a comparação e contraria a informação adequada e ostensiva sobre preço e quantidade.", reference: "CDC: arts. 6º, III, e 31 • legislação de afixação de preços" },
-      { id: "t-sup-2", level: "tecnico", scenario: "supermercado", owner: "RESPONSÁVEL PELO SUPERMERCADO", text: "Confirmado vício de quantidade, recusamos completar o peso, substituir, abater o preço ou restituir, mandando o consumidor tratar apenas com o fabricante.", answer: true, explanation: "Os fornecedores respondem solidariamente pelo vício de quantidade e o consumidor dispõe das alternativas legais.", reference: "CDC: art. 19" },
+      { id: "t-sup-2", level: "tecnico", scenario: "supermercado", owner: "RESPONSÁVEL PELO SUPERMERCADO", text: "Confirmado vício de quantidade, recusamos complementar a quantidade, substituir o produto, abater o preço ou restituir o valor pago e mandamos o consumidor tratar apenas com o fabricante.", answer: true, explanation: "Os fornecedores respondem solidariamente pelo vício de quantidade e o consumidor dispõe das alternativas legais.", reference: "CDC: art. 19" },
       { id: "t-sup-3", level: "tecnico", scenario: "supermercado", owner: "RESPONSÁVEL PELO SUPERMERCADO", text: "Ao confirmar divergência entre a gôndola e o caixa, corrigimos o sistema e aplicamos ao consumidor o preço anunciado mais favorável.", answer: false, explanation: "A conduta respeita a oferta apresentada e corrige a falha de informação de preço.", reference: "CDC: arts. 30 e 35" },
       { id: "t-ele-1", level: "tecnico", scenario: "eletronicos", owner: "RESPONSÁVEL PELA LOJA", text: "Um vício oculto apareceu meses depois. Rejeitamos a reclamação contando o prazo desde a compra, sem considerar a data em que o defeito ficou evidente.", answer: true, explanation: "Tratando-se de vício oculto, o prazo decadencial começa quando o defeito se evidencia, e não necessariamente na data da compra.", reference: "CDC: art. 26, §3º" },
       { id: "t-ele-2", level: "tecnico", scenario: "eletronicos", owner: "RESPONSÁVEL PELA LOJA", text: "Em documento separado e com manifestação expressa, consumidor e fornecedor ajustaram prazo de 45 dias para sanar o vício.", answer: false, explanation: "O prazo de 30 dias pode ser reduzido ou ampliado entre sete e 180 dias por convenção válida; em contrato de adesão, a cláusula deve ser separada e expressa.", reference: "CDC: art. 18, §2º" },
@@ -2252,12 +2327,12 @@
       { id: "t-ban-1", level: "tecnico", scenario: "banco", owner: "RESPONSÁVEL PELO BANCO", text: "Por atraso, aplicamos multa de mora de 2% sobre o valor da prestação e informamos previamente essa condição.", answer: false, explanation: "A multa moratória de até 2% da prestação é o limite previsto no CDC; isoladamente, a situação narrada não indica infração.", reference: "CDC: art. 52, §1º" },
       { id: "t-ban-2", level: "tecnico", scenario: "banco", owner: "RESPONSÁVEL PELO BANCO", text: "Na liquidação antecipada do débito, cobramos todas as parcelas futuras sem reduzir proporcionalmente juros e acréscimos.", answer: true, explanation: "A antecipação total ou parcial assegura redução proporcional dos juros e demais acréscimos.", reference: "CDC: art. 52, §2º" },
       { id: "t-ban-3", level: "tecnico", scenario: "banco", owner: "RESPONSÁVEL PELO BANCO", text: "Antes de conceder crédito, avaliamos responsavelmente as condições do consumidor e informamos custo efetivo, consequências do atraso e identidade do agente financiador.", answer: false, explanation: "A prática descrita atende aos deveres de crédito responsável e informação prévia.", reference: "CDC: arts. 54-B e 54-D • prevenção do superendividamento" },
-      { id: "t-onl-1", level: "tecnico", scenario: "online", owner: "RESPONSÁVEL PELO COMÉRCIO ELETRÔNICO", text: "No arrependimento válido, restituímos o produto, mas retivemos o frete de ida como custo obrigatório do consumidor.", answer: true, explanation: "A restituição deve abranger os valores pagos. A retenção do frete de ida transfere ao consumidor custo incompatível com o exercício do arrependimento.", reference: "CDC: art. 49, parágrafo único" },
+      { id: "t-onl-1", level: "tecnico", scenario: "online", owner: "RESPONSÁVEL PELO COMÉRCIO ELETRÔNICO", text: "No arrependimento válido, restituímos o valor do produto, mas retivemos o valor do frete de ida como custo obrigatório do consumidor.", answer: true, explanation: "A restituição deve abranger os valores pagos. A retenção do frete de ida transfere ao consumidor custo incompatível com o exercício do arrependimento.", reference: "CDC: art. 49, parágrafo único" },
       { id: "t-onl-2", level: "tecnico", scenario: "online", owner: "RESPONSÁVEL PELO COMÉRCIO ELETRÔNICO", text: "Descumprida oferta já aceita, recusamos cumprimento, equivalente ou restituição atualizada, deixando o consumidor sem qualquer opção.", answer: true, explanation: "Diante da recusa de cumprimento da oferta, a escolha entre as alternativas legais pertence ao consumidor.", reference: "CDC: art. 35" },
       { id: "t-onl-3", level: "tecnico", scenario: "online", owner: "RESPONSÁVEL PELO COMÉRCIO ELETRÔNICO", text: "Recebido o arrependimento de uma compra online financiada em contrato conexo, comunicamos a instituição e providenciamos a resolução do crédito sem ônus.", answer: false, explanation: "A providência é compatível com a proteção do consumidor nos contratos de crédito conexos à compra principal.", reference: "CDC: art. 54-F" },
       { id: "t-tel-1", level: "tecnico", scenario: "telefonia", owner: "RESPONSÁVEL PELA OPERADORA", text: "O contrato autoriza a operadora, sozinha, a alterar o preço a qualquer momento, sem critério objetivo nem possibilidade de oposição do consumidor.", answer: true, explanation: "Cláusula que permite variação unilateral do preço ou modificação desequilibrada do contrato pode ser abusiva e nula.", reference: "CDC: art. 51, X e XIII" },
       { id: "t-tel-2", level: "tecnico", scenario: "telefonia", owner: "RESPONSÁVEL PELA OPERADORA", text: "Após interrupção comprovada, restabelecemos o serviço, recalculamos a cobrança do período afetado e oferecemos canal de contestação com protocolo.", answer: false, explanation: "A conduta busca adequar o serviço e a cobrança, além de preservar registro e possibilidade de contestação.", reference: "CDC: arts. 20 e 22" },
-      { id: "t-tel-3", level: "tecnico", scenario: "telefonia", owner: "RESPONSÁVEL PELA OPERADORA", text: "A contratação registra consentimento, entrega cópia acessível e destaca preço, reajuste, fidelização e consequências do cancelamento.", answer: false, explanation: "Consentimento verificável, acesso ao contrato e destaque das condições relevantes cumprem deveres de transparência.", reference: "CDC: arts. 6º, III, 46 e 54, §§3º e 4º" }
+      { id: "t-tel-3", level: "tecnico", scenario: "telefonia", owner: "RESPONSÁVEL PELA OPERADORA", text: "Na contratação, registramos o consentimento, entregamos uma cópia acessível do contrato e destacamos o preço, o reajuste, a fidelização e as consequências do cancelamento.", answer: false, explanation: "Consentimento verificável, acesso ao contrato e destaque das condições relevantes cumprem deveres de transparência.", reference: "CDC: arts. 6º, III, 46 e 54, §§3º e 4º" }
     ];
 
     // Segunda coleção: amplia cada cenário para seis casos por nível (90 casos no total).
@@ -2270,13 +2345,13 @@
       { id: "f-ele-6", level: "fundamental", scenario: "eletronicos", owner: "DONO DA LOJA", text: "Um carregador começou a soltar faíscas. Bloqueamos a venda, avisamos os clientes e procuramos o fornecedor.", answer: false, hint: "A loja continuou vendendo o item perigoso?", explanation: "Bloquear a venda e alertar os consumidores é a resposta correta diante de risco.", reference: "CDC: arts. 8º e 10 • prevenção de riscos" },
       { id: "f-ban-4", level: "fundamental", scenario: "banco", owner: "GERENTE DO BANCO", text: "Incluímos um seguro pago no cartão sem o cliente pedir e cobramos a primeira mensalidade.", answer: true, hint: "O cliente autorizou o serviço cobrado?", explanation: "Cobrar por serviço não solicitado é prática abusiva.", reference: "CDC: art. 39, III • serviço não solicitado" },
       { id: "f-ban-5", level: "fundamental", scenario: "banco", owner: "GERENTE DO BANCO", text: "Entregamos uma cópia legível do contrato e explicamos onde o cliente pode tirar dúvidas.", answer: false, hint: "O cliente consegue conhecer e guardar o contrato?", explanation: "Dar acesso ao contrato e esclarecer dúvidas respeita o dever de informação.", reference: "CDC: arts. 6º, III, e 46" },
-      { id: "f-ban-6", level: "fundamental", scenario: "banco", owner: "GERENTE DO BANCO", text: "Dizemos que o empréstimo não tem custo, mas depois acrescentamos uma tarifa escondida.", answer: true, hint: "O preço verdadeiro foi contado antes da contratação?", explanation: "Esconder custos pode induzir o consumidor ao erro e viola o dever de informação.", reference: "CDC: arts. 6º, III, 37 e 52" },
+      { id: "f-ban-6", level: "fundamental", scenario: "banco", owner: "GERENTE DO BANCO", text: "Dizemos que o empréstimo não tem custo, mas depois acrescentamos uma tarifa escondida.", answer: true, hint: "O custo total foi informado antes da contratação?", explanation: "Esconder custos pode induzir o consumidor ao erro e viola o dever de informação.", reference: "CDC: arts. 6º, III, 37 e 52" },
       { id: "f-onl-4", level: "fundamental", scenario: "online", owner: "GERENTE DO SITE", text: "Nosso site vende produtos, mas esconde o nome, o endereço e qualquer forma de contato da empresa.", answer: true, hint: "O comprador consegue identificar quem está vendendo?", explanation: "O comércio eletrônico deve mostrar claramente quem é o fornecedor e como encontrá-lo.", reference: "Decreto 7.962/2013: art. 2º • identificação do fornecedor" },
-      { id: "f-onl-5", level: "fundamental", scenario: "online", owner: "GERENTE DO SITE", text: "Informamos o prazo antes do pagamento, enviamos o rastreio e entregamos o produto correto na data prometida.", answer: false, hint: "A oferta e o prazo foram cumpridos?", explanation: "A situação descreve cumprimento da oferta e informação adequada.", reference: "CDC: arts. 30 e 35 • cumprimento da oferta" },
+      { id: "f-onl-5", level: "fundamental", scenario: "online", owner: "GERENTE DO SITE", text: "Informamos o prazo antes do pagamento, enviamos o código de rastreamento e entregamos o produto correto na data prometida.", answer: false, hint: "A oferta e o prazo foram cumpridos?", explanation: "A situação descreve cumprimento da oferta e informação adequada.", reference: "CDC: arts. 30 e 35 • cumprimento da oferta" },
       { id: "f-onl-6", level: "fundamental", scenario: "online", owner: "GERENTE DO SITE", text: "O site mostra 'última unidade' para todos os produtos, mesmo quando há muito estoque, só para apressar a compra.", answer: true, hint: "A mensagem sobre o estoque é verdadeira?", explanation: "Criar falsa urgência com informação enganosa pode levar o consumidor a uma decisão que não tomaria.", reference: "CDC: art. 37 • publicidade enganosa" },
       { id: "f-tel-4", level: "fundamental", scenario: "telefonia", owner: "GERENTE DA OPERADORA", text: "Quando o cliente reclama de uma cobrança, recusamos registrar o atendimento e não fornecemos protocolo.", answer: true, hint: "A empresa permitiu acompanhar a reclamação?", explanation: "O atendimento deve ser adequado e permitir que a reclamação seja acompanhada.", reference: "CDC: arts. 6º, III, e 22 • atendimento adequado" },
-      { id: "f-tel-5", level: "fundamental", scenario: "telefonia", owner: "GERENTE DA OPERADORA", text: "A fatura separa o valor do plano, dos serviços extras autorizados e dos impostos, sem cobranças escondidas.", answer: false, hint: "Os valores estão claros e foram autorizados?", explanation: "Uma fatura clara e sem cobranças não solicitadas respeita o consumidor.", reference: "CDC: arts. 6º, III, e 31" },
-      { id: "f-tel-6", level: "fundamental", scenario: "telefonia", owner: "GERENTE DA OPERADORA", text: "A propaganda e o contrato informam o mesmo plano de 500 Mb, com preço e limites destacados antes da assinatura.", answer: false, hint: "A oferta combina com o contrato?", explanation: "Informação coerente e destacada permite uma escolha consciente.", reference: "CDC: arts. 30, 31 e 46" },
+      { id: "f-tel-5", level: "fundamental", scenario: "telefonia", owner: "GERENTE DA OPERADORA", text: "A fatura discrimina os valores do plano, dos serviços extras autorizados e dos impostos, sem cobranças escondidas.", answer: false, hint: "Os valores estão claros e foram autorizados?", explanation: "Uma fatura clara e sem cobranças não solicitadas respeita o consumidor.", reference: "CDC: arts. 6º, III, e 31" },
+      { id: "f-tel-6", level: "fundamental", scenario: "telefonia", owner: "GERENTE DA OPERADORA", text: "A propaganda e o contrato informam o mesmo plano de 500 Mb, com preço e limites destacados antes da assinatura.", answer: false, hint: "A oferta combina com o contrato?", explanation: "A informação coerente e destacada permite uma escolha consciente.", reference: "CDC: arts. 30, 31 e 46" },
 
       { id: "m-sup-4", level: "medio", scenario: "supermercado", owner: "GERENTE DO SUPERMERCADO", text: "A fiscalização encontrou alimento vencido exposto para venda, e a gerência decidiu mantê-lo na prateleira com desconto.", answer: true, explanation: "Desconto não torna seguro um alimento vencido. Produtos que oferecem risco não devem ser colocados no mercado.", reference: "CDC: arts. 8º e 10" },
       { id: "m-sup-5", level: "medio", scenario: "supermercado", owner: "GERENTE DO SUPERMERCADO", text: "Na venda a peso, descontamos a tara da embalagem, deixamos o visor da balança visível e entregamos comprovante da pesagem.", answer: false, explanation: "A prática garante informação verificável e cobrança apenas pela quantidade do produto.", reference: "CDC: arts. 6º, III, e 19" },
@@ -2294,17 +2369,17 @@
       { id: "m-tel-5", level: "medio", scenario: "telefonia", owner: "GERENTE DA OPERADORA", text: "A fidelização foi aceita em troca de benefício real; prazo e multa proporcional foram destacados antes da contratação.", answer: false, explanation: "A situação descreve informação prévia e consentimento, sem indicar imposição escondida.", reference: "CDC: arts. 6º, III, 46 e 54" },
       { id: "m-tel-6", level: "medio", scenario: "telefonia", owner: "GERENTE DA OPERADORA", text: "Ao terminar a fidelização, criamos automaticamente um novo período de permanência sem autorização do cliente.", answer: true, explanation: "Renovar obrigação de permanência sem consentimento pode impor vantagem e restrição não contratadas.", reference: "CDC: arts. 39, III, e 51, IV e XIII" },
 
-      { id: "t-sup-4", level: "tecnico", scenario: "supermercado", owner: "RESPONSÁVEL PELO SUPERMERCADO", text: "Mesmo após ciência formal de periculosidade descoberta depois da venda, omitimos o alerta e mantivemos o lote disponível.", answer: true, explanation: "O fornecedor que descobre periculosidade posterior deve comunicar autoridades e consumidores; manter a oferta amplia o risco.", reference: "CDC: art. 10, §§1º e 3º" },
+      { id: "t-sup-4", level: "tecnico", scenario: "supermercado", owner: "RESPONSÁVEL PELO SUPERMERCADO", text: "Mesmo após ciência formal de periculosidade descoberta depois da venda, omitimos o alerta e mantivemos o lote disponível.", answer: true, explanation: "O fornecedor que descobre a periculosidade após a venda deve comunicá-la às autoridades e aos consumidores; manter a oferta amplia o risco.", reference: "CDC: art. 10, §§1º e 3º" },
       { id: "t-sup-5", level: "tecnico", scenario: "supermercado", owner: "RESPONSÁVEL PELO SUPERMERCADO", text: "Mantemos rastreabilidade dos lotes, condições adequadas de armazenamento e informação ostensiva sobre alergênicos e riscos conhecidos.", answer: false, explanation: "As medidas descritas concretizam deveres de segurança, prevenção e informação.", reference: "CDC: arts. 6º, I e III, 8º e 31" },
       { id: "t-sup-6", level: "tecnico", scenario: "supermercado", owner: "RESPONSÁVEL PELO SUPERMERCADO", text: "Comprovado vício de quantidade, oferecemos ao consumidor, à sua escolha, complementação, substituição, abatimento ou restituição.", answer: false, explanation: "As alternativas apresentadas correspondem às opções legais para vício de quantidade.", reference: "CDC: art. 19" },
       { id: "t-ele-4", level: "tecnico", scenario: "eletronicos", owner: "RESPONSÁVEL PELA LOJA", text: "Inserimos cláusula segundo a qual loja, fabricante e importador nunca respondem por vícios, ainda que o produto esteja na garantia legal.", answer: true, explanation: "É vedada cláusula que exonere ou atenue a responsabilidade legal por vícios na relação de consumo.", reference: "CDC: arts. 24, 25 e 51, I" },
       { id: "t-ele-5", level: "tecnico", scenario: "eletronicos", owner: "RESPONSÁVEL PELA LOJA", text: "O vício foi sanado sem custo em 22 dias, preservando qualidade, características e valor do produto.", answer: false, explanation: "O reparo ocorreu dentro do prazo e sem as circunstâncias que autorizariam uso imediato das alternativas do §1º.", reference: "CDC: art. 18, §§1º e 3º" },
       { id: "t-ele-6", level: "tecnico", scenario: "eletronicos", owner: "RESPONSÁVEL PELA ASSISTÊNCIA", text: "No reparo, instalamos peça usada e inferior, fora das especificações do fabricante, sem autorização do consumidor.", answer: true, explanation: "No serviço de reparação, os componentes devem ser originais adequados e novos, ou manter as especificações, salvo autorização do consumidor.", reference: "CDC: art. 21" },
-      { id: "t-ban-4", level: "tecnico", scenario: "banco", owner: "RESPONSÁVEL PELO BANCO", text: "Concluímos o crédito, mas impedimos o consumidor de acessar ou conservar uma cópia do contrato e de suas condições.", answer: true, explanation: "O consumidor precisa conhecer previamente e conservar o conteúdo contratual; impedir acesso compromete transparência e consentimento.", reference: "CDC: arts. 46, 52 e 54-B" },
-      { id: "t-ban-5", level: "tecnico", scenario: "banco", owner: "RESPONSÁVEL PELO BANCO", text: "A oferta apresenta taxa de juros e Custo Efetivo Total, discriminando tarifas, tributos, seguro opcional e soma final do financiamento.", answer: false, explanation: "A discriminação dos custos permite comparar propostas e atende aos deveres de informação no crédito.", reference: "CDC: arts. 52 e 54-B • regulamentação do CET" },
-      { id: "t-ban-6", level: "tecnico", scenario: "banco", owner: "RESPONSÁVEL PELO BANCO", text: "Assediamos consumidor em vulnerabilidade agravada com ofertas repetidas de crédito e afirmamos que a contratação deve ser imediata.", answer: true, explanation: "A oferta de crédito não pode assediar ou pressionar consumidor, especialmente pessoa vulnerável ou em situação agravada.", reference: "CDC: art. 54-C, IV" },
+      { id: "t-ban-4", level: "tecnico", scenario: "banco", owner: "RESPONSÁVEL PELO BANCO", text: "Concluímos a contratação do crédito, mas impedimos o consumidor de acessar ou conservar uma cópia do contrato e de suas condições.", answer: true, explanation: "O consumidor precisa conhecer previamente e conservar o conteúdo contratual; impedir acesso compromete transparência e consentimento.", reference: "CDC: arts. 46, 52 e 54-B" },
+      { id: "t-ban-5", level: "tecnico", scenario: "banco", owner: "RESPONSÁVEL PELO BANCO", text: "A oferta apresenta a taxa de juros e o Custo Efetivo Total, discriminando tarifas, tributos, seguro opcional e soma final do financiamento.", answer: false, explanation: "A discriminação dos custos permite comparar propostas e atende aos deveres de informação no crédito.", reference: "CDC: arts. 52 e 54-B • regulamentação do CET" },
+      { id: "t-ban-6", level: "tecnico", scenario: "banco", owner: "RESPONSÁVEL PELO BANCO", text: "Assediamos um consumidor em situação de vulnerabilidade agravada com ofertas repetidas de crédito e afirmamos que a contratação deve ser imediata.", answer: true, explanation: "Na oferta de crédito, não se pode assediar ou pressionar o consumidor, especialmente quando ele está em situação de vulnerabilidade agravada.", reference: "CDC: art. 54-C, IV" },
       { id: "t-onl-4", level: "tecnico", scenario: "online", owner: "RESPONSÁVEL PELO COMÉRCIO ELETRÔNICO", text: "Ocultamos cláusulas limitativas no resumo e, após a contratação, não disponibilizamos contrato que o consumidor possa guardar.", answer: true, explanation: "O comércio eletrônico deve destacar limitações no resumo e fornecer contrato em meio que permita conservação e reprodução.", reference: "Decreto 7.962/2013: art. 4º, I e IV" },
-      { id: "t-onl-5", level: "tecnico", scenario: "online", owner: "RESPONSÁVEL PELO COMÉRCIO ELETRÔNICO", text: "Antes da confirmação, permitimos corrigir erros e exibimos fornecedor, riscos, preço total, frete, disponibilidade, prazo e restrições.", answer: false, explanation: "As ferramentas e informações descritas atendem aos principais deveres da contratação eletrônica.", reference: "Decreto 7.962/2013: arts. 2º e 4º, II" },
+      { id: "t-onl-5", level: "tecnico", scenario: "online", owner: "RESPONSÁVEL PELO COMÉRCIO ELETRÔNICO", text: "Antes da confirmação, permitimos corrigir erros e exibimos a identificação do fornecedor, os riscos, o preço total, frete, disponibilidade, prazo e restrições.", answer: false, explanation: "As ferramentas e informações descritas atendem aos principais deveres da contratação eletrônica.", reference: "Decreto 7.962/2013: arts. 2º e 4º, II" },
       { id: "t-onl-6", level: "tecnico", scenario: "online", owner: "RESPONSÁVEL PELO COMÉRCIO ELETRÔNICO", text: "Enviamos produto sem pedido e depois emitimos cobrança, alegando que o silêncio do destinatário vale como aceitação.", answer: true, explanation: "Produto enviado sem solicitação equipara-se a amostra grátis, inexistindo obrigação de pagamento.", reference: "CDC: art. 39, III e parágrafo único" },
       { id: "t-tel-4", level: "tecnico", scenario: "telefonia", owner: "RESPONSÁVEL PELA OPERADORA", text: "Interrupções recorrentes tornam o serviço inadequado, mas recusamos reexecução, abatimento, restituição ou correção da cobrança.", answer: true, explanation: "Diante de serviço inadequado, a recusa de todas as alternativas legais e de ajuste da cobrança viola os direitos do consumidor.", reference: "CDC: arts. 20 e 22" },
       { id: "t-tel-5", level: "tecnico", scenario: "telefonia", owner: "RESPONSÁVEL PELA OPERADORA", text: "Franquia, redução de velocidade, cobertura, reajuste e limites técnicos são apresentados de forma destacada antes do consentimento.", answer: false, explanation: "A informação prévia, clara e ostensiva permite avaliar adequação e custo do serviço.", reference: "CDC: arts. 6º, III, 31 e 46" },
@@ -2401,6 +2476,65 @@
     let soundEnabled = true;
     let audioContext = null;
 
+
+    const INVESTIGATIONS = {"f-sup-1": ["O preço do arroz precisa ser conferido.", "Escolhi o arroz pelo preço exposto na prateleira.", "Etiqueta da prateleira", "ARROZ • R$ 8,90", "Registro do caixa", "O caixa cobra R$ 11,90. A gerência não permite pagar R$ 8,90."], "f-ele-2": ["Um cliente quer devolver um fone.", "Comprei na loja física e mudei de ideia. O fone funciona bem.", "Condições da compra", "Compra presencial. Não houve promessa de troca por preferência pessoal ou cor.", "Inspecionar o fone", "O produto não apresenta defeito."], "f-ban-1": ["Confira como o empréstimo foi oferecido.", "Recebi uma cópia das condições antes de contratar.", "Proposta de crédito", "Juros, número de parcelas e total a pagar foram apresentados antes da assinatura.", "Registro de atendimento", "O banco entregou uma cópia ao cliente."], "f-onl-3": ["Confira o celular entregue ao comprador.", "Recebi um modelo diferente do anunciado. A loja diz que preciso aceitá-lo.", "Anúncio do produto", "CELULAR • Capacidade anunciada: 128 GB.", "Inspecionar a entrega", "Modelo recebido: 64 GB."], "f-tel-1": ["Um pacote apareceu na conta do cliente.", "Não pedi nem autorizei um pacote de jogos.", "Conferir a fatura", "Existe uma cobrança por um pacote de jogos.", "Registro de contratação", "A operadora incluiu o pacote sem solicitação ou autorização."], "m-sup-2": ["Verifique a quantidade de um produto.", "A embalagem informa um quilo. Quero conferir o conteúdo.", "Ler a embalagem", "Peso informado: 1 kg. Não há aviso de quantidade diferente.", "Conferir a pesagem", "A fiscalização comprova apenas 850 g do produto."], "m-ele-5": ["Confira o atendimento de uma assistência.", "Entreguei um produto com defeito e recebi o aparelho funcionando.", "Ordem de serviço", "O reparo foi concluído em 20 dias.", "Comprovante de retirada", "Produto devolvido funcionando, sem custo ao consumidor."], "m-ban-3": ["Investigue a oferta de um seguro.", "Pude escolher se queria contratar o seguro junto do empréstimo.", "Proposta do banco", "Seguro opcional, apresentado separadamente do empréstimo.", "Registro de autorização", "O seguro só foi incluído após o consentimento específico do cliente."], "m-onl-2": ["Investigue a resposta a uma devolução.", "Desisti da compra online dentro de sete dias.", "Pedido de arrependimento", "Pedido registrado dentro do prazo de sete dias.", "Resposta da loja", "A loja oferece somente vale-compras e recusa devolver o dinheiro."], "m-tel-2": ["O valor do plano mudou. Confira os registros.", "Não pedi nem autorizei um plano mais caro. Também não fui avisado.", "Comparar a fatura", "A fatura cobra a diferença de um plano mais caro.", "Registro da mudança", "A operadora trocou o plano sem pedido, consentimento ou aviso."], "t-sup-3": ["Confira uma divergência de preços.", "O preço da gôndola era diferente do registrado no caixa.", "Conferência da oferta", "A equipe confirmou a divergência entre gôndola e caixa.", "Registro da correção", "Sistema corrigido. Foi aplicado ao consumidor o preço anunciado mais favorável."], "t-ele-2": ["Examine o prazo combinado para o reparo.", "Concordei expressamente com um prazo de 45 dias.", "Termo de acordo", "Prazo para sanar o vício: 45 dias.", "Conferir a assinatura", "A convenção está em documento separado, com manifestação expressa do consumidor e do fornecedor."], "t-ban-2": ["Confira o cálculo de uma quitação antecipada.", "Quero quitar a dívida antes do vencimento das parcelas futuras.", "Cálculo da quitação", "O banco cobra a soma de todas as parcelas futuras.", "Conferir os encargos", "Não foi aplicada redução proporcional de juros e acréscimos."], "t-onl-4": ["Verifique o acesso às condições da compra.", "Após contratar, não consigo guardar uma cópia do contrato.", "Resumo da contratação", "As cláusulas limitativas foram ocultadas no resumo.", "Área de documentos", "Após a contratação, não há contrato disponível para conservação pelo consumidor."], "t-tel-2": ["Confira as providências após uma interrupção.", "Houve uma interrupção comprovada. O serviço foi restabelecido.", "Conferir a cobrança", "A operadora recalculou a cobrança do período afetado.", "Protocolo de atendimento", "Há canal de contestação com protocolo para acompanhar o caso."]};
+    let collectedClues = new Set();
+    function investigationReady() {
+      return !INVESTIGATIONS[selectedQuestions[currentIndex]?.id] || collectedClues.size === 3;
+    }
+    function renderInvestigation(question) {
+      collectedClues = new Set();
+      const record = INVESTIGATIONS[question.id];
+      const actions = document.getElementById('sceneActions');
+      const panel = document.getElementById('investigationPanel');
+      const cards = document.getElementById('evidenceCards');
+      actions.replaceChildren(); cards.replaceChildren();
+      actions.hidden = panel.hidden = !record;
+      screens.game.classList.toggle('investigating', !!record);
+      if (!record) return;
+      ui.speakerLabel.textContent = 'DOSSIÊ • INVESTIGAÇÃO EM CAMPO';
+      ui.questionText.textContent = record[0];
+      ui.caseHint.hidden = true;
+      ui.trueButton.disabled = ui.falseButton.disabled = true;
+      ui.instructionText.textContent = 'REÚNA AS TRÊS PISTAS PARA DECIDIR.';
+      document.getElementById('investigationStatus').textContent = 'ARQUIVO ABERTO • 0/3 EVIDÊNCIAS • USE 1, 2 E 3';
+      const clues = [['Ouvir o consumidor', record[1]], [record[2], record[3]], [record[4], record[5]]];
+      clues.forEach(([title, content], index) => {
+        const button = document.createElement('button');
+        button.type = 'button'; button.className = 'clue-button';
+        const icon = document.createElement('span');
+        icon.className = 'clue-icon ' + ['person', 'document', 'inspect'][index]; icon.setAttribute('aria-hidden', 'true');
+        const label = document.createElement('span'); label.className = 'clue-label'; label.textContent = title;
+        const key = document.createElement('span'); key.className = 'clue-key'; key.textContent = `TECLA ${index + 1} • EXAMINAR`;
+        label.appendChild(key); button.append(icon, label);
+        button.setAttribute('aria-pressed', 'false');
+        button.setAttribute('aria-controls', `evidence-${index}`);
+        const card = document.createElement('article');
+        card.className = 'evidence-card'; card.id = `evidence-${index}`; card.hidden = true; card.dataset.number = String(index + 1).padStart(2, '0');
+        const heading = document.createElement('h3'); heading.textContent = title;
+        const body = document.createElement('p'); body.textContent = content;
+        card.append(heading, body); cards.appendChild(card);
+        button.addEventListener('click', () => {
+          if (answerLocked) return;
+          const isNew = !collectedClues.has(index);
+          collectedClues.add(index); card.hidden = false;
+          button.setAttribute('aria-pressed', 'true');
+          key.textContent = `TECLA ${index + 1} • CONFERIDO`;
+          const ready = investigationReady();
+          document.getElementById('investigationStatus').textContent = `${ready ? 'DOSSIÊ COMPLETO' : 'ARQUIVO ABERTO'} • ${collectedClues.size}/3 EVIDÊNCIAS${ready ? ' • EMITIR PARECER' : ''}`;
+          ui.trueButton.disabled = ui.falseButton.disabled = !ready;
+          if (ready) {
+            ui.instructionText.textContent = 'COM BASE NAS EVIDÊNCIAS, HÁ INFRAÇÃO?';
+            ui.caseHint.hidden = !(selectedLevel === 'fundamental' && question.hint);
+          }
+          ui.liveRegion.textContent = `${title}. ${content}. ${collectedClues.size} de 3 ${collectedClues.size === 1 ? "pista coletada" : "pistas coletadas"}.`;
+          if (isNew) playSound('select');
+        });
+        actions.appendChild(button);
+      });
+      ui.liveRegion.textContent = `${record[0]} Investigue usando as ações 1, 2 e 3 antes de decidir.`;
+    }
+
     function showScreen(name) {
       Object.entries(screens).forEach(([key, element]) => {
         element.hidden = key !== name;
@@ -2445,7 +2579,8 @@
       const scenarioSequence = shuffle(SCENARIO_ORDER);
       return scenarioSequence.flatMap((scenario) => {
         const pool = questions.filter((question) => question.level === level && question.scenario === scenario);
-        return shuffle(pool).slice(0, CASES_PER_SCENARIO);
+        const opening = pool.find(question => INVESTIGATIONS[question.id]);
+        return [opening, ...shuffle(pool.filter(question => question !== opening)).slice(0, CASES_PER_SCENARIO - 1)];
       });
     }
 
@@ -2668,14 +2803,14 @@
       ui.questionText.textContent = question.text;
       ui.caseHint.hidden = !(selectedLevel === "fundamental" && question.hint);
       ui.caseHint.textContent = question.hint ? `PISTA: ${question.hint}` : "";
-      ui.instructionText.textContent = "ESSA SITUAÇÃO É UMA INFRAÇÃO?";
+      ui.instructionText.textContent = "HÁ INFRAÇÃO NESTA SITUAÇÃO?";
       ui.levelBadge.textContent = level.label;
       ui.locationBadge.textContent = scenario.label;
       ui.locationName.textContent = scenario.label;
       ui.locationSubtitle.textContent = scenario.subtitle;
       ui.sceneDecor.dataset.label = scenario.decor;
       ui.office.dataset.scenario = question.scenario;
-      ui.office.setAttribute("aria-label", `O fiscal do PROCON conversa com o responsável de ${scenario.label.toLowerCase()}, em estilo pixel art`);
+      ui.office.setAttribute("aria-label", `O fiscal do PROCON conversa com o responsável pelo estabelecimento. Cenário: ${scenario.label.toLowerCase()}, em estilo pixel art`);
       ui.visitStep.textContent = `VISITA ${visitIndex + 1} DE ${routeSequence.length}`;
       ui.visitName.textContent = `CHEGANDO: ${scenario.label}`;
       renderRoute(visitIndex);
@@ -2704,7 +2839,8 @@
       ui.comboBadge.classList.remove("show");
       ui.comboBadge.textContent = `COMBO x${combo}`;
       if (combo >= 2) ui.comboBadge.classList.add("show");
-      ui.liveRegion.textContent = `${isNewVisit ? `O fiscal entrou em ${scenario.label}. ` : ""}Caso ${currentIndex + 1} de ${TOTAL_CASES}. ${question.text}`;
+      ui.liveRegion.textContent = `${isNewVisit ? `Local da visita: ${scenario.label}. ` : ""}Caso ${currentIndex + 1} de ${TOTAL_CASES}. ${question.text}`;
+      renderInvestigation(question);
     }
 
     function comboBonus(sequence) {
@@ -2713,8 +2849,9 @@
     }
 
     function answerQuestion(playerAnswer) {
-      if (answerLocked || activeScreen !== "game") return;
+      if (answerLocked || activeScreen !== "game" || !investigationReady()) return;
       answerLocked = true;
+      document.querySelectorAll(".clue-button").forEach(button => { button.disabled = true; });
 
       const question = selectedQuestions[currentIndex];
       const isCorrect = playerAnswer === question.answer;
@@ -2867,7 +3004,7 @@
       showScreen("final");
       createConfetti();
       playSound("finish");
-      ui.liveRegion.textContent = `Missão concluída. ${getRank(correct)}. ${correct} acertos, ${wrong} erros e ${score} pontos.`;
+      ui.liveRegion.textContent = `Missão concluída. ${getRank(correct)}. ${correct} ${correct === 1 ? "acerto" : "acertos"}, ${wrong} ${wrong === 1 ? "erro" : "erros"} e ${score} pontos.`;
       setTimeout(() => ui.restartButton.focus(), 250);
     }
 
@@ -2928,6 +3065,10 @@
       } else if (activeScreen === "intro" && event.key === "Enter" && selectedLevel) {
         ui.briefingButton.click();
       } else if (activeScreen === "game") {
+        if (!answerLocked && ["1", "2", "3"].includes(key)) {
+          const clue = document.querySelectorAll(".clue-button")[Number(key) - 1];
+          if (clue) { event.preventDefault(); clue.click(); }
+        }
         if (!answerLocked && key === "v") answerQuestion(true);
         if (!answerLocked && key === "f") answerQuestion(false);
         if (answerLocked && event.key === "Enter") nextCase();
@@ -2936,6 +3077,7 @@
       }
     });
 
+    drawCoverArt();
   </script>
 </body>
 </html>
