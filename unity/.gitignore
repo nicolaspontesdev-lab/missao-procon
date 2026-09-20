@@ -1,0 +1,71 @@
+# ---------------------------------------------------------------
+# Projeto Unity. Só entra no repositorio o que o Unity nao consegue
+# gerar sozinho: Assets, Packages e ProjectSettings.
+# Quem clonar abre esta pasta pelo Unity Hub (versao 6000.3.22f1)
+# e o resto e reconstruido na primeira abertura.
+# ---------------------------------------------------------------
+
+# Ferramenta local de automacao do editor: fica so na minha maquina
+/Packages/com.anklebreaker.unity-mcp/
+/Packages/com.anklebreaker.unity-mcp.meta
+/Packages/packages-lock.json
+
+# Pastas que o Unity regenera (e que sao enormes)
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+
+# Meta de asset so e ignorado junto com o asset
+!/[Aa]ssets/**/*.meta
+
+# Plugin gerado pelo Rider
+/[Aa]ssets/Plugins/Editor/JetBrains*
+
+# Cache do Visual Studio / Gradle
+.vs/
+.gradle/
+
+# Solucao e projetos gerados pela IDE
+ExportedObj/
+.consulo/
+*.csproj
+*.unityproj
+*.sln
+*.slnx
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# Relatorio de crash
+sysinfo.txt
+
+# Builds
+*.apk
+*.aab
+*.unitypackage
+*.app
+
+# Crashlytics
+crashlytics-build.properties
+
+# Addressables empacotado
+/[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
+/[Aa]ssets/[Ss]treamingAssets/aa.meta
+/[Aa]ssets/[Ss]treamingAssets/aa/*
