@@ -223,7 +223,7 @@
       display: block;
       width: min(820px, 96%);
       height: auto;
-      aspect-ratio: 640 / 200;
+      aspect-ratio: 4470 / 2190;
       margin: 0 auto 22px;
       position: relative;
       object-fit: contain;
@@ -2126,7 +2126,7 @@
 
       <section class="screen start-screen" id="startScreen">
         <div class="start-card">
-          <canvas class="cover-art" id="coverCanvas" width="640" height="200" role="img" aria-label="Fachada em pixel art de um posto do PROCON"></canvas>
+          <img class="cover-art" src="menu-procon.png" width="4470" height="2190" alt="Fachada do PROCON em pixel art, com portas de vidro, jardins e prédios ao fundo">
           <span class="tiny-label">ARQUIVO 01 • TREINAMENTO OFICIAL</span>
           <h1>MISSÃO<br>PROCON</h1>
           <p class="mission-line">DEFENDA. ORIENTE. RESOLVA.</p>
@@ -2618,133 +2618,6 @@
       return String(value).padStart(4, "0");
     }
 
-    function drawCoverArt() {
-      const canvas = document.getElementById("coverCanvas");
-      if (!canvas || typeof canvas.getContext !== "function") return;
-      const context = canvas.getContext("2d");
-      if (!context) return;
-      context.imageSmoothingEnabled = false;
-
-      const colors = {
-        ink: "#101733", blue: "#2463eb", blueDark: "#14378e", cyan: "#55d9e8",
-        skyLight: "#a9eef1", paper: "#fff8df", paperDark: "#e4cf99", yellow: "#ffd84a",
-        green: "#31b86b", greenDark: "#17663f", red: "#d83a4e", redDark: "#7f1e36",
-        road: "#283654", roadLight: "#425377", sidewalk: "#d6b477", skin: "#d78c5f",
-        hair: "#30232a", white: "#fffdf2", trunk: "#794632"
-      };
-      const rect = (x, y, width, height, color) => {
-        context.fillStyle = color;
-        context.fillRect(x, y, width, height);
-      };
-      const outlined = (x, y, width, height, fill, border = colors.ink, size = 4) => {
-        rect(x, y, width, height, border);
-        rect(x + size, y + size, width - size * 2, height - size * 2, fill);
-      };
-
-      // Céu, horizonte e nuvens em blocos grandes.
-      rect(0, 0, 640, 200, colors.cyan);
-      rect(0, 58, 640, 54, colors.skyLight);
-      rect(32, 22, 62, 12, colors.white); rect(46, 12, 36, 10, colors.white);
-      rect(518, 28, 70, 11, colors.white); rect(538, 18, 34, 10, colors.white);
-      rect(586, 8, 22, 22, colors.yellow); rect(580, 14, 34, 10, colors.yellow);
-
-      // Silhueta distante da cidade.
-      const skyline = [
-        [0, 77, 44, 35, "#607ca8"], [48, 66, 36, 46, "#4e6b99"], [88, 83, 30, 29, "#7189ad"],
-        [500, 74, 38, 38, "#5b77a4"], [542, 61, 48, 51, "#4b6796"], [594, 79, 46, 33, "#6d86ac"]
-      ];
-      skyline.forEach(([x, y, width, height, color]) => {
-        rect(x, y, width, height, color);
-        for (let wx = x + 7; wx < x + width - 4; wx += 12) {
-          for (let wy = y + 8; wy < y + height - 4; wy += 12) rect(wx, wy, 5, 5, "#b9d8d8");
-        }
-      });
-
-      // Prédio do PROCON com fachada, janelas e porta de vidro.
-      rect(132, 27, 376, 91, colors.ink);
-      rect(138, 33, 364, 85, colors.paperDark);
-      rect(146, 40, 348, 78, colors.paper);
-      rect(132, 25, 376, 10, colors.blueDark);
-      rect(126, 21, 388, 7, colors.blue);
-
-      outlined(205, 38, 230, 38, colors.blue);
-      rect(211, 44, 218, 7, "#3677f2");
-      context.fillStyle = colors.white;
-      context.font = "bold 23px 'Courier New', monospace";
-      context.textAlign = "center";
-      context.textBaseline = "middle";
-      context.fillText("PROCON", 320, 59);
-
-      outlined(151, 82, 98, 36, colors.cyan);
-      outlined(391, 82, 98, 36, colors.cyan);
-      rect(198, 86, 5, 28, "#9ceaf0"); rect(438, 86, 5, 28, "#9ceaf0");
-      rect(245, 80, 150, 38, colors.paperDark);
-      outlined(278, 79, 84, 57, "#53cfe0");
-      rect(318, 83, 5, 49, colors.ink);
-      rect(286, 88, 27, 34, "#8be5ea"); rect(328, 88, 26, 34, "#8be5ea");
-      rect(257, 119, 126, 6, colors.ink); rect(268, 125, 104, 6, "#71809a"); rect(280, 131, 80, 5, colors.ink);
-
-      // Totem de atendimento e bandeira.
-      outlined(515, 49, 70, 35, colors.blueDark);
-      context.fillStyle = colors.white;
-      context.font = "bold 9px 'Courier New', monospace";
-      context.fillText("ABERTO", 550, 66);
-      rect(548, 84, 5, 49, colors.ink);
-      rect(553, 88, 31, 17, colors.green);
-      rect(558, 92, 21, 9, colors.yellow);
-      rect(566, 94, 6, 5, colors.blue);
-
-      // Calçada com ladrilhos e faixa de acesso.
-      rect(0, 112, 640, 47, colors.sidewalk);
-      for (let x = 0; x < 640; x += 32) {
-        rect(x, 112, 2, 47, "#b78b5c");
-        if ((x / 32) % 2 === 0) rect(x + 2, 136, 30, 2, "#e3c793");
-      }
-      rect(0, 156, 640, 5, colors.ink);
-      rect(0, 161, 640, 39, colors.road);
-      rect(0, 165, 640, 4, colors.roadLight);
-      for (let x = 26; x < 190; x += 26) rect(x, 175, 16, 20, colors.white);
-      for (let x = 238; x < 400; x += 47) rect(x, 179, 28, 5, colors.yellow);
-
-      // Árvore, canteiro e poste urbano.
-      rect(69, 83, 10, 65, colors.trunk);
-      rect(60, 136, 30, 8, colors.trunk);
-      outlined(42, 132, 64, 25, colors.greenDark);
-      rect(45, 62, 26, 27, colors.greenDark); rect(68, 51, 31, 36, colors.green); rect(36, 79, 52, 29, colors.green);
-      rect(51, 58, 25, 20, "#57cc83"); rect(82, 68, 23, 23, colors.greenDark);
-      rect(600, 55, 6, 94, colors.ink); rect(586, 52, 34, 7, colors.ink);
-      rect(590, 59, 26, 18, colors.yellow); rect(595, 63, 16, 10, colors.white);
-
-      const drawPerson = (x, y, shirt, badge = false) => {
-        rect(x - 6, y + 53, 42, 6, "rgba(16,23,51,.30)");
-        rect(x + 2, y + 39, 10, 17, colors.blueDark); rect(x + 20, y + 39, 10, 17, colors.blueDark);
-        outlined(x, y + 18, 34, 28, shirt, colors.ink, 3);
-        rect(x - 5, y + 23, 7, 22, colors.skin); rect(x + 32, y + 23, 7, 22, colors.skin);
-        outlined(x + 5, y, 24, 22, colors.skin, colors.ink, 3);
-        rect(x + 3, y - 3, 28, 9, colors.hair); rect(x + 6, y + 7, 4, 4, colors.ink); rect(x + 22, y + 7, 4, 4, colors.ink);
-        rect(x + 13, y + 14, 8, 3, colors.redDark);
-        if (badge) { rect(x + 14, y + 24, 7, 9, colors.yellow); rect(x + 16, y + 26, 3, 5, colors.blueDark); }
-      };
-      drawPerson(112, 101, colors.red);
-      drawPerson(468, 101, colors.blue, true);
-
-      // Veículo e bicicleta dão movimento visual à rua.
-      outlined(421, 169, 93, 25, colors.red, colors.ink, 4);
-      rect(437, 160, 48, 13, colors.redDark); rect(444, 163, 17, 8, "#8be5ea"); rect(465, 163, 15, 8, "#8be5ea");
-      rect(435, 189, 17, 9, colors.ink); rect(486, 189, 17, 9, colors.ink);
-      rect(530, 176, 24, 24, "transparent");
-      context.strokeStyle = colors.ink;
-      context.lineWidth = 4;
-      context.strokeRect(530, 174, 18, 18); context.strokeRect(570, 174, 18, 18);
-      context.beginPath(); context.moveTo(539, 183); context.lineTo(559, 165); context.lineTo(579, 183); context.lineTo(550, 183); context.lineTo(563, 174); context.stroke();
-
-      // Moldura interna e pequenos brilhos finalizam o painel.
-      context.strokeStyle = "rgba(255,255,255,.30)";
-      context.lineWidth = 4;
-      context.strokeRect(5, 5, 630, 190);
-      rect(14, 14, 5, 5, colors.white); rect(621, 14, 5, 5, colors.white);
-    }
-
     function initAudio() {
 
       if (!audioContext) {
@@ -3178,7 +3051,6 @@
       }
     });
 
-    drawCoverArt();
   </script>
 </body>
 </html>

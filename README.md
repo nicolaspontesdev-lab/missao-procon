@@ -35,7 +35,7 @@ Também é possível abrir o arquivo `index.html` diretamente em qualquer navega
 ## Estrutura
 
 - `index.html`: jogo completo, com HTML, CSS e JavaScript.
-- A arte da tela de abertura está incorporada ao arquivo `index.html`.
+- `menu-procon.png`: arte da tela de abertura.
 - `JOGAR MISSÃO PROCON.cmd`: atalho de inicialização para Windows.
 
 ## Aviso educativo
