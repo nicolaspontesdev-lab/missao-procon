@@ -1,0 +1,906 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b59ba8252802ec04a9918ebc73ae2b91, type: 3}
+  m_Name: CaseDatabase
+  m_EditorClassIdentifier: Assembly-CSharp::Procon.CaseDatabase
+  casesPerScenario: 3
+  levels:
+  - key: 0
+    label: FUNDAMENTAL II
+    basePoints: 100
+    showHints: 1
+    description: "Situa\xE7\xF5es diretas. O dossi\xEA traz uma pista extra antes
+      da decis\xE3o."
+  - key: 1
+    label: "ENSINO M\xC9DIO"
+    basePoints: 125
+    showHints: 0
+    description: Casos com mais nuance e sem pista. Vale mais ponto por acerto.
+  - key: 2
+    label: "T\xC9CNICO / SUPERIOR"
+    basePoints: 150
+    showHints: 0
+    description: "Linguagem t\xE9cnica do CDC, sem pista e com a maior pontua\xE7\xE3o."
+  scenarios:
+  - key: 0
+    label: SUPERMERCADO
+    subtitle: "FISCALIZA\xC7\xC3O DE PRE\xC7OS"
+    decor: CORREDOR DE PRODUTOS
+    tint: {r: 0.19215687, g: 0.72156864, b: 0.41960785, a: 1}
+  - key: 1
+    label: "ELETR\xD4NICOS"
+    subtitle: "GARANTIA E ASSIST\xCANCIA"
+    decor: "MOSTRU\xC1RIO DA LOJA"
+    tint: {r: 0.33333334, g: 0.8509804, b: 0.9098039, a: 1}
+  - key: 2
+    label: BANCO
+    subtitle: "CR\xC9DITO RESPONS\xC1VEL"
+    decor: "TERMINAIS BANC\xC1RIOS"
+    tint: {r: 1, g: 0.84705883, b: 0.2901961, a: 1}
+  - key: 3
+    label: COMPRAS ONLINE
+    subtitle: OFERTAS E ENTREGAS
+    decor: CENTRO DE ENTREGAS
+    tint: {r: 0.14117648, g: 0.3882353, b: 0.92156863, a: 1}
+  - key: 4
+    label: TELEFONIA
+    subtitle: "PLANOS E SERVI\xC7OS"
+    decor: "MOSTRU\xC1RIO DE PLANOS"
+    tint: {r: 0.9490196, g: 0.54901963, b: 0.15686275, a: 1}
+  cases:
+  - id: f-sup-1
+    level: 0
+    scenario: 0
+    owner: GERENTE DO SUPERMERCADO
+    text: "Na prateleira, o arroz custa R$ 8,90, mas no caixa cobramos R$ 11,90 e
+      n\xE3o deixamos o cliente pagar o menor pre\xE7o."
+    isViolation: 1
+    hint: Compare a oferta mostrada com o valor cobrado.
+    explanation: "O pre\xE7o deve ser claro e a oferta anunciada vincula o fornecedor.
+      Diante da diferen\xE7a, o consumidor n\xE3o deve ser obrigado a pagar o valor
+      maior."
+    legalReference: "CDC: arts. 6\xBA, III, 30 e 35 \u2022 informa\xE7\xE3o e cumprimento
+      da oferta"
+    investigation:
+      briefing: "O pre\xE7o do arroz precisa ser conferido."
+      consumerStatement: "Escolhi o arroz pelo pre\xE7o exposto na prateleira."
+      documentTitle: Etiqueta da prateleira
+      documentBody: "ARROZ \u2022 R$ 8,90"
+      inspectionTitle: Registro do caixa
+      inspectionBody: "O caixa cobra R$ 11,90. A ger\xEAncia n\xE3o permite pagar
+        R$ 8,90."
+  - id: f-sup-2
+    level: 0
+    scenario: 0
+    owner: GERENTE DO SUPERMERCADO
+    text: Nossa equipe confere as datas todos os dias e retira das prateleiras os
+      alimentos vencidos antes de abrir a loja.
+    isViolation: 0
+    hint: "Pergunte se algum produto vencido continuou \xE0 venda."
+    explanation: "A atitude descrita protege o consumidor. Retirar produtos vencidos
+      antes da venda \xE9 uma pr\xE1tica correta de seguran\xE7a."
+    legalReference: "CDC: arts. 8\xBA e 10 \u2022 prote\xE7\xE3o da sa\xFAde e seguran\xE7a"
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: f-sup-3
+    level: 0
+    scenario: 0
+    owner: GERENTE DO SUPERMERCADO
+    text: "S\xF3 vendemos um pacote de arroz se o cliente tamb\xE9m comprar uma garrafa
+      de \xF3leo."
+    isViolation: 1
+    hint: O cliente pode ser obrigado a levar outro produto?
+    explanation: "Condicionar a venda de um produto \xE0 compra de outro \xE9 venda
+      casada, uma pr\xE1tica abusiva."
+    legalReference: "CDC: art. 39, I \u2022 proibi\xE7\xE3o de venda casada"
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: f-ele-1
+    level: 0
+    scenario: 1
+    owner: DONO DA LOJA
+    text: "O celular apresentou defeito cinco dias ap\xF3s a compra, mas mandamos
+      o cliente procurar somente a f\xE1brica e recusamos qualquer atendimento."
+    isViolation: 1
+    hint: A loja que vendeu pode simplesmente abandonar o cliente?
+    explanation: "A loja faz parte da cadeia de fornecimento e n\xE3o pode afastar
+      sua responsabilidade pelo defeito apenas enviando o consumidor \xE0 f\xE1brica."
+    legalReference: "CDC: art. 18 \u2022 responsabilidade solid\xE1ria por v\xEDcio
+      do produto"
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: f-ele-2
+    level: 0
+    scenario: 1
+    owner: DONO DA LOJA
+    text: "O fone comprado na loja f\xEDsica funciona bem. O cliente mudou de ideia,
+      mas nossa pol\xEDtica n\xE3o previa troca por prefer\xEAncia pessoal ou cor."
+    isViolation: 0
+    hint: Existe defeito ou promessa de troca?
+    explanation: "Em loja f\xEDsica, a troca de produto sem defeito por simples mudan\xE7a
+      de ideia depende da pol\xEDtica ou da promessa feita pela loja."
+    legalReference: 'CDC: oferta vincula o fornecedor; arrependimento legal se aplica,
+      em regra, a compras fora da loja'
+    investigation:
+      briefing: Um cliente quer devolver um fone.
+      consumerStatement: "Comprei na loja f\xEDsica e mudei de ideia. O fone funciona
+        bem."
+      documentTitle: "Condi\xE7\xF5es da compra"
+      documentBody: "Compra presencial. N\xE3o houve promessa de troca por prefer\xEAncia
+        pessoal ou cor."
+      inspectionTitle: Inspecionar o fone
+      inspectionBody: "O produto n\xE3o apresenta defeito."
+  - id: f-ele-3
+    level: 0
+    scenario: 1
+    owner: DONO DA LOJA
+    text: "Todos os aparelhos t\xEAm etiqueta leg\xEDvel com pre\xE7o \xE0 vista
+      e parcelado antes de o cliente decidir comprar."
+    isViolation: 0
+    hint: "A informa\xE7\xE3o est\xE1 clara antes da compra?"
+    explanation: "Informar previamente os pre\xE7os e as condi\xE7\xF5es de pagamento
+      \xE9 a conduta correta."
+    legalReference: "CDC: arts. 6\xBA, III, e 31 \u2022 informa\xE7\xE3o clara e
+      adequada"
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: f-ban-1
+    level: 0
+    scenario: 2
+    owner: GERENTE DO BANCO
+    text: "Antes da contrata\xE7\xE3o do empr\xE9stimo, mostramos os juros, o n\xFAmero
+      de parcelas e o total a pagar e entregamos uma c\xF3pia dessas condi\xE7\xF5es
+      ao cliente."
+    isViolation: 0
+    hint: "O cliente recebeu as informa\xE7\xF5es antes de assinar?"
+    explanation: "A descri\xE7\xE3o mostra transpar\xEAncia na contrata\xE7\xE3o
+      do cr\xE9dito, como exige a prote\xE7\xE3o do consumidor."
+    legalReference: "CDC: art. 52 \u2022 informa\xE7\xF5es obrigat\xF3rias no cr\xE9dito"
+    investigation:
+      briefing: "Confira como o empr\xE9stimo foi oferecido."
+      consumerStatement: "Recebi uma c\xF3pia das condi\xE7\xF5es antes de contratar."
+      documentTitle: "Proposta de cr\xE9dito"
+      documentBody: "Juros, n\xFAmero de parcelas e total a pagar foram apresentados
+        antes da assinatura."
+      inspectionTitle: Registro de atendimento
+      inspectionBody: "O banco entregou uma c\xF3pia ao cliente."
+  - id: f-ban-2
+    level: 0
+    scenario: 2
+    owner: GERENTE DO BANCO
+    text: "Pressionamos uma pessoa idosa a contratar cr\xE9dito na hora e dizemos
+      que ela perder\xE1 o benef\xEDcio se pedir tempo para pensar."
+    isViolation: 1
+    hint: "H\xE1 press\xE3o ou amea\xE7a para fechar o contrato?"
+    explanation: "Pressionar, assediar ou explorar a vulnerabilidade do consumidor
+      para oferecer cr\xE9dito \xE9 pr\xE1tica proibida."
+    legalReference: "CDC: arts. 39, IV, e 54-C, IV \u2022 prote\xE7\xE3o contra ass\xE9dio
+      e press\xE3o"
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: f-ban-3
+    level: 0
+    scenario: 2
+    owner: COBRADOR DA FINANCEIRA
+    text: "Para cobrar uma d\xEDvida, revelamos a situa\xE7\xE3o em voz alta para
+      toda a fila e envergonhamos o cliente."
+    isViolation: 1
+    hint: "A cobran\xE7a respeitou a dignidade da pessoa?"
+    explanation: "A cobran\xE7a n\xE3o pode expor o consumidor ao rid\xEDculo nem
+      causar constrangimento ou amea\xE7a."
+    legalReference: "CDC: art. 42 \u2022 cobran\xE7a sem constrangimento"
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: f-onl-1
+    level: 0
+    scenario: 3
+    owner: GERENTE DO SITE
+    text: "A compra foi feita pela internet. Quatro dias ap\xF3s receber o produto,
+      o cliente quis desistir, mas recusamos a desist\xEAncia sem analisar o pedido."
+    isViolation: 1
+    hint: Conte quantos dias se passaram desde o recebimento.
+    explanation: "Em compras fora do estabelecimento, o consumidor pode desistir
+      em at\xE9 sete dias, contados da assinatura ou do recebimento."
+    legalReference: "CDC: art. 49 \u2022 direito de arrependimento"
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: f-onl-2
+    level: 0
+    scenario: 3
+    owner: GERENTE DO SITE
+    text: "O cliente desistiu da compra online no prazo de sete dias. Recebemos a
+      devolu\xE7\xE3o e restitu\xEDmos tamb\xE9m o valor do frete."
+    isViolation: 0
+    hint: A loja respeitou o prazo e devolveu os valores?
+    explanation: "A conduta est\xE1 correta: no arrependimento v\xE1lido, os valores
+      pagos devem ser restitu\xEDdos, inclusive o frete."
+    legalReference: "CDC: art. 49 \u2022 restitui\xE7\xE3o no direito de arrependimento"
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: f-onl-3
+    level: 0
+    scenario: 3
+    owner: GERENTE DO SITE
+    text: "Anunciamos um celular com 128 GB, mas enviamos um modelo de 64 GB e afirmamos
+      que o consumidor \xE9 obrigado a aceitar."
+    isViolation: 1
+    hint: "O produto entregue \xE9 igual ao anunciado?"
+    explanation: "O produto deve corresponder \xE0 oferta. O consumidor pode exigir
+      solu\xE7\xE3o adequada quando a oferta n\xE3o \xE9 cumprida."
+    legalReference: "CDC: arts. 30 e 35 \u2022 oferta vincula o fornecedor"
+    investigation:
+      briefing: Confira o celular entregue ao comprador.
+      consumerStatement: "Recebi um modelo diferente do anunciado. A loja diz que
+        preciso aceit\xE1-lo."
+      documentTitle: "An\xFAncio do produto"
+      documentBody: "CELULAR \u2022 Capacidade anunciada: 128 GB."
+      inspectionTitle: Inspecionar a entrega
+      inspectionBody: 'Modelo recebido: 64 GB.'
+  - id: f-tel-1
+    level: 0
+    scenario: 4
+    owner: GERENTE DA OPERADORA
+    text: Colocamos um pacote pago de jogos na conta sem o cliente pedir ou autorizar.
+    isViolation: 1
+    hint: "O consumidor escolheu contratar esse servi\xE7o?"
+    explanation: "Fornecer ou cobrar servi\xE7o n\xE3o solicitado \xE9 pr\xE1tica
+      abusiva."
+    legalReference: "CDC: art. 39, III \u2022 servi\xE7o n\xE3o solicitado"
+    investigation:
+      briefing: Um pacote apareceu na conta do cliente.
+      consumerStatement: "N\xE3o pedi nem autorizei um pacote de jogos."
+      documentTitle: Conferir a fatura
+      documentBody: "Existe uma cobran\xE7a por um pacote de jogos."
+      inspectionTitle: "Registro de contrata\xE7\xE3o"
+      inspectionBody: "A operadora incluiu o pacote sem solicita\xE7\xE3o ou autoriza\xE7\xE3o."
+  - id: f-tel-2
+    level: 0
+    scenario: 4
+    owner: GERENTE DA OPERADORA
+    text: "O cliente pediu a mudan\xE7a de plano. Confirmamos o novo pre\xE7o, registramos
+      a autoriza\xE7\xE3o e enviamos o resumo do contrato."
+    isViolation: 0
+    hint: "A mudan\xE7a foi autorizada e explicada?"
+    explanation: "Com consentimento e informa\xE7\xE3o clara, a altera\xE7\xE3o descrita
+      n\xE3o indica infra\xE7\xE3o."
+    legalReference: "CDC: arts. 6\xBA, III, e 46 \u2022 informa\xE7\xE3o e conhecimento
+      do contrato"
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: f-tel-3
+    level: 0
+    scenario: 4
+    owner: GERENTE DA OPERADORA
+    text: "Oferecemos canais simples de cancelamento, registramos o protocolo e explicamos
+      quando o servi\xE7o terminar\xE1."
+    isViolation: 0
+    hint: A empresa dificultou ou facilitou o pedido?
+    explanation: "A conduta facilita o exerc\xEDcio do direito do consumidor e registra
+      o atendimento."
+    legalReference: "CDC: dever de informa\xE7\xE3o e boa-f\xE9 no atendimento"
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: m-sup-1
+    level: 1
+    scenario: 0
+    owner: GERENTE DO SUPERMERCADO
+    text: "A etiqueta mostra R$ 5,99, mas o sistema cobra R$ 7,49. Mesmo ap\xF3s
+      a confer\xEAncia, o caixa exige o valor maior."
+    isViolation: 1
+    hint: 
+    explanation: "A informa\xE7\xE3o de pre\xE7o integra a oferta. Confirmada a diverg\xEAncia,
+      exigir o valor maior viola o dever de informa\xE7\xE3o e o cumprimento da oferta."
+    legalReference: "CDC: arts. 6\xBA, III, 30 e 35"
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: m-sup-2
+    level: 1
+    scenario: 0
+    owner: GERENTE DO SUPERMERCADO
+    text: "A embalagem informa 1 kg, mas a fiscaliza\xE7\xE3o comprova que o produto
+      cont\xE9m apenas 850 g, sem aviso ao consumidor."
+    isViolation: 1
+    hint: 
+    explanation: "A diferen\xE7a de quantidade \xE9 v\xEDcio do produto e pode gerar
+      substitui\xE7\xE3o, abatimento, complementa\xE7\xE3o ou restitui\xE7\xE3o,
+      conforme o caso."
+    legalReference: "CDC: art. 19 \u2022 v\xEDcio de quantidade"
+    investigation:
+      briefing: Verifique a quantidade de um produto.
+      consumerStatement: "A embalagem informa um quilo. Quero conferir o conte\xFAdo."
+      documentTitle: Ler a embalagem
+      documentBody: "Peso informado: 1 kg. N\xE3o h\xE1 aviso de quantidade diferente."
+      inspectionTitle: Conferir a pesagem
+      inspectionBody: "A fiscaliza\xE7\xE3o comprova apenas 850 g do produto."
+  - id: m-sup-3
+    level: 1
+    scenario: 0
+    owner: GERENTE DO SUPERMERCADO
+    text: "A promo\xE7\xE3o informa com destaque o per\xEDodo, os produtos participantes,
+      o limite por pessoa e a quantidade dispon\xEDvel."
+    isViolation: 0
+    hint: 
+    explanation: "Condi\xE7\xF5es relevantes claras e vis\xEDveis permitem decis\xE3o
+      consciente e reduzem o risco de publicidade enganosa."
+    legalReference: "CDC: arts. 30, 31 e 37 \u2022 oferta e publicidade"
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: m-ele-1
+    level: 1
+    scenario: 1
+    owner: DONO DA LOJA
+    text: "A assist\xEAncia ficou 35 dias com o notebook defeituoso. Mesmo assim,
+      recusamos troca, restitui\xE7\xE3o ou abatimento do pre\xE7o."
+    isViolation: 1
+    hint: 
+    explanation: "N\xE3o sanado o v\xEDcio no prazo legal de 30 dias, o consumidor
+      pode escolher entre as alternativas previstas no CDC."
+    legalReference: "CDC: art. 18, \xA71\xBA"
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: m-ele-2
+    level: 1
+    scenario: 1
+    owner: DONO DA LOJA
+    text: "Nosso contrato diz que a garantia legal n\xE3o existe e que somente uma
+      garantia estendida paga permite reclamar de defeitos."
+    isViolation: 1
+    hint: 
+    explanation: "A garantia legal independe de termo expresso. O contrato n\xE3o
+      pode elimin\xE1-la nem condicionar seu exerc\xEDcio \xE0 compra de garantia
+      adicional."
+    legalReference: "CDC: arts. 24 e 25 \u2022 garantia legal e veda\xE7\xE3o de
+      exonera\xE7\xE3o"
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: m-ele-3
+    level: 1
+    scenario: 1
+    owner: DONO DA LOJA
+    text: "Oferecemos garantia estendida separadamente, explicamos que \xE9 opcional
+      e n\xE3o dizemos que ela substitui a garantia legal."
+    isViolation: 0
+    hint: 
+    explanation: "A oferta opcional e transparente n\xE3o caracteriza, por si s\xF3,
+      infra\xE7\xE3o. O consumidor deve poder escolher livremente."
+    legalReference: "CDC: dever de informa\xE7\xE3o e proibi\xE7\xE3o de venda casada"
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: m-ban-1
+    level: 1
+    scenario: 2
+    owner: GERENTE DO BANCO
+    text: "A propaganda destaca uma parcela pequena, mas esconde juros, encargos
+      e o total da d\xEDvida at\xE9 depois da assinatura."
+    isViolation: 1
+    hint: 
+    explanation: "Na oferta de cr\xE9dito, custo, juros, parcelas e total a pagar
+      precisam ser informados previamente e com clareza."
+    legalReference: "CDC: arts. 52 e 54-B \u2022 informa\xE7\xE3o no cr\xE9dito"
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: m-ban-2
+    level: 1
+    scenario: 2
+    owner: GERENTE DO BANCO
+    text: "O cliente antecipou as \xFAltimas parcelas e aplicamos a redu\xE7\xE3o
+      proporcional dos juros e demais acr\xE9scimos."
+    isViolation: 0
+    hint: 
+    explanation: "A liquida\xE7\xE3o antecipada com redu\xE7\xE3o proporcional \xE9
+      justamente o direito assegurado ao consumidor."
+    legalReference: "CDC: art. 52, \xA72\xBA \u2022 liquida\xE7\xE3o antecipada"
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: m-ban-3
+    level: 1
+    scenario: 2
+    owner: GERENTE DO BANCO
+    text: "O seguro \xE9 opcional, aparece separado do empr\xE9stimo e s\xF3 \xE9
+      inclu\xEDdo depois de consentimento espec\xEDfico do cliente."
+    isViolation: 0
+    hint: 
+    explanation: "A contrata\xE7\xE3o separada, informada e volunt\xE1ria evita venda
+      casada e cobran\xE7a de servi\xE7o n\xE3o solicitado."
+    legalReference: "CDC: arts. 39, I e III \u2022 contrata\xE7\xE3o livre"
+    investigation:
+      briefing: Investigue a oferta de um seguro.
+      consumerStatement: "Pude escolher se queria contratar o seguro junto do empr\xE9stimo."
+      documentTitle: Proposta do banco
+      documentBody: "Seguro opcional, apresentado separadamente do empr\xE9stimo."
+      inspectionTitle: "Registro de autoriza\xE7\xE3o"
+      inspectionBody: "O seguro s\xF3 foi inclu\xEDdo ap\xF3s o consentimento espec\xEDfico
+        do cliente."
+  - id: m-onl-1
+    level: 1
+    scenario: 3
+    owner: GERENTE DO SITE
+    text: "Confirmamos por e-mail uma oferta com estoque dispon\xEDvel, mas depois
+      cancelamos apenas porque o desconto anunciado ficou caro para a empresa."
+    isViolation: 1
+    hint: 
+    explanation: "A oferta suficientemente precisa obriga o fornecedor. O simples
+      arrependimento comercial da empresa n\xE3o afasta as op\xE7\xF5es do consumidor."
+    legalReference: "CDC: arts. 30 e 35 \u2022 cumprimento da oferta"
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: m-onl-2
+    level: 1
+    scenario: 3
+    owner: GERENTE DO SITE
+    text: No arrependimento dentro de sete dias, oferecemos somente um vale-compras
+      e recusamos restituir o dinheiro.
+    isViolation: 1
+    hint: 
+    explanation: "Exercido validamente o arrependimento, os valores pagos devem ser
+      restitu\xEDdos, e o consumidor n\xE3o pode ser obrigado a aceitar apenas cr\xE9dito
+      na loja."
+    legalReference: "CDC: art. 49, par\xE1grafo \xFAnico"
+    investigation:
+      briefing: "Investigue a resposta a uma devolu\xE7\xE3o."
+      consumerStatement: Desisti da compra online dentro de sete dias.
+      documentTitle: Pedido de arrependimento
+      documentBody: Pedido registrado dentro do prazo de sete dias.
+      inspectionTitle: Resposta da loja
+      inspectionBody: A loja oferece somente vale-compras e recusa devolver o dinheiro.
+  - id: m-onl-3
+    level: 1
+    scenario: 3
+    owner: GERENTE DO SITE
+    text: "Recebemos o pedido de arrependimento no sexto dia, orientamos a devolu\xE7\xE3o
+      sem custo e providenciamos o estorno integral."
+    isViolation: 0
+    hint: 
+    explanation: "A empresa respeitou o prazo e as consequ\xEAncias do direito de
+      arrependimento."
+    legalReference: 'CDC: art. 49'
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: m-tel-1
+    level: 1
+    scenario: 4
+    owner: GERENTE DA OPERADORA
+    text: "Uma falha interrompeu totalmente o servi\xE7o. Restabelecemos a linha,
+      registramos o caso e concedemos o cr\xE9dito correspondente ao per\xEDodo sem
+      uso."
+    isViolation: 0
+    hint: 
+    explanation: "A situa\xE7\xE3o descreve provid\xEAncias para reparar a falha
+      e ajustar a cobran\xE7a, sem indicar recusa de atendimento."
+    legalReference: "CDC: arts. 20 e 22 \u2022 qualidade e adequa\xE7\xE3o do servi\xE7o"
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: m-tel-2
+    level: 1
+    scenario: 4
+    owner: GERENTE DA OPERADORA
+    text: "Trocamos o plano por outro mais caro sem pedido, consentimento ou aviso
+      e cobramos a diferen\xE7a na fatura."
+    isViolation: 1
+    hint: 
+    explanation: "Alterar e cobrar servi\xE7o sem consentimento e informa\xE7\xE3o
+      viola a transpar\xEAncia e pode configurar pr\xE1tica abusiva."
+    legalReference: 'CDC: arts. 39, III, 46 e 51, X'
+    investigation:
+      briefing: O valor do plano mudou. Confira os registros.
+      consumerStatement: "N\xE3o pedi nem autorizei um plano mais caro. Tamb\xE9m
+        n\xE3o fui avisado."
+      documentTitle: Comparar a fatura
+      documentBody: "A fatura cobra a diferen\xE7a de um plano mais caro."
+      inspectionTitle: "Registro da mudan\xE7a"
+      inspectionBody: A operadora trocou o plano sem pedido, consentimento ou aviso.
+  - id: m-tel-3
+    level: 1
+    scenario: 4
+    owner: GERENTE DA OPERADORA
+    text: "Antes da contrata\xE7\xE3o, mostramos pre\xE7o, franquia, velocidade,
+      fideliza\xE7\xE3o e multa de forma leg\xEDvel, e o cliente confirmou o plano."
+    isViolation: 0
+    hint: 
+    explanation: "A descri\xE7\xE3o respeita o dever de informa\xE7\xE3o pr\xE9via
+      e permite uma escolha consciente."
+    legalReference: "CDC: arts. 6\xBA, III, 31 e 46"
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: t-sup-1
+    level: 2
+    scenario: 0
+    owner: "RESPONS\xC1VEL PELO SUPERMERCADO"
+    text: "Produtos de quantidades diferentes exibem s\xF3 o pre\xE7o total; o pre\xE7o
+      por unidade de medida fica ausente, impedindo compara\xE7\xE3o objetiva."
+    isViolation: 1
+    hint: 
+    explanation: "A apresenta\xE7\xE3o incompleta dificulta a compara\xE7\xE3o e
+      contraria a informa\xE7\xE3o adequada e ostensiva sobre pre\xE7o e quantidade."
+    legalReference: "CDC: arts. 6\xBA, III, e 31 \u2022 legisla\xE7\xE3o de afixa\xE7\xE3o
+      de pre\xE7os"
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: t-sup-2
+    level: 2
+    scenario: 0
+    owner: "RESPONS\xC1VEL PELO SUPERMERCADO"
+    text: "Confirmado v\xEDcio de quantidade, recusamos complementar a quantidade,
+      substituir o produto, abater o pre\xE7o ou restituir o valor pago e mandamos
+      o consumidor tratar apenas com o fabricante."
+    isViolation: 1
+    hint: 
+    explanation: "Os fornecedores respondem solidariamente pelo v\xEDcio de quantidade
+      e o consumidor disp\xF5e das alternativas legais."
+    legalReference: 'CDC: art. 19'
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: t-sup-3
+    level: 2
+    scenario: 0
+    owner: "RESPONS\xC1VEL PELO SUPERMERCADO"
+    text: "Ao confirmar diverg\xEAncia entre a g\xF4ndola e o caixa, corrigimos o
+      sistema e aplicamos ao consumidor o pre\xE7o anunciado mais favor\xE1vel."
+    isViolation: 0
+    hint: 
+    explanation: "A conduta respeita a oferta apresentada e corrige a falha de informa\xE7\xE3o
+      de pre\xE7o."
+    legalReference: 'CDC: arts. 30 e 35'
+    investigation:
+      briefing: "Confira uma diverg\xEAncia de pre\xE7os."
+      consumerStatement: "O pre\xE7o da g\xF4ndola era diferente do registrado no
+        caixa."
+      documentTitle: "Confer\xEAncia da oferta"
+      documentBody: "A equipe confirmou a diverg\xEAncia entre g\xF4ndola e caixa."
+      inspectionTitle: "Registro da corre\xE7\xE3o"
+      inspectionBody: "Sistema corrigido. Foi aplicado ao consumidor o pre\xE7o anunciado
+        mais favor\xE1vel."
+  - id: t-ele-1
+    level: 2
+    scenario: 1
+    owner: "RESPONS\xC1VEL PELA LOJA"
+    text: "Um v\xEDcio oculto apareceu meses depois. Rejeitamos a reclama\xE7\xE3o
+      contando o prazo desde a compra, sem considerar a data em que o defeito ficou
+      evidente."
+    isViolation: 1
+    hint: 
+    explanation: "Tratando-se de v\xEDcio oculto, o prazo decadencial come\xE7a quando
+      o defeito se evidencia, e n\xE3o necessariamente na data da compra."
+    legalReference: "CDC: art. 26, \xA73\xBA"
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: t-ele-2
+    level: 2
+    scenario: 1
+    owner: "RESPONS\xC1VEL PELA LOJA"
+    text: "Em documento separado e com manifesta\xE7\xE3o expressa, consumidor e
+      fornecedor ajustaram prazo de 45 dias para sanar o v\xEDcio."
+    isViolation: 0
+    hint: 
+    explanation: "O prazo de 30 dias pode ser reduzido ou ampliado entre sete e 180
+      dias por conven\xE7\xE3o v\xE1lida; em contrato de ades\xE3o, a cl\xE1usula
+      deve ser separada e expressa."
+    legalReference: "CDC: art. 18, \xA72\xBA"
+    investigation:
+      briefing: Examine o prazo combinado para o reparo.
+      consumerStatement: Concordei expressamente com um prazo de 45 dias.
+      documentTitle: Termo de acordo
+      documentBody: "Prazo para sanar o v\xEDcio: 45 dias."
+      inspectionTitle: Conferir a assinatura
+      inspectionBody: "A conven\xE7\xE3o est\xE1 em documento separado, com manifesta\xE7\xE3o
+        expressa do consumidor e do fornecedor."
+  - id: t-ele-3
+    level: 2
+    scenario: 1
+    owner: "RESPONS\xC1VEL PELA LOJA"
+    text: "Mesmo sendo produto essencial e estando comprovado o v\xEDcio, obrigamos
+      o consumidor a esperar 30 dias, sem permitir uso imediato das alternativas
+      legais."
+    isViolation: 1
+    hint: 
+    explanation: "Em produto essencial, ou quando o reparo compromete qualidade,
+      valor ou caracter\xEDsticas, o consumidor pode usar imediatamente as alternativas
+      do \xA71\xBA."
+    legalReference: "CDC: art. 18, \xA73\xBA"
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: t-ban-1
+    level: 2
+    scenario: 2
+    owner: "RESPONS\xC1VEL PELO BANCO"
+    text: "Por atraso, aplicamos multa de mora de 2% sobre o valor da presta\xE7\xE3o
+      e informamos previamente essa condi\xE7\xE3o."
+    isViolation: 0
+    hint: 
+    explanation: "A multa morat\xF3ria de at\xE9 2% da presta\xE7\xE3o \xE9 o limite
+      previsto no CDC; isoladamente, a situa\xE7\xE3o narrada n\xE3o indica infra\xE7\xE3o."
+    legalReference: "CDC: art. 52, \xA71\xBA"
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: t-ban-2
+    level: 2
+    scenario: 2
+    owner: "RESPONS\xC1VEL PELO BANCO"
+    text: "Na liquida\xE7\xE3o antecipada do d\xE9bito, cobramos todas as parcelas
+      futuras sem reduzir proporcionalmente juros e acr\xE9scimos."
+    isViolation: 1
+    hint: 
+    explanation: "A antecipa\xE7\xE3o total ou parcial assegura redu\xE7\xE3o proporcional
+      dos juros e demais acr\xE9scimos."
+    legalReference: "CDC: art. 52, \xA72\xBA"
+    investigation:
+      briefing: "Confira o c\xE1lculo de uma quita\xE7\xE3o antecipada."
+      consumerStatement: "Quero quitar a d\xEDvida antes do vencimento das parcelas
+        futuras."
+      documentTitle: "C\xE1lculo da quita\xE7\xE3o"
+      documentBody: O banco cobra a soma de todas as parcelas futuras.
+      inspectionTitle: Conferir os encargos
+      inspectionBody: "N\xE3o foi aplicada redu\xE7\xE3o proporcional de juros e
+        acr\xE9scimos."
+  - id: t-ban-3
+    level: 2
+    scenario: 2
+    owner: "RESPONS\xC1VEL PELO BANCO"
+    text: "Antes de conceder cr\xE9dito, avaliamos responsavelmente as condi\xE7\xF5es
+      do consumidor e informamos custo efetivo, consequ\xEAncias do atraso e identidade
+      do agente financiador."
+    isViolation: 0
+    hint: 
+    explanation: "A pr\xE1tica descrita atende aos deveres de cr\xE9dito respons\xE1vel
+      e informa\xE7\xE3o pr\xE9via."
+    legalReference: "CDC: arts. 54-B e 54-D \u2022 preven\xE7\xE3o do superendividamento"
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: t-onl-1
+    level: 2
+    scenario: 3
+    owner: "RESPONS\xC1VEL PELO COM\xC9RCIO ELETR\xD4NICO"
+    text: "No arrependimento v\xE1lido, restitu\xEDmos o valor do produto, mas retivemos
+      o valor do frete de ida como custo obrigat\xF3rio do consumidor."
+    isViolation: 1
+    hint: 
+    explanation: "A restitui\xE7\xE3o deve abranger os valores pagos. A reten\xE7\xE3o
+      do frete de ida transfere ao consumidor custo incompat\xEDvel com o exerc\xEDcio
+      do arrependimento."
+    legalReference: "CDC: art. 49, par\xE1grafo \xFAnico"
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: t-onl-2
+    level: 2
+    scenario: 3
+    owner: "RESPONS\xC1VEL PELO COM\xC9RCIO ELETR\xD4NICO"
+    text: "Descumprida oferta j\xE1 aceita, recusamos cumprimento, equivalente ou
+      restitui\xE7\xE3o atualizada, deixando o consumidor sem qualquer op\xE7\xE3o."
+    isViolation: 1
+    hint: 
+    explanation: Diante da recusa de cumprimento da oferta, a escolha entre as alternativas
+      legais pertence ao consumidor.
+    legalReference: 'CDC: art. 35'
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: t-onl-3
+    level: 2
+    scenario: 3
+    owner: "RESPONS\xC1VEL PELO COM\xC9RCIO ELETR\xD4NICO"
+    text: "Recebido o arrependimento de uma compra online financiada em contrato
+      conexo, comunicamos a institui\xE7\xE3o e providenciamos a resolu\xE7\xE3o
+      do cr\xE9dito sem \xF4nus."
+    isViolation: 0
+    hint: 
+    explanation: "A provid\xEAncia \xE9 compat\xEDvel com a prote\xE7\xE3o do consumidor
+      nos contratos de cr\xE9dito conexos \xE0 compra principal."
+    legalReference: 'CDC: art. 54-F'
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: t-tel-1
+    level: 2
+    scenario: 4
+    owner: "RESPONS\xC1VEL PELA OPERADORA"
+    text: "O contrato autoriza a operadora, sozinha, a alterar o pre\xE7o a qualquer
+      momento, sem crit\xE9rio objetivo nem possibilidade de oposi\xE7\xE3o do consumidor."
+    isViolation: 1
+    hint: 
+    explanation: "Cl\xE1usula que permite varia\xE7\xE3o unilateral do pre\xE7o ou
+      modifica\xE7\xE3o desequilibrada do contrato pode ser abusiva e nula."
+    legalReference: 'CDC: art. 51, X e XIII'
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
+  - id: t-tel-2
+    level: 2
+    scenario: 4
+    owner: "RESPONS\xC1VEL PELA OPERADORA"
+    text: "Ap\xF3s interrup\xE7\xE3o comprovada, restabelecemos o servi\xE7o, recalculamos
+      a cobran\xE7a do per\xEDodo afetado e oferecemos canal de contesta\xE7\xE3o
+      com protocolo."
+    isViolation: 0
+    hint: 
+    explanation: "A conduta busca adequar o servi\xE7o e a cobran\xE7a, al\xE9m de
+      preservar registro e possibilidade de contesta\xE7\xE3o."
+    legalReference: 'CDC: arts. 20 e 22'
+    investigation:
+      briefing: "Confira as provid\xEAncias ap\xF3s uma interrup\xE7\xE3o."
+      consumerStatement: "Houve uma interrup\xE7\xE3o comprovada. O servi\xE7o foi
+        restabelecido."
+      documentTitle: "Conferir a cobran\xE7a"
+      documentBody: "A operadora recalculou a cobran\xE7a do per\xEDodo afetado."
+      inspectionTitle: Protocolo de atendimento
+      inspectionBody: "H\xE1 canal de contesta\xE7\xE3o com protocolo para acompanhar
+        o caso."
+  - id: t-tel-3
+    level: 2
+    scenario: 4
+    owner: "RESPONS\xC1VEL PELA OPERADORA"
+    text: "Na contrata\xE7\xE3o, registramos o consentimento, entregamos uma c\xF3pia
+      acess\xEDvel do contrato e destacamos o pre\xE7o, o reajuste, a fideliza\xE7\xE3o
+      e as consequ\xEAncias do cancelamento."
+    isViolation: 0
+    hint: 
+    explanation: "Consentimento verific\xE1vel, acesso ao contrato e destaque das
+      condi\xE7\xF5es relevantes cumprem deveres de transpar\xEAncia."
+    legalReference: "CDC: arts. 6\xBA, III, 46 e 54, \xA7\xA73\xBA e 4\xBA"
+    investigation:
+      briefing: 
+      consumerStatement: 
+      documentTitle: 
+      documentBody: 
+      inspectionTitle: 
+      inspectionBody: 
