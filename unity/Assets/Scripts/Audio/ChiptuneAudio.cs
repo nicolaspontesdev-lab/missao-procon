@@ -4,8 +4,8 @@ using UnityEngine;
 namespace Procon
 {
     /// <summary>
-    /// Todo o audio do jogo e gerado por codigo: nenhum arquivo de som entra no
-    /// projeto. Os clipes sao sintetizados uma vez e ficam em cache.
+    /// Efeitos sonoros do jogo, sintetizados por codigo e guardados em cache.
+    /// O jogo nao tem musica de fundo: a trilha foi retirada a pedido da equipe.
     /// </summary>
     public class ChiptuneAudio : MonoBehaviour
     {
@@ -25,7 +25,6 @@ namespace Procon
         static ChiptuneAudio instance;
 
         AudioSource sfxSource;
-        AudioSource musicSource;
         readonly Dictionary<string, AudioClip> cache = new Dictionary<string, AudioClip>();
 
         public static ChiptuneAudio Instance
@@ -54,50 +53,7 @@ namespace Procon
             sfxSource.playOnAwake = false;
             sfxSource.volume = 0.7f;
 
-            musicSource = gameObject.AddComponent<AudioSource>();
-            musicSource.playOnAwake = false;
-            musicSource.loop = true;
-            musicSource.volume = 0.32f;
-
             GameSession.LoadPreferences();
-        }
-
-        // ------------------------------------------------------------------ musica
-
-        public void PlayMusic()
-        {
-            if (musicSource == null) return;
-            if (musicSource.clip == null) musicSource.clip = BuildMusicLoop();
-            musicSource.mute = !GameSession.MusicOn;
-            if (!musicSource.isPlaying) musicSource.Play();
-        }
-
-        public void RefreshMusicState()
-        {
-            if (musicSource == null) return;
-            musicSource.mute = !GameSession.MusicOn;
-            if (GameSession.MusicOn && !musicSource.isPlaying) PlayMusic();
-        }
-
-        /// <summary>Loop de 64 passos, o mesmo padrao do jogo original.</summary>
-        AudioClip BuildMusicLoop()
-        {
-            const float stepSeconds = 0.205f;
-            var roots = new[] { 45, 41, 48, 43 };
-            var melody = new[] { 0, 7, 12, 7, 3, 7, 10, 7, 0, 7, 12, 15, 12, 7, 3, 7 };
-            var notes = new List<Note>();
-
-            for (var step = 0; step < 64; step++)
-            {
-                var time = step * stepSeconds;
-                var root = roots[step / 16];
-
-                if (step % 4 == 0) notes.Add(MakeNote(root, time, 0.44f, 0.30f, Wave.Triangle));
-                if (step % 2 == 0) notes.Add(MakeNote(root + 12 + melody[step % 16], time, 0.21f, 0.13f, Wave.Square));
-                if (step % 8 == 4) notes.Add(MakeNote(root + 19, time, 0.30f, 0.11f, Wave.Triangle));
-            }
-
-            return Render("procon-music", notes, 64 * stepSeconds);
         }
 
         // ------------------------------------------------------------------ efeitos
@@ -174,12 +130,6 @@ namespace Procon
         }
 
         // ------------------------------------------------------------------ sintese
-
-        static Note MakeNote(int midi, float start, float duration, float volume, Wave wave)
-        {
-            var frequency = 440f * Mathf.Pow(2f, (midi - 69) / 12f);
-            return Tone(frequency, start, duration, volume, wave);
-        }
 
         static Note Tone(float frequency, float start, float duration, float volume, Wave wave)
         {

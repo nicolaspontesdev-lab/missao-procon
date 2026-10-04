@@ -49,22 +49,30 @@ namespace Procon
         public Button backFromCreditsButton;
 
         [Header("Audio")]
-        public Button musicButton;
-        public TMP_Text musicLabel;
         public Button sfxButton;
         public TMP_Text sfxLabel;
 
         [Header("Cenas")]
         public string gameSceneName = "01_Jogo";
 
+        [Header("Faixa do topo")]
+        [Tooltip("Texto que corre no topo, como o ticker do jogo em HTML. A frase vem repetida.")]
+        public RectTransform ticker;
+        [Min(0f)] public float tickerSpeed = 60f;
+
+        [Header("Titulo")]
+        [Tooltip("Titulo que sobe e desce devagar, em degraus, como letreiro de fliperama.")]
+        public RectTransform title;
+
         readonly List<GameObject> panels = new List<GameObject>();
         GameObject activePanel;
+        Vector2 titleHome;
+        Coroutine cardPop;
 
         void Start()
         {
             GameSession.LoadPreferences();
             GameSession.HasLevel = false;
-            ChiptuneAudio.Instance.PlayMusic();
 
             panels.Clear();
             if (titlePanel != null) panels.Add(titlePanel);
@@ -76,6 +84,7 @@ namespace Procon
             RefreshAudioLabels();
             ResetLevelSelection();
             ShowPanel(titlePanel);
+            if (title != null) titleHome = title.anchoredPosition;
         }
 
         void WireButtons()
@@ -93,13 +102,6 @@ namespace Procon
             Bind(backFromCreditsButton, () => ShowPanel(titlePanel));
             Bind(startButton, StartMission);
 
-            Bind(musicButton, () =>
-            {
-                GameSession.MusicOn = !GameSession.MusicOn;
-                GameSession.SavePreferences();
-                ChiptuneAudio.Instance.RefreshMusicState();
-                RefreshAudioLabels();
-            });
 
             Bind(sfxButton, () =>
             {
@@ -137,7 +139,6 @@ namespace Procon
 
         void RefreshAudioLabels()
         {
-            if (musicLabel != null) musicLabel.text = GameSession.MusicOn ? "MÚSICA: LIGADA" : "MÚSICA: DESLIGADA";
             if (sfxLabel != null) sfxLabel.text = GameSession.SfxOn ? "EFEITOS: LIGADOS" : "EFEITOS: DESLIGADOS";
         }
 
@@ -165,7 +166,31 @@ namespace Procon
             }
 
             PaintLevelButtons();
+            PopLevelCard(key);
             ChiptuneAudio.Instance.Play("select");
+        }
+
+        /// <summary>Cartao escolhido da um salto curto, em degraus.</summary>
+        void PopLevelCard(LevelKey key)
+        {
+            foreach (var option in levelOptions)
+            {
+                if (option == null || option.button == null || option.key != key) continue;
+                var rect = (RectTransform)option.button.transform;
+                if (cardPop != null) StopCoroutine(cardPop);
+                foreach (var other in levelOptions)
+                    if (other?.button != null) other.button.transform.localScale = Vector3.one;
+                cardPop = StartCoroutine(PixelMotion.Steps(0.28f, 4, t =>
+                    rect.localScale = Vector3.one * Mathf.Lerp(1f, 1.08f, PixelMotion.Bounce(t))));
+            }
+        }
+
+        void BobTitle()
+        {
+            if (title == null) return;
+            // 4 px para cima e para baixo a cada 0,8 s, sem suavizar (estilo pixel)
+            var up = Mathf.FloorToInt(Time.unscaledTime / 0.8f) % 2 == 0;
+            title.anchoredPosition = titleHome + new Vector2(0f, up ? 4f : 0f);
         }
 
         void PaintLevelButtons()
@@ -197,8 +222,23 @@ namespace Procon
 #endif
         }
 
+        void ScrollTicker()
+        {
+            if (ticker == null) return;
+            // a frase vem repetida quatro vezes: ao andar um quarto da largura, volta
+            // ao inicio sem emenda visivel
+            var loop = ticker.rect.width / 4f;
+            if (loop <= 0f) return;
+            var x = ticker.anchoredPosition.x - tickerSpeed * Time.deltaTime;
+            if (x <= -loop) x += loop;
+            ticker.anchoredPosition = new Vector2(x, ticker.anchoredPosition.y);
+        }
+
         void Update()
         {
+            ScrollTicker();
+            BobTitle();
+
             var keyboard = Keyboard.current;
             if (keyboard == null) return;
 

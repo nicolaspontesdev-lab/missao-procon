@@ -1,0 +1,631 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6424c77fa0f46d8438be294304db2ea1, type: 3}
+  m_Name: CaseVisualBook
+  m_EditorClassIdentifier: Assembly-CSharp::Procon.CaseVisualBook
+  entries:
+  - caseId: f-sup-1
+    ownerVariant: 0
+    note: 
+    fills:
+    - slotId: etiqueta
+      caption: 'ARROZ
+
+        R$ 8,90'
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: produto-principal
+      caption: ARROZ
+      sprite: {fileID: 21300000, guid: 1e75661dfd6542144957ed4a28a97840, type: 3}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: terminal
+      caption: 'CAIXA
+
+        R$ 11,90'
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: f-sup-2
+    ownerVariant: 1
+    note: 
+    fills:
+    - slotId: produto-principal
+      caption: 
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: caixa
+      caption: RETIRADOS
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: f-sup-3
+    ownerVariant: 2
+    note: 
+    fills:
+    - slotId: produto-principal
+      caption: ARROZ
+      sprite: {fileID: 21300000, guid: 1e75661dfd6542144957ed4a28a97840, type: 3}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: produto-secundario
+      caption: "\xD3LEO"
+      sprite: {fileID: 21300000, guid: 07115971e23644644b2d101bb6634f60, type: 3}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: f-ele-1
+    ownerVariant: 1
+    note: 
+    fills:
+    - slotId: celular
+      caption: "DEFEITO AP\xD3S 5 DIAS"
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: f-ele-2
+    ownerVariant: 2
+    note: 
+    fills:
+    - slotId: fone
+      caption: 
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: documento
+      caption: "COMPRA NA\nLOJA F\xCDSICA"
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: f-ele-3
+    ownerVariant: 0
+    note: 
+    fills:
+    - slotId: notebook
+      caption: 
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: etiqueta
+      caption: "\xC0 VISTA E\nPARCELADO"
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: f-ban-1
+    ownerVariant: 0
+    note: 
+    fills:
+    - slotId: documento
+      caption: "PROPOSTA\nDE CR\xC9DITO"
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: documento-secundario
+      caption: "C\xD3PIA DO\nCLIENTE"
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: f-ban-2
+    ownerVariant: 2
+    note: 
+    fills:
+    - slotId: documento
+      caption: "PROPOSTA\nDE CR\xC9DITO"
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: f-ban-3
+    ownerVariant: 3
+    note: 
+    fills:
+    - slotId: terminal
+      caption: "COBRAN\xC7A"
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: f-onl-1
+    ownerVariant: 1
+    note: 
+    fills:
+    - slotId: caixa
+      caption: "RECEBIDO\nH\xC1 4 DIAS"
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: terminal
+      caption: "PEDIDO DE\nDESIST\xCANCIA"
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: f-onl-2
+    ownerVariant: 0
+    note: 
+    fills:
+    - slotId: caixa
+      caption: DEVOLVIDO
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: terminal
+      caption: 'PRODUTO
+
+        + FRETE'
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: f-onl-3
+    ownerVariant: 2
+    note: 
+    fills:
+    - slotId: celular
+      caption: 64 GB
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: terminal
+      caption: "AN\xDANCIO\n128 GB"
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: f-tel-1
+    ownerVariant: 0
+    note: 
+    fills:
+    - slotId: celular
+      caption: 
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: documento
+      caption: 'FATURA
+
+        PACOTE DE JOGOS'
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: f-tel-2
+    ownerVariant: 1
+    note: 
+    fills:
+    - slotId: celular
+      caption: 
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: documento
+      caption: "MUDAN\xC7A\nDE PLANO"
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: f-tel-3
+    ownerVariant: 2
+    note: 
+    fills:
+    - slotId: terminal
+      caption: 'CANCELAMENTO
+
+        PROTOCOLO'
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: m-sup-1
+    ownerVariant: 0
+    note: 
+    fills:
+    - slotId: etiqueta
+      caption: R$ 5,99
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: produto-principal
+      caption: 
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: terminal
+      caption: 'SISTEMA
+
+        R$ 7,49'
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: m-sup-2
+    ownerVariant: 3
+    note: 
+    fills:
+    - slotId: produto-principal
+      caption: 1 kg
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: balanca
+      caption: 850 g
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: m-sup-3
+    ownerVariant: 1
+    note: 
+    fills:
+    - slotId: cartaz
+      caption: "PROMO\xC7\xC3O\nPER\xCDODO\nPRODUTOS\nLIMITE POR PESSOA\nQUANTIDADE"
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: m-ele-1
+    ownerVariant: 3
+    note: 
+    fills:
+    - slotId: notebook
+      caption: 
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: documento
+      caption: "35 DIAS NA\nASSIST\xCANCIA"
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: m-ele-2
+    ownerVariant: 1
+    note: 
+    fills:
+    - slotId: documento
+      caption: CONTRATO
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: documento-secundario
+      caption: 'GARANTIA
+
+        ESTENDIDA PAGA'
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: m-ele-3
+    ownerVariant: 2
+    note: 
+    fills:
+    - slotId: documento
+      caption: 'GARANTIA ESTENDIDA
+
+        OPCIONAL'
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: m-ban-1
+    ownerVariant: 1
+    note: 
+    fills:
+    - slotId: cartaz
+      caption: 'PROPAGANDA
+
+        PARCELA EM
+
+        DESTAQUE'
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: documento
+      caption: CONTRATO
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: m-ban-2
+    ownerVariant: 0
+    note: 
+    fills:
+    - slotId: documento
+      caption: "ANTECIPA\xC7\xC3O DAS\n\xDALTIMAS PARCELAS"
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: m-ban-3
+    ownerVariant: 2
+    note: 
+    fills:
+    - slotId: documento
+      caption: "EMPR\xC9STIMO"
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: documento-secundario
+      caption: 'SEGURO
+
+        OPCIONAL'
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: m-onl-1
+    ownerVariant: 3
+    note: 
+    fills:
+    - slotId: terminal
+      caption: 'OFERTA
+
+        CONFIRMADA'
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: documento
+      caption: CANCELAMENTO
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: m-onl-2
+    ownerVariant: 1
+    note: 
+    fills:
+    - slotId: caixa
+      caption: DEVOLVIDO
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: cartao
+      caption: VALE-COMPRAS
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: m-onl-3
+    ownerVariant: 0
+    note: 
+    fills:
+    - slotId: caixa
+      caption: "6\xBA DIA"
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: terminal
+      caption: 'ESTORNO
+
+        INTEGRAL'
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: m-tel-1
+    ownerVariant: 3
+    note: 
+    fills:
+    - slotId: celular
+      caption: 
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: documento
+      caption: "CR\xC9DITO DO\nPER\xCDODO SEM USO"
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: m-tel-2
+    ownerVariant: 0
+    note: 
+    fills:
+    - slotId: documento
+      caption: 'FATURA
+
+        PLANO MAIS CARO'
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: m-tel-3
+    ownerVariant: 1
+    note: 
+    fills:
+    - slotId: cartaz
+      caption: "PLANO\nPRE\xC7O \u2022 FRANQUIA\nVELOCIDADE\nFIDELIZA\xC7\xC3O \u2022
+        MULTA"
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: t-sup-1
+    ownerVariant: 2
+    note: 
+    fills:
+    - slotId: produto-principal
+      caption: 
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: produto-secundario
+      caption: 
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: etiqueta
+      caption: "PRE\xC7O TOTAL"
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: t-sup-2
+    ownerVariant: 3
+    note: 
+    fills:
+    - slotId: produto-principal
+      caption: 
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: balanca
+      caption: 
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: t-sup-3
+    ownerVariant: 0
+    note: 
+    fills:
+    - slotId: etiqueta
+      caption: "PRE\xC7O ANUNCIADO"
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: produto-principal
+      caption: 
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: terminal
+      caption: CORRIGIDO
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: t-ele-1
+    ownerVariant: 0
+    note: 
+    fills:
+    - slotId: produto-principal
+      caption: 
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: documento
+      caption: 'DEFEITO
+
+        MESES DEPOIS'
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: t-ele-2
+    ownerVariant: 3
+    note: 
+    fills:
+    - slotId: documento
+      caption: 'TERMO SEPARADO
+
+        45 DIAS'
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: t-ele-3
+    ownerVariant: 1
+    note: 
+    fills:
+    - slotId: produto-principal
+      caption: 
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: documento
+      caption: 'ESPERA DE
+
+        30 DIAS'
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: t-ban-1
+    ownerVariant: 3
+    note: 
+    fills:
+    - slotId: documento
+      caption: 'MULTA DE
+
+        MORA 2%'
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: t-ban-2
+    ownerVariant: 1
+    note: 
+    fills:
+    - slotId: documento
+      caption: "C\xC1LCULO DA\nQUITA\xC7\xC3O"
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: t-ban-3
+    ownerVariant: 0
+    note: 
+    fills:
+    - slotId: documento
+      caption: "AVALIA\xC7\xC3O\nDE CR\xC9DITO"
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: t-onl-1
+    ownerVariant: 2
+    note: 
+    fills:
+    - slotId: caixa
+      caption: DEVOLVIDO
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: terminal
+      caption: 'PRODUTO
+
+        FRETE DE IDA'
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: t-onl-2
+    ownerVariant: 3
+    note: 
+    fills:
+    - slotId: documento
+      caption: 'OFERTA
+
+        ACEITA'
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: t-onl-3
+    ownerVariant: 1
+    note: 
+    fills:
+    - slotId: documento
+      caption: PEDIDO
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: documento-secundario
+      caption: "CR\xC9DITO\nCONEXO"
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: t-tel-1
+    ownerVariant: 2
+    note: 
+    fills:
+    - slotId: documento
+      caption: CONTRATO
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: t-tel-2
+    ownerVariant: 3
+    note: 
+    fills:
+    - slotId: documento
+      caption: "COBRAN\xC7A\nRECALCULADA"
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: terminal
+      caption: PROTOCOLO
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+  - caseId: t-tel-3
+    ownerVariant: 0
+    note: 
+    fills:
+    - slotId: documento
+      caption: CONTRATO
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0
+    - slotId: documento-secundario
+      caption: "C\xD3PIA DO\nCLIENTE"
+      sprite: {fileID: 0}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      overrideTint: 0

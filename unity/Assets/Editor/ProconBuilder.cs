@@ -19,20 +19,84 @@ namespace Procon.EditorTools
     {
         const string JsonPath = "Assets/Editor/procon-cases.json";
         const string DatabasePath = "Assets/Data/CaseDatabase.asset";
+        const string VisualBookPath = "Assets/Data/CaseVisualBook.asset";
         const string MenuScenePath = "Assets/Scenes/00_Menu.unity";
         const string GameScenePath = "Assets/Scenes/01_Jogo.unity";
+
+        /// <summary>
+        /// Avisa antes de reconstruir as cenas. Os palcos sao montados por codigo,
+        /// entao regerar os recria iguais; o que se perde e edicao feita a mao
+        /// dentro da cena.
+        /// </summary>
+        static bool ConfirmSceneRebuild()
+        {
+            return EditorUtility.DisplayDialog(
+                "Regerar as cenas do Missao PROCON",
+                "As cenas 00_Menu e 01_Jogo serao construidas do zero.\n\n" +
+                "RECRIADO pelo codigo, identico: palcos, personagens, objetos, interface.\n\n" +
+                "NAO E TOCADO: os 45 casos, o procon-cases.json e o CaseVisualBook.\n\n" +
+                "PERDIDO: qualquer edicao feita a mao dentro das cenas.",
+                "Regerar", "Cancelar");
+        }
 
         [MenuItem("Missao PROCON/Gerar tudo (dados + cenas)", false, 0)]
         public static void BuildEverything()
         {
+            if (!ConfirmSceneRebuild()) return;
+            Regenerate();
+        }
+
+        /// <summary>
+        /// Regera tudo sem perguntar. Fica fora do menu de proposito: e o caminho
+        /// da automacao, nao o que se clica por engano.
+        /// </summary>
+        public static void Regenerate()
+        {
             var database = ImportCases();
             if (database == null) return;
-            BuildGameScene(database);
+            var visualBook = EnsureVisualBook(database);
+
+            BuildGameScene(database, visualBook);
             BuildMenuScene(database);
             RegisterScenes();
             ConfigurePlayer();
             EditorSceneManager.OpenScene(MenuScenePath);
             Debug.Log("Missao PROCON: dados e cenas gerados.");
+        }
+
+        /// <summary>
+        /// Garante o caderno visual. Cria se nao existir e acrescenta apenas os
+        /// casos que ainda nao tem entrada. Nunca apaga nem sobrescreve o que ja
+        /// foi configurado.
+        /// </summary>
+        static CaseVisualBook EnsureVisualBook(CaseDatabase database)
+        {
+            Directory.CreateDirectory("Assets/Data");
+            var book = AssetDatabase.LoadAssetAtPath<CaseVisualBook>(VisualBookPath);
+            if (book == null)
+            {
+                book = ScriptableObject.CreateInstance<CaseVisualBook>();
+                AssetDatabase.CreateAsset(book, VisualBookPath);
+            }
+
+            var added = 0;
+            foreach (var item in database.cases)
+            {
+                if (item == null || string.IsNullOrEmpty(item.id)) continue;
+                if (book.Has(item.id)) continue;
+                book.entries.Add(new CaseVisual { caseId = item.id });
+                added++;
+            }
+
+            if (added > 0)
+            {
+                EditorUtility.SetDirty(book);
+                AssetDatabase.SaveAssets();
+                Debug.Log("Missao PROCON: " + added + " caso(s) entraram no caderno visual; " +
+                          (book.entries.Count - added) + " ja configurado(s) foram preservados.");
+            }
+
+            return book;
         }
 
         [MenuItem("Missao PROCON/1 - Importar casos do JSON", false, 20)]
@@ -113,7 +177,9 @@ namespace Procon.EditorTools
                 Debug.LogError("Importe os casos antes de gerar as cenas.");
                 return;
             }
-            BuildGameScene(database);
+            if (!ConfirmSceneRebuild()) return;
+
+            BuildGameScene(database, EnsureVisualBook(database));
             BuildMenuScene(database);
             RegisterScenes();
             EditorSceneManager.OpenScene(MenuScenePath);
@@ -258,13 +324,14 @@ namespace Procon.EditorTools
 
         // ================================================================== cena do jogo
 
-        static void BuildGameScene(CaseDatabase database)
+        static void BuildGameScene(CaseDatabase database, CaseVisualBook visualBook)
         {
             var frame = NewScene("Cabinet");
 
             var controllerNode = new GameObject("GameController");
             var controller = controllerNode.AddComponent<GameController>();
             controller.database = database;
+            controller.visualBook = visualBook;
             controller.menuSceneName = "00_Menu";
 
             // ---- topo
@@ -335,7 +402,7 @@ namespace Procon.EditorTools
             var column = UiKit.Node("SceneColumn", parent);
             var columnRect = UiKit.Rect(column);
             columnRect.anchorMin = Vector2.zero;
-            columnRect.anchorMax = new Vector2(0.40f, 1f);
+            columnRect.anchorMax = new Vector2(0.50f, 1f);
             columnRect.offsetMin = Vector2.zero;
             columnRect.offsetMax = Vector2.zero;
 
@@ -346,73 +413,25 @@ namespace Procon.EditorTools
             controller.locationSubtitle = UiKit.Label("LocationSubtitle", header.transform, "SUBTÍTULO", 19, Palette.Cyan, TextAlignmentOptions.Left);
             UiKit.Frac(UiKit.Rect(controller.locationSubtitle.gameObject), 0.04f, 0.06f, 0.98f, 0.46f);
 
-            var box = UiKit.Panel("SceneBox", column.transform, Palette.Ink);
+            var box = UiKit.Panel("SceneBox", column.transform, Palette.Shadow);
             var boxRect = UiKit.Rect(box.gameObject);
             boxRect.anchorMin = Vector2.zero;
             boxRect.anchorMax = Vector2.one;
             boxRect.offsetMin = new Vector2(0f, 56f);
             boxRect.offsetMax = new Vector2(0f, -96f);
 
-            controller.sceneWall = UiKit.Panel("Wall", box.transform, Palette.Ink2);
-            UiKit.Frac(UiKit.Rect(controller.sceneWall.gameObject), 0f, 0.34f, 1f, 1f);
-
-            controller.sceneFloor = UiKit.Panel("Floor", box.transform, Palette.Shadow);
-            UiKit.Frac(UiKit.Rect(controller.sceneFloor.gameObject), 0f, 0f, 1f, 0.34f);
-
-            var props = new Image[5];
-            for (var i = 0; i < props.Length; i++)
-            {
-                props[i] = UiKit.Panel("Prop" + (i + 1), box.transform, Palette.Ink2);
-                var x = 0.05f + i * 0.19f;
-                UiKit.Frac(UiKit.Rect(props[i].gameObject), x, 0.58f, x + 0.14f, 0.84f);
-            }
-            controller.sceneProps = props;
-
-            controller.inspectorBody = BuildFigure(box.transform, "Inspector", 0.09f, 0.35f, Palette.Blue, "FISCAL");
-            controller.ownerBody = BuildFigure(box.transform, "Owner", 0.62f, 0.88f, Palette.Green, "RESPONSÁVEL");
-
-            controller.speechPing = UiKit.Label("SpeechPing", box.transform, "?", 46, Palette.Yellow, TextAlignmentOptions.Center);
-            UiKit.Frac(UiKit.Rect(controller.speechPing.gameObject), 0.64f, 0.66f, 0.96f, 0.90f);
-
-            controller.decorLabel = UiKit.Label("DecorLabel", box.transform, "CENÁRIO", 16, Palette.Alpha(Palette.White, 0.55f), TextAlignmentOptions.Center);
-            UiKit.Frac(UiKit.Rect(controller.decorLabel.gameObject), 0f, 0.01f, 1f, 0.09f);
+            // cinco palcos com a arte extraida do HTML; so o do caso atual fica ligado
+            controller.stages = StageArt.BuildAll(box.transform, controller.database).ToArray();
 
             controller.visitLine = UiKit.Label("VisitLine", column.transform, "VISITA 1 DE 5", 20, Palette.Cyan, TextAlignmentOptions.Center);
             UiKit.BottomBand(UiKit.Rect(controller.visitLine.gameObject), 8, 44);
-        }
-
-        /// <summary>Boneco de blocagem: cabeca, tronco e dois bracos.</summary>
-        static Image BuildFigure(Transform parent, string name, float xMin, float xMax, Color color, string caption)
-        {
-            var group = UiKit.Node(name, parent);
-            UiKit.Frac(UiKit.Rect(group), xMin, 0.05f, xMax, 0.66f);
-
-            var head = UiKit.Panel("Head", group.transform, Palette.Paper);
-            UiKit.Frac(UiKit.Rect(head.gameObject), 0.28f, 0.74f, 0.72f, 1f);
-
-            var torso = UiKit.Panel("Torso", group.transform, color);
-            UiKit.Frac(UiKit.Rect(torso.gameObject), 0.16f, 0.22f, 0.84f, 0.72f);
-
-            var armLeft = UiKit.Panel("ArmLeft", group.transform, Palette.Mix(Palette.Ink2, Palette.Shadow, 0.45f));
-            UiKit.Frac(UiKit.Rect(armLeft.gameObject), 0.02f, 0.30f, 0.16f, 0.66f);
-
-            var armRight = UiKit.Panel("ArmRight", group.transform, Palette.Mix(Palette.Ink2, Palette.Shadow, 0.45f));
-            UiKit.Frac(UiKit.Rect(armRight.gameObject), 0.84f, 0.30f, 0.98f, 0.66f);
-
-            var legs = UiKit.Panel("Legs", group.transform, Palette.Mix(Palette.Ink2, Palette.Shadow, 0.7f));
-            UiKit.Frac(UiKit.Rect(legs.gameObject), 0.24f, 0.02f, 0.76f, 0.22f);
-
-            var label = UiKit.Label("Caption", group.transform, caption, 14, Palette.Alpha(Palette.White, 0.5f), TextAlignmentOptions.Center);
-            UiKit.Frac(UiKit.Rect(label.gameObject), -0.15f, -0.14f, 1.15f, 0.02f);
-
-            return torso;
         }
 
         static void BuildDialogColumn(Transform parent, GameController controller)
         {
             var column = UiKit.Node("DialogColumn", parent);
             var columnRect = UiKit.Rect(column);
-            columnRect.anchorMin = new Vector2(0.41f, 0f);
+            columnRect.anchorMin = new Vector2(0.51f, 0f);
             columnRect.anchorMax = Vector2.one;
             columnRect.offsetMin = Vector2.zero;
             columnRect.offsetMax = Vector2.zero;
@@ -587,8 +606,47 @@ namespace Procon.EditorTools
             controller.database = database;
             controller.gameSceneName = "01_Jogo";
 
+            // ---- fundo: a fachada do PROCON, a mesma arte da tela inicial do HTML
+            var cover = UiKit.Panel("Fachada", frame, Color.white);
+            cover.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Menu/menu-procon.png");
+            cover.raycastTarget = false;
+            UiKit.Full(UiKit.Rect(cover.gameObject));
+            if (cover.sprite != null)
+            {
+                var coverFit = cover.gameObject.AddComponent<AspectRatioFitter>();
+                coverFit.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+                coverFit.aspectRatio = cover.sprite.rect.width / cover.sprite.rect.height;
+            }
+            frame.gameObject.AddComponent<RectMask2D>();     // a fachada nao vaza da moldura
+            var shade = UiKit.Panel("Escurecer", frame, Palette.Alpha(Palette.Shadow, 0.55f));
+            shade.raycastTarget = false;
+            UiKit.Full(UiKit.Rect(shade.gameObject));
+
+            // ---- faixa de texto correndo no topo (ticker do HTML)
+            var tickerBand = UiKit.Panel("Ticker", frame, Palette.Alpha(Palette.Shadow, 0.85f));
+            UiKit.TopBand(UiKit.Rect(tickerBand.gameObject), 0, 38);
+            tickerBand.gameObject.AddComponent<RectMask2D>();
+            var phrase = "ORIENTAR • INFORMAR • PROTEGER • EQUILIBRAR AS RELAÇÕES DE CONSUMO • ";
+            var tickerText = UiKit.Label("TickerTexto", tickerBand.transform, phrase + phrase + phrase + phrase,
+                                         17, Palette.Cyan, TextAlignmentOptions.Left);
+            tickerText.fontStyle = FontStyles.Bold;
+            var tickerRect = tickerText.rectTransform;
+            tickerRect.anchorMin = new Vector2(0f, 0f);
+            tickerRect.anchorMax = new Vector2(0f, 1f);
+            tickerRect.pivot = new Vector2(0f, 0.5f);
+            tickerRect.anchoredPosition = Vector2.zero;
+            var tickerFit = tickerText.gameObject.AddComponent<ContentSizeFitter>();
+            tickerFit.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+            controller.ticker = tickerRect;
+
+            // placa escura atras do titulo: sem ela o subtitulo some no ceu da fachada
+            var titlePlate = UiKit.Panel("PlacaTitulo", frame, Palette.Alpha(Palette.Shadow, 0.8f));
+            titlePlate.raycastTarget = false;
+            UiKit.TopBand(UiKit.Rect(titlePlate.gameObject), 50, 172, 380, 380);
+
             var title = UiKit.Label("Title", frame, "MISSÃO PROCON", 86, Palette.Yellow, TextAlignmentOptions.Center);
             UiKit.TopBand(UiKit.Rect(title.gameObject), 56, 110);
+            controller.title = (RectTransform)title.transform;
 
             var subtitle = UiKit.Label("Subtitle", frame, "FISCALIZAÇÃO DO CONSUMIDOR • CÓDIGO DE DEFESA DO CONSUMIDOR", 26, Palette.Cyan, TextAlignmentOptions.Center);
             UiKit.TopBand(UiKit.Rect(subtitle.gameObject), 168, 44);
@@ -599,7 +657,7 @@ namespace Procon.EditorTools
             controller.titlePanel = titlePanel;
 
             var menuList = UiKit.Node("Options", titlePanel.transform);
-            UiKit.Centered(UiKit.Rect(menuList), 560, 420);
+            UiKit.Centered(UiKit.Rect(menuList), 560, 420, -110f);   // abaixo do letreiro da fachada
             UiKit.VList(menuList, 16, 0);
 
             controller.playButton = MenuButton(menuList.transform, "JOGAR", Palette.Blue, Palette.White);
@@ -671,10 +729,6 @@ namespace Procon.EditorTools
             var audioRow = UiKit.Node("AudioRow", frame);
             UiKit.BottomBand(UiKit.Rect(audioRow), 20, 62, 40, 40);
             UiKit.HList(audioRow, 14, 0);
-
-            var music = UiKit.Button("MusicButton", audioRow.transform, "MÚSICA: LIGADA", Palette.Mix(Palette.Ink, Palette.Shadow, 0.25f), Palette.Cyan, 20);
-            controller.musicButton = music.button;
-            controller.musicLabel = music.label;
 
             var sfx = UiKit.Button("SfxButton", audioRow.transform, "EFEITOS: LIGADOS", Palette.Mix(Palette.Ink, Palette.Shadow, 0.25f), Palette.Cyan, 20);
             controller.sfxButton = sfx.button;

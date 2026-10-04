@@ -41,14 +41,11 @@ namespace Procon
         public RectTransform routeBar;
         public TMP_Text routeStopTemplate;
 
-        [Header("Cena (blocagem)")]
-        public Image sceneWall;
-        public Image sceneFloor;
-        public Image[] sceneProps;
-        public Image ownerBody;
-        public Image inspectorBody;
-        public TMP_Text speechPing;
-        public TMP_Text decorLabel;
+        [Header("Cena")]
+        [Tooltip("Um palco por ambiente. Só o do caso atual fica ligado.")]
+        public StageView[] stages;
+        [Tooltip("Configuração visual de cada caso. Vazio = palco sem objetos.")]
+        public CaseVisualBook visualBook;
         public TMP_Text locationName;
         public TMP_Text locationSubtitle;
         public TMP_Text visitLine;
@@ -115,6 +112,7 @@ namespace Procon
         readonly List<ProconCase> missed = new List<ProconCase>();
         readonly HashSet<int> collectedClues = new HashSet<int>();
         readonly List<GameObject> spawned = new List<GameObject>();
+        StageView currentStage;
 
         ProconCase Current => round != null && index >= 0 && index < round.Total ? round.cases[index] : null;
 
@@ -128,7 +126,6 @@ namespace Procon
             }
 
             GameSession.LoadPreferences();
-            ChiptuneAudio.Instance.PlayMusic();
 
             if (routeStopTemplate != null) routeStopTemplate.gameObject.SetActive(false);
             if (reviewItemTemplate != null) reviewItemTemplate.gameObject.SetActive(false);
@@ -208,6 +205,7 @@ namespace Procon
 
             if (finalPanel != null) finalPanel.SetActive(false);
             if (reviewPanel != null) reviewPanel.SetActive(false);
+            ShowScore(0);
 
             BuildRouteBar();
             RenderCase();
@@ -266,26 +264,25 @@ namespace Procon
             SetText(levelBadge, level.label);
             SetText(locationBadge, scenario.label);
             SetText(caseCounter, (index + 1) + "/" + round.Total);
-            SetText(scoreValue, score.ToString("0000"));
+            ShowScore(score);
             SetText(correctValue, correct.ToString());
             SetText(wrongValue, wrong.ToString());
             SetText(comboBadge, "COMBO x" + combo);
             if (comboBadge != null) comboBadge.color = combo >= 2 ? Palette.Yellow : Palette.Alpha(Palette.White, 0.35f);
             if (progressFill != null)
-                progressFill.anchorMax = new Vector2((float)(index + 1) / round.Total, 1f);
+                SlideProgress((float)(index + 1) / round.Total);
 
             PaintRouteBar(stopIndex);
 
             SetText(locationName, scenario.label);
             SetText(locationSubtitle, scenario.subtitle);
-            SetText(decorLabel, scenario.decor);
             SetText(visitLine, "VISITA " + (stopIndex + 1) + " DE " + round.StopCount);
-            PaintScene(scenario);
+            ShowStage(current, scenario);
 
             SetText(caseTag, scenario.label + " • CASO " + (positionInStop + 1) + "/" + stopSize);
             SetText(speakerLabel, "RESPOSTA DO RESPONSÁVEL • " + current.owner);
             SetText(questionText, current.text);
-            SetText(speechPing, "?");
+            if (currentStage != null) currentStage.SetSpeech("?");
 
             var showHint = level.showHints && !string.IsNullOrWhiteSpace(current.hint);
             if (hintText != null)
@@ -300,24 +297,37 @@ namespace Procon
 
             RenderInvestigation(current);
 
-            if (isNewVisit) ChiptuneAudio.Instance.Play("arrival");
+            if (isNewVisit)
+            {
+                ChiptuneAudio.Instance.Play("arrival");
+                if (currentStage != null) currentStage.PlayArrival(stopIndex + 1, round.StopCount, scenario.label);
+            }
             ScrollDialogToTop();
+            DialogIn();
         }
 
-        void PaintScene(ScenarioDef scenario)
+        /// <summary>
+        /// Liga o palco do ambiente do caso e desliga os outros. O palco é sempre
+        /// limpo antes de receber a configuração, para que preço, peso ou prazo de
+        /// um caso nunca sobrem na tela do caso seguinte.
+        /// </summary>
+        void ShowStage(ProconCase current, ScenarioDef scenario)
         {
-            if (sceneWall != null) sceneWall.color = Palette.Mix(Palette.Ink2, scenario.tint, 0.22f);
-            if (sceneFloor != null) sceneFloor.color = Palette.Mix(Palette.Ink, scenario.tint, 0.12f);
-            if (ownerBody != null) ownerBody.color = scenario.tint;
-            if (inspectorBody != null) inspectorBody.color = Palette.Blue;
+            currentStage = null;
+            if (stages == null) return;
 
-            if (sceneProps == null) return;
-            for (var i = 0; i < sceneProps.Length; i++)
+            foreach (var stage in stages)
             {
-                if (sceneProps[i] == null) continue;
-                var t = sceneProps.Length <= 1 ? 0f : (float)i / (sceneProps.Length - 1);
-                sceneProps[i].color = Palette.Mix(scenario.tint, Palette.Shadow, 0.20f + t * 0.35f);
+                if (stage == null) continue;
+                var isActive = stage.scenario == current.scenario;
+                stage.gameObject.SetActive(isActive);
+                if (isActive) currentStage = stage;
             }
+
+            if (currentStage == null) return;
+
+            currentStage.Clear();
+            currentStage.Apply(visualBook != null ? visualBook.For(current.id) : null);
         }
 
         void RenderInvestigation(ProconCase current)
@@ -376,7 +386,12 @@ namespace Procon
             if (slot == null) return;
 
             var isNew = collectedClues.Add(clueIndex);
-            if (slot.card != null) slot.card.SetActive(true);
+            if (slot.card != null)
+            {
+                slot.card.SetActive(true);
+                if (isNew) CardIn(slot.card);
+            }
+            if (isNew && slot.button != null) Stamp((RectTransform)slot.button.transform);
             if (slot.hotkey != null) slot.hotkey.text = "TECLA " + (clueIndex + 1) + " • CONFERIDO";
             if (slot.icon != null) slot.icon.color = Palette.Green;
 
@@ -447,22 +462,33 @@ namespace Procon
                 missed.Add(current);
             }
 
-            SetText(feedbackTitle, isCorrect ? "✓ CORRETO!" : "✕ NÃO FOI DESSA VEZ");
+            // sem simbolo: a fonte do jogo nao tem o check e mostrava um quadrado
+            SetText(feedbackTitle, isCorrect ? "CORRETO!" : "NÃO FOI DESSA VEZ");
             SetText(feedbackPoints, "+" + earned + " PONTOS");
             SetText(feedbackText, current.explanation);
             SetText(feedbackReference, "BASE EDUCATIVA: " + current.legalReference);
             if (feedbackTitle != null) feedbackTitle.color = isCorrect ? Palette.Green : Palette.Red;
             if (feedbackStripe != null) feedbackStripe.color = isCorrect ? Palette.GreenDark : Palette.RedDark;
-            if (feedbackPanel != null) feedbackPanel.SetActive(true);
+            if (feedbackPanel != null)
+            {
+                feedbackPanel.SetActive(true);
+                FadeIn(feedbackPanel);
+            }
+            AnimateAnswerButtons(current.isViolation, playerSaysViolation, isCorrect);
 
-            SetText(speechPing, isCorrect ? "!" : "...");
-            if (ownerBody != null) ownerBody.color = isCorrect ? Palette.Green : Palette.Red;
+            if (currentStage != null)
+            {
+                currentStage.SetSpeech(isCorrect ? "!" : "...");
+                currentStage.React(isCorrect);
+                if (isCorrect) currentStage.FloatScore("+" + earned);
+            }
 
-            SetText(scoreValue, score.ToString("0000"));
+            RollScore(score);
             SetText(correctValue, correct.ToString());
             SetText(wrongValue, wrong.ToString());
             SetText(comboBadge, "COMBO x" + combo);
             if (comboBadge != null) comboBadge.color = combo >= 2 ? Palette.Yellow : Palette.Alpha(Palette.White, 0.35f);
+            if (isCorrect && combo >= 2) ComboPop();
 
             SetInstruction("RESPOSTA REGISTRADA • CONFIRA A EXPLICAÇÃO");
 
@@ -529,6 +555,8 @@ namespace Procon
 
             if (finalPanel != null) finalPanel.SetActive(true);
             ChiptuneAudio.Instance.Play("finish");
+            MedalPop();
+            Confetti();
         }
 
         void RenderReview()
@@ -631,6 +659,169 @@ namespace Procon
             if (dialogScroll == null) return;
             Canvas.ForceUpdateCanvases();
             dialogScroll.verticalNormalizedPosition = 1f;
+        }
+
+        // ------------------------------------------------------------------ animacoes da interface
+        // Todas portadas do CSS do jogo em HTML, com o mesmo tempo e em degraus.
+
+        Coroutine rolling;
+        Coroutine sliding;
+        int shownScore;
+
+        void ShowScore(int value)
+        {
+            if (rolling != null) StopCoroutine(rolling);
+            rolling = null;
+            shownScore = value;
+            SetText(scoreValue, value.ToString("0000"));
+        }
+
+        /// <summary>Placar contando ate o valor novo, como num fliperama.</summary>
+        void RollScore(int target)
+        {
+            if (rolling != null) StopCoroutine(rolling);
+            var from = shownScore;
+            rolling = StartCoroutine(PixelMotion.Steps(0.5f, 10, t =>
+            {
+                shownScore = Mathf.RoundToInt(Mathf.Lerp(from, target, t));
+                SetText(scoreValue, shownScore.ToString("0000"));
+            }));
+            if (scoreValue != null)
+            {
+                var rect = scoreValue.rectTransform;
+                StartCoroutine(PixelMotion.Steps(0.3f, 4, t =>
+                    rect.localScale = Vector3.one * Mathf.Lerp(1f, 1.2f, PixelMotion.Bounce(t))));
+            }
+        }
+
+        /// <summary>Barra de progresso andando ate o caso atual.</summary>
+        void SlideProgress(float target)
+        {
+            if (progressFill == null) return;
+            if (sliding != null) StopCoroutine(sliding);
+            var from = progressFill.anchorMax.x;
+            if (target < from) from = 0f;   // rodada nova: comeca do zero
+            sliding = StartCoroutine(PixelMotion.Steps(0.35f, 5, t =>
+                progressFill.anchorMax = new Vector2(Mathf.Lerp(from, target, t), 1f)));
+        }
+
+        /// <summary>Ficha de evidencia abrindo: aparece crescendo (como o dialog-in do HTML).</summary>
+        void CardIn(GameObject card)
+        {
+            var rect = (RectTransform)card.transform;
+            var group = card.GetComponent<CanvasGroup>();
+            if (group == null) group = card.AddComponent<CanvasGroup>();
+            StartCoroutine(PixelMotion.Steps(0.24f, 4, t =>
+            {
+                rect.localScale = new Vector3(1f, Mathf.Lerp(0.2f, 1f, t), 1f);
+                group.alpha = t;
+            }));
+        }
+
+        /// <summary>Botao da pista examinada: carimbo, afunda e volta.</summary>
+        void Stamp(RectTransform rect)
+        {
+            var path = new[] { 1f, 0.9f, 1.06f, 1f };
+            StartCoroutine(PixelMotion.Steps(0.24f, 3, t =>
+                rect.localScale = Vector3.one * path[Mathf.RoundToInt(t * 3f)]));
+        }
+
+        /// <summary>Caixa de dialogo abrindo de cima para baixo (dialog-in).</summary>
+        void DialogIn()
+        {
+            if (dialogScroll == null) return;
+            var rect = (RectTransform)dialogScroll.transform;
+            StartCoroutine(PixelMotion.Steps(0.24f, 4, t =>
+                rect.localScale = new Vector3(1f, Mathf.Lerp(0.06f, 1f, t), 1f)));
+        }
+
+        /// <summary>Painel aparecendo (feedback-in).</summary>
+        void FadeIn(GameObject panel)
+        {
+            var group = panel.GetComponent<CanvasGroup>();
+            if (group == null) group = panel.AddComponent<CanvasGroup>();
+            StartCoroutine(PixelMotion.Steps(0.3f, 4, t => group.alpha = t));
+        }
+
+        /// <summary>O selo do combo saltando (combo-pop).</summary>
+        void ComboPop()
+        {
+            if (comboBadge == null) return;
+            var rect = comboBadge.rectTransform;
+            StartCoroutine(PixelMotion.Steps(0.4f, 5, t =>
+            {
+                var scale = t < 0.7f ? Mathf.Lerp(0f, 1.18f, t / 0.7f) : Mathf.Lerp(1.18f, 1f, (t - 0.7f) / 0.3f);
+                rect.localScale = Vector3.one * scale;
+                rect.localEulerAngles = new Vector3(0f, 0f, t < 0.7f ? Mathf.Lerp(-8f, 3f, t / 0.7f) : Mathf.Lerp(3f, 0f, (t - 0.7f) / 0.3f));
+            }));
+        }
+
+        /// <summary>
+        /// O botao da resposta certa pulsa (selected-correct); se o jogador errou,
+        /// o botao que ele escolheu treme (shake).
+        /// </summary>
+        void AnimateAnswerButtons(bool correctAnswer, bool playerAnswer, bool isCorrect)
+        {
+            var right = correctAnswer ? violationButton : lawfulButton;
+            if (right != null)
+            {
+                var rect = (RectTransform)right.transform;
+                StartCoroutine(PixelMotion.Steps(0.5f, 4, t =>
+                    rect.localScale = Vector3.one * (1f + 0.035f * PixelMotion.Bounce(t))));
+            }
+
+            if (isCorrect) return;
+            var chosen = playerAnswer ? violationButton : lawfulButton;
+            if (chosen == null) return;
+            var label = chosen.transform.childCount > 0 ? (RectTransform)chosen.transform.GetChild(0) : null;
+            if (label == null) return;
+            var start = label.anchoredPosition;
+            var offsets = new[] { 0f, -8f, 8f, -5f, 0f };
+            StartCoroutine(PixelMotion.Steps(0.4f, 4, t =>
+                label.anchoredPosition = start + new Vector2(offsets[Mathf.RoundToInt(t * 4f)], 0f)));
+        }
+
+        /// <summary>A patente final aparece girando (medal-pop).</summary>
+        void MedalPop()
+        {
+            if (rankLabel == null) return;
+            var rect = rankLabel.rectTransform;
+            StartCoroutine(PixelMotion.Steps(0.5f, 5, t =>
+            {
+                rect.localScale = Vector3.one * t;
+                rect.localEulerAngles = new Vector3(0f, 0f, Mathf.Lerp(-20f, 0f, t));
+            }));
+        }
+
+        /// <summary>Confete caindo na tela final (confetti-fall), 42 pedacos como no HTML.</summary>
+        void Confetti()
+        {
+            if (finalPanel == null) return;
+            var area = (RectTransform)finalPanel.transform;
+            var colors = new[] { Palette.Yellow, Palette.Cyan, Palette.Red, Palette.Green, Palette.Blue };
+            var height = area.rect.height;
+            for (var i = 0; i < 42; i++)
+            {
+                var piece = new GameObject("Confete", typeof(RectTransform), typeof(Image));
+                var rect = (RectTransform)piece.transform;
+                rect.SetParent(area, false);
+                rect.anchorMin = rect.anchorMax = new Vector2(Random.value, 1f);
+                rect.pivot = new Vector2(0.5f, 0.5f);
+                rect.sizeDelta = new Vector2(12f, 18f);
+                var image = piece.GetComponent<Image>();
+                image.color = colors[i % colors.Length];
+                image.raycastTarget = false;
+                rect.anchoredPosition = new Vector2(0f, 20f);
+
+                var duration = 2.2f + Random.value * 1.5f;
+                var delay = Random.value * 2.2f;
+                StartCoroutine(PixelMotion.Steps(duration, 24, t =>
+                {
+                    rect.anchoredPosition = new Vector2(0f, 20f - (height + 60f) * t);
+                    rect.localEulerAngles = new Vector3(0f, 0f, 270f * t);
+                    if (t >= 1f) Destroy(piece);
+                }, delay));
+            }
         }
 
         static void SetText(TMP_Text target, string value)

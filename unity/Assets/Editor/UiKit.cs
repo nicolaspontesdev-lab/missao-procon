@@ -71,6 +71,14 @@ namespace Procon.EditorTools
                 fadeDuration = 0.08f
             };
 
+            // contorno escuro e sombra dura de 6px, como os botoes do jogo em HTML
+            var outline = node.AddComponent<Outline>();
+            outline.effectColor = Palette.Shadow;
+            outline.effectDistance = new Vector2(3f, -3f);
+            var shadow = node.AddComponent<Shadow>();
+            shadow.effectColor = Palette.Alpha(Palette.Shadow, 0.9f);
+            shadow.effectDistance = new Vector2(6f, -6f);
+
             var label = Label(name + "Label", node.transform, text, size, foreground, TextAlignmentOptions.Center);
             Stretch(Rect(label.gameObject), 12, 6, 12, 6);
 
