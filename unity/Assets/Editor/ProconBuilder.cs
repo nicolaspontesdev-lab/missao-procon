@@ -426,6 +426,11 @@ namespace Procon.EditorTools
             line.raycastTarget = false;
             Box(line.rectTransform, 44, 80, 1192, 3);
 
+            // aspas grandes e apagadas na margem: a fala do responsavel e uma citacao
+            var quote = Text("Aspas", screen, "“", 120, new Color(1f, 0.8f, 0.28f, 0.35f), TextAlignmentOptions.TopLeft, true);
+            Box(quote.rectTransform, 4, 168, 44, 120);
+            quote.overflowMode = TextOverflowModes.Overflow;
+
             // ---- pergunta: uma coluna que se ajusta ao texto (quem fala, pergunta,
             // pista e evidencias do dossie), sem posicoes fixas que se sobreponham
             var column = UiKit.Node("ColunaDaPergunta", screen);
@@ -446,8 +451,22 @@ namespace Procon.EditorTools
             UiKit.FitHeight(evidence);
             controller.clues = new ClueSlot[3];
 
-            controller.instructionText = Text("Instrucao", screen, "HÁ INFRAÇÃO NESTA SITUAÇÃO?", 30, Gold, TextAlignmentOptions.Left, true);
-            Box(controller.instructionText.rectTransform, 44, 652, 580, 46);
+            var banner = UiKit.Panel("FaixaDaInstrucao", screen, Night);
+            banner.raycastTarget = false;
+            ShowSkin.Plate(banner, new Color(0.03f, 0.06f, 0.16f, 0.9f), GoldLine, 2f, false, true);
+            Box(banner.rectTransform, 30, 644, 600, 58);
+            var seal = UiKit.Panel("Selo", banner.transform, Gold);
+            seal.sprite = ShowSkin.DiscSprite;
+            seal.raycastTarget = false;
+            var sealRect = seal.rectTransform;
+            sealRect.anchorMin = sealRect.anchorMax = new Vector2(0f, 0.5f);
+            sealRect.pivot = new Vector2(0f, 0.5f);
+            sealRect.sizeDelta = new Vector2(40f, 40f);
+            sealRect.anchoredPosition = new Vector2(10f, 0f);
+            var mark = Text("Interrogacao", seal.transform, "?", 28, Palette.Ink, TextAlignmentOptions.Center, true);
+            UiKit.Full(mark.rectTransform);
+            controller.instructionText = Text("Instrucao", banner.transform, "HÁ INFRAÇÃO NESTA SITUAÇÃO?", 30, Gold, TextAlignmentOptions.Left, true);
+            UiKit.Stretch(controller.instructionText.rectTransform, 62, 4, 18, 4);
             controller.instructionText.enableWordWrapping = false;
             controller.instructionText.enableAutoSizing = true;
             controller.instructionText.fontSizeMin = 18f;
@@ -571,7 +590,7 @@ namespace Procon.EditorTools
         static UiKit.ButtonParts AnswerButton(Transform parent, string name, string text, string key, Color color)
         {
             var parts = UiKit.Button(name, parent, text, color, Color.white, 36);
-            Pill(parts.background, color, 1.1f);
+            parts.background = ShowSkin.ShowButton(parts.button, color, Gold, 6f, 1.1f);
             parts.label.fontStyle = FontStyles.Bold;
             parts.label.enableWordWrapping = false;
             parts.label.enableAutoSizing = true;
@@ -580,14 +599,18 @@ namespace Procon.EditorTools
             UiKit.Stretch(parts.label.rectTransform, 108, 8, 28, 8);
 
             // tecla num selo redondo a esquerda, como a letra das alternativas
-            var badge = UiKit.Panel("Tecla", parts.root.transform, new Color(0f, 0f, 0f, 0.35f));
+            var badge = UiKit.Panel("Tecla", parts.root.transform, new Color(0.03f, 0.05f, 0.12f, 0.9f));
             badge.sprite = ShowSkin.DiscSprite;
             badge.raycastTarget = false;
             var badgeRect = badge.rectTransform;
             badgeRect.anchorMin = badgeRect.anchorMax = new Vector2(0f, 0.5f);
             badgeRect.pivot = new Vector2(0f, 0.5f);
-            badgeRect.sizeDelta = new Vector2(72f, 72f);
+            badgeRect.sizeDelta = new Vector2(74f, 74f);
             badgeRect.anchoredPosition = new Vector2(20f, 0f);
+            var badgeRing = UiKit.Panel("Anel", badge.transform, Gold);
+            badgeRing.sprite = ShowSkin.RingSprite;
+            badgeRing.raycastTarget = false;
+            UiKit.Full(badgeRing.rectTransform);
             var letter = Text("Letra", badge.transform, key, 36, Gold, TextAlignmentOptions.Center, true);
             UiKit.Full(letter.rectTransform);
             return parts;
@@ -596,7 +619,8 @@ namespace Procon.EditorTools
         static ClueSlot BuildClue(Transform buttonParent, Transform cardParent, int index)
         {
             var parts = UiKit.Button("Clue" + (index + 1), buttonParent, "", NightLight, Color.white, 18);
-            Pill(parts.background, NightLight, 2f);
+            ShowSkin.ShowButton(parts.button, new Color(0.07f, 0.13f, 0.32f), new Color(0.33f, 0.85f, 0.95f), 3f, 1.6f);
+            parts.root.GetComponent<HoverScale>().hover = 1.03f;
             UnityEngine.Object.DestroyImmediate(parts.label.gameObject);
 
             var icon = UiKit.Panel("Icon", parts.root.transform, Palette.Alpha(Palette.Cyan, 0.55f));
@@ -642,7 +666,7 @@ namespace Procon.EditorTools
             rect.anchoredPosition = new Vector2(0f, 30f);
             rect.sizeDelta = new Vector2(0f, rect.sizeDelta.y);
             var list = UiKit.VList(card.gameObject, 10, 26);
-            list.padding = new RectOffset(34, 34, 22, 26);
+            list.padding = new RectOffset(48, 34, 22, 26);
             list.childAlignment = TextAnchor.UpperLeft;
             UiKit.FitHeight(card.gameObject);
             controller.feedbackPanel = card.gameObject;
@@ -650,7 +674,13 @@ namespace Procon.EditorTools
             var stripe = UiKit.Panel("Faixa", card.transform, Palette.GreenDark);
             stripe.raycastTarget = false;
             Pill(stripe, Palette.GreenDark, 8f);
-            UiKit.Height(stripe.gameObject, 6);
+            stripe.gameObject.AddComponent<LayoutElement>().ignoreLayout = true;
+            var stripeRect = stripe.rectTransform;
+            stripeRect.anchorMin = new Vector2(0f, 0f);
+            stripeRect.anchorMax = new Vector2(0f, 1f);
+            stripeRect.pivot = new Vector2(0f, 0.5f);
+            stripeRect.offsetMin = new Vector2(16f, 18f);
+            stripeRect.offsetMax = new Vector2(26f, -18f);
             controller.feedbackStripe = stripe;
 
             // titulo e pontos a esquerda, botao de proxima a direita
@@ -668,7 +698,7 @@ namespace Procon.EditorTools
             UiKit.Height(controller.feedbackPoints.gameObject, 30);
 
             var next = UiKit.Button("NextButton", header.transform, "PRÓXIMA PERGUNTA", Gold, Palette.Ink, 26);
-            Pill(next.background, Gold, 1.3f);
+            ShowSkin.ShowButton(next.button, Gold, new Color(1f, 0.93f, 0.7f), 4f, 1.3f);
             next.label.fontStyle = FontStyles.Bold;
             var nextLayout = next.root.AddComponent<LayoutElement>();
             nextLayout.preferredWidth = 400f;
@@ -718,11 +748,11 @@ namespace Procon.EditorTools
             UiKit.HList(buttons, 20, 0);
             UiKit.Height(buttons, 84);
             var restart = UiKit.Button("RestartButton", buttons.transform, "JOGAR DE NOVO", Gold, Palette.Ink, 28);
-            Pill(restart.background, Gold, 1.3f);
+            ShowSkin.ShowButton(restart.button, Gold, new Color(1f, 0.93f, 0.7f), 4f, 1.3f);
             restart.label.fontStyle = FontStyles.Bold;
             controller.restartButton = restart.button;
             var menu = UiKit.Button("MenuButton", buttons.transform, "VOLTAR AO MENU", NightLight, Color.white, 28);
-            Pill(menu.background, NightLight, 1.3f);
+            ShowSkin.ShowButton(menu.button, new Color(0.08f, 0.2f, 0.5f), Gold, 4f, 1.3f);
             menu.label.fontStyle = FontStyles.Bold;
             controller.menuButton = menu.button;
 

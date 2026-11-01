@@ -219,17 +219,18 @@ namespace Procon.EditorTools
             if (subtitle != null) { subtitle.color = Gold; TextShadow(subtitle); }
 
             MenuButton(m.playButton, Gold, Palette.Ink);
-            MenuButton(m.helpButton, new Color(0.1f, 0.17f, 0.42f, 0.95f), Color.white);
+            MenuButton(m.helpButton, new Color(0.08f, 0.22f, 0.55f), Color.white);
             MenuButton(m.creditsButton, new Color(0.14f, 0.1f, 0.38f, 0.95f), Color.white);
             MenuButton(m.quitButton, new Color(0.55f, 0.1f, 0.2f, 0.95f), Color.white);
             MenuButton(m.startButton, Gold, Palette.Ink);
-            MenuButton(m.backFromLevelButton, new Color(0.1f, 0.17f, 0.42f, 0.95f), Color.white);
-            MenuButton(m.sfxButton, new Color(0.05f, 0.04f, 0.14f, 0.9f), Palette.Cyan);
+            MenuButton(m.backFromLevelButton, new Color(0.08f, 0.22f, 0.55f), Color.white);
+            MenuButton(m.sfxButton, new Color(0.04f, 0.08f, 0.2f), Palette.Cyan);
 
             foreach (var option in m.levelOptions)
             {
                 if (option == null) continue;
                 Plate(option.background, option.background.color, Neon, 1.6f);
+                if (option.button != null) option.button.gameObject.AddComponent<HoverScale>().hover = 1.03f;
                 if (option.title != null) { option.title.fontStyle = FontStyles.Bold; option.title.fontSize = 34; }
             }
             if (m.levelStatus != null) { m.levelStatus.fontStyle = FontStyles.Bold; TextShadow(m.levelStatus, 2f); }
@@ -246,12 +247,65 @@ namespace Procon.EditorTools
                 MenuButton(back, Gold, Palette.Ink);
         }
 
+        /// <summary>
+        /// Botao de programa de perguntas em camadas: sombra suave embaixo, aro
+        /// colorido, face em degrade (clara em cima) e um filete de reflexo no alto.
+        /// Devolve a face, que e a parte que muda de cor (acerto, erro, desligado).
+        /// O fundo original fica transparente, so para receber o clique.
+        /// </summary>
+        public static Image ShowButton(Button button, Color fill, Color rim, float rimWidth = 5f, float corner = 1.1f)
+        {
+            EnsureSprites();
+            foreach (var effect in button.GetComponents<BaseMeshEffect>()) Object.DestroyImmediate(effect);
+            var hit = button.GetComponent<Image>();
+            hit.sprite = pill; hit.type = Image.Type.Sliced; hit.pixelsPerUnitMultiplier = corner;
+            hit.color = Color.clear;
+
+            Image Layer(string name, Color color, float inset, Vector2 shift)
+            {
+                var image = UiKit.Panel(name, button.transform, color);
+                image.sprite = pill; image.type = Image.Type.Sliced; image.pixelsPerUnitMultiplier = corner;
+                image.raycastTarget = false;
+                var rect = image.rectTransform;
+                UiKit.Full(rect);
+                rect.offsetMin = new Vector2(inset, inset) + shift;
+                rect.offsetMax = new Vector2(-inset, -inset) + shift;
+                return image;
+            }
+            fill.a = 1f;   // face opaca: translucida, o aro aparecia atraves dela
+            var shadow = Layer("Sombra", new Color(0f, 0f, 0f, 0.45f), 0f, new Vector2(0f, -7f));
+            var ring = Layer("Aro", rim, 0f, Vector2.zero);
+            var face = Layer("Face", fill, rimWidth, Vector2.zero);
+            var shine = UiKit.Panel("Reflexo", button.transform, new Color(1f, 1f, 1f, 0.35f));
+            shine.raycastTarget = false;
+            var shineRect = shine.rectTransform;
+            shineRect.anchorMin = new Vector2(0f, 1f);
+            shineRect.anchorMax = Vector2.one;
+            shineRect.pivot = new Vector2(0.5f, 1f);
+            shineRect.offsetMin = new Vector2(rimWidth + 26f, -(rimWidth + 6f) - 2f);
+            shineRect.offsetMax = new Vector2(-(rimWidth + 26f), -(rimWidth + 6f));
+            shadow.transform.SetSiblingIndex(0);
+            ring.transform.SetSiblingIndex(1);
+            face.transform.SetSiblingIndex(2);
+            shine.transform.SetSiblingIndex(3);
+            button.targetGraphic = face;
+            // desligado (dossie ainda aberto): so escurece, sem ficar transparente
+            var colors = button.colors;
+            colors.disabledColor = new Color(0.5f, 0.52f, 0.58f, 1f);
+            button.colors = colors;
+            if (button.GetComponent<HoverScale>() == null) button.gameObject.AddComponent<HoverScale>();
+            return face;
+        }
+
+        public static Sprite RingSprite => ring;
+
         static void MenuButton(Button button, Color fill, Color text)
         {
             if (button == null) return;
-            Plate(button.GetComponent<Image>(), fill, new Color(1f, 0.9f, 0.6f), 1.2f, true, true);
+            ShowButton(button, fill, new Color(1f, 0.86f, 0.5f), 4f, 1.2f);
             var label = button.GetComponentInChildren<TMP_Text>();
             if (label != null) { label.color = text; label.fontStyle = FontStyles.Bold; }
+            if (button.GetComponent<HoverScale>() == null) button.gameObject.AddComponent<HoverScale>();
         }
 
     }

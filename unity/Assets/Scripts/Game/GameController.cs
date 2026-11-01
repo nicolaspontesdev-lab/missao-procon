@@ -788,15 +788,47 @@ namespace Procon
         /// <summary>Caixa de dialogo abrindo de cima para baixo (dialog-in).</summary>
         void DialogIn()
         {
-            if (dialogScroll == null) return;
-            var rect = (RectTransform)dialogScroll.transform;
-            StartCoroutine(PixelMotion.Steps(0.24f, 4, t =>
-                rect.localScale = new Vector3(1f, Mathf.Lerp(0.06f, 1f, t), 1f)));
+            if (dialogScroll != null)
+            {
+                var rect = (RectTransform)dialogScroll.transform;
+                StartCoroutine(PixelMotion.Steps(0.24f, 4, t =>
+                    rect.localScale = new Vector3(1f, Mathf.Lerp(0.06f, 1f, t), 1f)));
+                return;
+            }
+            // no telao: a pergunta entra deslizando e os controles sobem de baixo
+            if (questionText != null) StartCoroutine(SlideIn(questionText.transform.parent, new Vector2(-40f, 0f), 0.35f));
+            if (answerRow != null) StartCoroutine(SlideIn(answerRow.transform.parent, new Vector2(0f, -60f), 0.3f));
+        }
+
+        /// <summary>Bloco aparecendo: desliza do deslocamento ate o lugar e vai de transparente a visivel.</summary>
+        System.Collections.IEnumerator SlideIn(Transform target, Vector2 offset, float duration)
+        {
+            var rect = target as RectTransform;
+            if (rect == null) yield break;
+            var group = rect.GetComponent<CanvasGroup>();
+            if (group == null) group = rect.gameObject.AddComponent<CanvasGroup>();
+            var home = rect.anchoredPosition;
+            if (rect.TryGetComponent<SlideHome>(out var memory)) home = memory.home;
+            else rect.gameObject.AddComponent<SlideHome>().home = home;
+            for (var time = 0f; time < duration; time += Time.deltaTime)
+            {
+                var k = 1f - Mathf.Pow(1f - time / duration, 3f);
+                rect.anchoredPosition = home + offset * (1f - k);
+                group.alpha = k;
+                yield return null;
+            }
+            rect.anchoredPosition = home;
+            group.alpha = 1f;
         }
 
         /// <summary>Painel aparecendo (feedback-in).</summary>
         void FadeIn(GameObject panel)
         {
+            if (dialogScroll == null)
+            {
+                StartCoroutine(SlideIn(panel.transform, new Vector2(0f, -50f), 0.3f));
+                return;
+            }
             var group = panel.GetComponent<CanvasGroup>();
             if (group == null) group = panel.AddComponent<CanvasGroup>();
             StartCoroutine(PixelMotion.Steps(0.3f, 4, t => group.alpha = t));
@@ -832,7 +864,8 @@ namespace Procon
             if (isCorrect) return;
             var chosen = playerAnswer ? violationButton : lawfulButton;
             if (chosen == null) return;
-            var label = chosen.transform.childCount > 0 ? (RectTransform)chosen.transform.GetChild(0) : null;
+            var text = chosen.GetComponentInChildren<TMP_Text>();
+            var label = text != null ? text.rectTransform : null;
             if (label == null) return;
             var start = label.anchoredPosition;
             var offsets = new[] { 0f, -8f, 8f, -5f, 0f };
