@@ -15,21 +15,22 @@ MonoBehaviour:
   casesPerScenario: 3
   levels:
   - key: 0
-    label: FUNDAMENTAL II
+    label: "F\xC1CIL"
     basePoints: 100
     showHints: 1
-    description: "Situa\xE7\xF5es diretas. O dossi\xEA traz uma pista extra antes
-      da decis\xE3o."
+    description: "N\xEDvel Fundamental II. Situa\xE7\xF5es diretas, com uma pista
+      extra antes da decis\xE3o."
   - key: 1
-    label: "ENSINO M\xC9DIO"
+    label: "M\xC9DIO"
     basePoints: 125
     showHints: 0
-    description: Casos com mais nuance e sem pista. Vale mais ponto por acerto.
+    description: "N\xEDvel Ensino M\xE9dio. Casos com mais nuance e sem pista."
   - key: 2
-    label: "T\xC9CNICO / SUPERIOR"
+    label: "DIF\xCDCIL"
     basePoints: 150
     showHints: 0
-    description: "Linguagem t\xE9cnica do CDC, sem pista e com a maior pontua\xE7\xE3o."
+    description: "N\xEDvel T\xE9cnico / Superior. Linguagem t\xE9cnica do CDC, sem
+      pista."
   scenarios:
   - key: 0
     label: SUPERMERCADO

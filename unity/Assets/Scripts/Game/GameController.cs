@@ -85,6 +85,7 @@ namespace Procon
         public TMP_Text finalCorrect;
         public TMP_Text finalWrong;
         public TMP_Text finalPercent;
+        public TMP_Text finalAnswered;
         public TMP_Text rankLabel;
         public TMP_Text finalSummary;
         public Button reviewButton;
@@ -94,6 +95,12 @@ namespace Procon
         public TMP_Text reviewItemTemplate;
         public Button restartButton;
         public Button menuButton;
+
+        [Header("Programa de TV")]
+        [Tooltip("Apresentador 3D do estudio; pode ficar vazio.")]
+        public Presenter presenter;
+        [Tooltip("Fala do apresentador na faixa de baixo da tela.")]
+        public TMP_Text presenterLine;
 
         [Header("Cenas")]
         public string menuSceneName = "00_Menu";
@@ -305,6 +312,11 @@ namespace Procon
             }
             ScrollDialogToTop();
             DialogIn();
+
+            if (presenter != null) presenter.Introduce();
+            SetText(presenterLine, isNewVisit
+                ? "Vamos para " + scenario.label + "! Ouça o que diz o responsável e decida: é infração?"
+                : "Mais uma situação em " + scenario.label + ". Atenção à resposta!");
         }
 
         /// <summary>
@@ -474,6 +486,7 @@ namespace Procon
             {
                 feedbackPanel.SetActive(true);
                 FadeIn(feedbackPanel);
+                StartCoroutine(ScrollToFeedback());
             }
             AnimateAnswerButtons(current.isViolation, playerSaysViolation, isCorrect);
 
@@ -498,6 +511,11 @@ namespace Procon
             SetText(nextButtonLabel, isLast ? "VER RESULTADO FINAL" : endsVisit ? "IR PARA O PRÓXIMO LOCAL" : "PRÓXIMA PERGUNTA");
 
             ChiptuneAudio.Instance.Play(isCorrect ? "correct" : "wrong");
+
+            if (presenter != null) presenter.React(isCorrect);
+            SetText(presenterLine, isCorrect
+                ? "Resposta certa! Veja a explicação no telão."
+                : "Não foi dessa vez! A explicação está no telão.");
         }
 
         void PaintAnswerButtons(bool? correctAnswer, bool? playerAnswer)
@@ -545,6 +563,7 @@ namespace Procon
             SetText(finalCorrect, correct.ToString());
             SetText(finalWrong, wrong.ToString());
             SetText(finalPercent, percent + "%");
+            SetText(finalAnswered, round.Total.ToString());
             SetText(rankLabel, Scoring.Rank(correct, round.Total));
             SetText(finalSummary,
                 "Nível: " + database.Level(GameSession.Level).label +
@@ -556,6 +575,8 @@ namespace Procon
 
             if (finalPanel != null) finalPanel.SetActive(true);
             ChiptuneAudio.Instance.Play("finish");
+            if (presenter != null) presenter.Celebrate();
+            SetText(presenterLine, "Fim do programa! " + correct + " acertos em " + round.Total + " perguntas. Obrigado por participar!");
             MedalPop();
             Confetti();
         }
@@ -660,6 +681,24 @@ namespace Procon
             if (dialogScroll == null) return;
             Canvas.ForceUpdateCanvases();
             dialogScroll.verticalNormalizedPosition = 1f;
+        }
+
+        /// <summary>
+        /// Depois da resposta, desce o texto ate a explicacao: no telao a coluna e
+        /// mais baixa e ela ficava escondida embaixo das pistas.
+        /// </summary>
+        System.Collections.IEnumerator ScrollToFeedback()
+        {
+            if (dialogScroll == null) yield break;
+            yield return null;   // espera o layout medir o painel novo
+            Canvas.ForceUpdateCanvases();
+            var from = dialogScroll.verticalNormalizedPosition;
+            for (var t = 0f; t < 0.35f; t += Time.deltaTime)
+            {
+                dialogScroll.verticalNormalizedPosition = Mathf.Lerp(from, 0f, t / 0.35f);
+                yield return null;
+            }
+            dialogScroll.verticalNormalizedPosition = 0f;
         }
 
         // ------------------------------------------------------------------ animacoes da interface

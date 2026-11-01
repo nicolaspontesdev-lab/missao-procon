@@ -236,18 +236,18 @@ namespace Procon.EditorTools
             {
                 new LevelDef
                 {
-                    key = LevelKey.Fundamental, label = "FUNDAMENTAL II", basePoints = 100, showHints = true,
-                    description = "Situações diretas. O dossiê traz uma pista extra antes da decisão."
+                    key = LevelKey.Fundamental, label = "FÁCIL", basePoints = 100, showHints = true,
+                    description = "Nível Fundamental II. Situações diretas, com uma pista extra antes da decisão."
                 },
                 new LevelDef
                 {
-                    key = LevelKey.Medio, label = "ENSINO MÉDIO", basePoints = 125, showHints = false,
-                    description = "Casos com mais nuance e sem pista. Vale mais ponto por acerto."
+                    key = LevelKey.Medio, label = "MÉDIO", basePoints = 125, showHints = false,
+                    description = "Nível Ensino Médio. Casos com mais nuance e sem pista."
                 },
                 new LevelDef
                 {
-                    key = LevelKey.Tecnico, label = "TÉCNICO / SUPERIOR", basePoints = 150, showHints = false,
-                    description = "Linguagem técnica do CDC, sem pista e com a maior pontuação."
+                    key = LevelKey.Tecnico, label = "DIFÍCIL", basePoints = 150, showHints = false,
+                    description = "Nível Técnico / Superior. Linguagem técnica do CDC, sem pista."
                 }
             };
         }
@@ -313,8 +313,8 @@ namespace Procon.EditorTools
 
         static void ConfigurePlayer()
         {
-            PlayerSettings.productName = "Missão PROCON";
-            PlayerSettings.companyName = "Equipe Missão PROCON";
+            PlayerSettings.productName = "Show do PROCON";
+            PlayerSettings.companyName = "Equipe PROCON";
             PlayerSettings.defaultScreenWidth = 1600;
             PlayerSettings.defaultScreenHeight = 900;
             PlayerSettings.resizableWindow = true;
@@ -326,19 +326,23 @@ namespace Procon.EditorTools
 
         static void BuildGameScene(CaseDatabase database, CaseVisualBook visualBook)
         {
-            var frame = NewScene("Cabinet");
+            // estudio de TV em 3D; a interface 2D do jogo vai dentro do telao
+            var rig = ShowBuilder.BuildStudioScene();
+            var frame = rig.screen != null ? rig.screen : NewScene("Cabinet");
 
             var controllerNode = new GameObject("GameController");
             var controller = controllerNode.AddComponent<GameController>();
             controller.database = database;
             controller.visualBook = visualBook;
             controller.menuSceneName = "00_Menu";
+            controller.presenter = rig.presenter;
+            controller.presenterLine = rig.presenterLine;
 
             // ---- topo
             var topBar = UiKit.Panel("TopBar", frame, Palette.Shadow);
             UiKit.TopBand(UiKit.Rect(topBar.gameObject), 0, 84);
 
-            var title = UiKit.Label("Title", topBar.transform, "MISSÃO PROCON", 36, Palette.Yellow, TextAlignmentOptions.Left);
+            var title = UiKit.Label("Title", topBar.transform, "SHOW DO PROCON", 36, Palette.Yellow, TextAlignmentOptions.Left);
             UiKit.Frac(UiKit.Rect(title.gameObject), 0.012f, 0f, 0.35f, 1f);
 
             controller.levelBadge = UiKit.Label("LevelBadge", topBar.transform, "NÍVEL", 24, Palette.Cyan, TextAlignmentOptions.Center);
@@ -401,8 +405,8 @@ namespace Procon.EditorTools
         {
             var column = UiKit.Node("SceneColumn", parent);
             var columnRect = UiKit.Rect(column);
-            columnRect.anchorMin = Vector2.zero;
-            columnRect.anchorMax = new Vector2(0.50f, 1f);
+            columnRect.anchorMin = new Vector2(0.51f, 0f);
+            columnRect.anchorMax = Vector2.one;
             columnRect.offsetMin = Vector2.zero;
             columnRect.offsetMax = Vector2.zero;
 
@@ -431,8 +435,8 @@ namespace Procon.EditorTools
         {
             var column = UiKit.Node("DialogColumn", parent);
             var columnRect = UiKit.Rect(column);
-            columnRect.anchorMin = new Vector2(0.51f, 0f);
-            columnRect.anchorMax = Vector2.one;
+            columnRect.anchorMin = Vector2.zero;
+            columnRect.anchorMax = new Vector2(0.49f, 1f);
             columnRect.offsetMin = Vector2.zero;
             columnRect.offsetMax = Vector2.zero;
 
@@ -549,10 +553,11 @@ namespace Procon.EditorTools
             controller.finalPanel = overlay.gameObject;
 
             var card = UiKit.Panel("Card", overlay.transform, Palette.Ink2);
-            UiKit.Centered(UiKit.Rect(card.gameObject), 1180, 880);
+            UiKit.Centered(UiKit.Rect(card.gameObject), 1240, 800);
             UiKit.VList(card.gameObject, 12, 26);
+            UiKit.FitHeight(card.gameObject);   // cresce so quando abre a revisao
 
-            var title = UiKit.Label("Title", card.transform, "MISSÃO CONCLUÍDA", 44, Palette.Yellow, TextAlignmentOptions.Center);
+            var title = UiKit.Label("Title", card.transform, "FIM DO PROGRAMA", 44, Palette.Yellow, TextAlignmentOptions.Center);
             UiKit.Height(title.gameObject, 58);
 
             controller.rankLabel = UiKit.Label("RankLabel", card.transform, "PATENTE", 30, Palette.Cyan, TextAlignmentOptions.Center);
@@ -561,6 +566,7 @@ namespace Procon.EditorTools
             var stats = UiKit.Node("Stats", card.transform);
             UiKit.HList(stats, 12, 0);
             UiKit.Height(stats, 110);
+            controller.finalAnswered = Stat(stats.transform, "PERGUNTAS", "0", Palette.White);
             controller.finalScore = Stat(stats.transform, "PONTOS", "0000", Palette.Yellow);
             controller.finalCorrect = Stat(stats.transform, "ACERTOS", "0", Palette.Green);
             controller.finalWrong = Stat(stats.transform, "ERROS", "0", Palette.Red);
@@ -584,7 +590,7 @@ namespace Procon.EditorTools
             controller.menuButton = menu.button;
 
             var reviewScroll = UiKit.VScroll("ReviewPanel", card.transform, Palette.Mix(Palette.Ink, Palette.Shadow, 0.4f), out var reviewContent);
-            UiKit.Height(reviewScroll.gameObject, 430);
+            UiKit.Height(reviewScroll.gameObject, 340);
             controller.reviewPanel = reviewScroll.gameObject;
 
             UiKit.VList(reviewContent.gameObject, 10, 12).childAlignment = TextAnchor.UpperLeft;
@@ -599,36 +605,31 @@ namespace Procon.EditorTools
 
         static void BuildMenuScene(CaseDatabase database)
         {
+            ShowBuilder.EnsureMenuArt();
             var frame = NewScene("Cabinet");
+            frame.GetComponent<Image>().color = new Color(0.09f, 0.05f, 0.2f);
+            frame.gameObject.AddComponent<RectMask2D>();     // holofotes e brilhos nao vazam
 
             var controllerNode = new GameObject("MenuController");
             var controller = controllerNode.AddComponent<MenuController>();
             controller.database = database;
             controller.gameSceneName = "01_Jogo";
 
-            // ---- fundo: a fachada do PROCON, a mesma arte da tela inicial do HTML
-            var cover = UiKit.Panel("Fachada", frame, Color.white);
-            cover.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Menu/menu-procon.png");
-            cover.raycastTarget = false;
-            UiKit.Full(UiKit.Rect(cover.gameObject));
-            if (cover.sprite != null)
-            {
-                var coverFit = cover.gameObject.AddComponent<AspectRatioFitter>();
-                coverFit.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
-                coverFit.aspectRatio = cover.sprite.rect.width / cover.sprite.rect.height;
-            }
-            frame.gameObject.AddComponent<RectMask2D>();     // a fachada nao vaza da moldura
-            var shade = UiKit.Panel("Escurecer", frame, Palette.Alpha(Palette.Shadow, 0.55f));
-            shade.raycastTarget = false;
-            UiKit.Full(UiKit.Rect(shade.gameObject));
+            // ---- palco: brilhos coloridos, chao iluminado e dois holofotes indo e voltando
+            Glow(frame, "Brilho roxo", new Color(0.55f, 0.25f, 1f, 0.55f), 0.5f, 0.78f, 1500f);
+            Glow(frame, "Brilho magenta", new Color(1f, 0.25f, 0.6f, 0.35f), 0.08f, 0.05f, 900f);
+            Glow(frame, "Brilho ciano", new Color(0.25f, 0.8f, 1f, 0.3f), 0.92f, 0.05f, 900f);
+            Glow(frame, "Chao do palco", new Color(1f, 0.8f, 0.4f, 0.25f), 0.5f, -0.02f, 1300f);
+            Beam(frame, "Holofote esquerdo", 0.12f, new Color(1f, 0.85f, 0.5f, 0.22f), -25f, 0f);
+            Beam(frame, "Holofote direito", 0.88f, new Color(0.5f, 0.85f, 1f, 0.22f), 25f, 2.5f);
 
-            // ---- faixa de texto correndo no topo (ticker do HTML)
+            // ---- faixa de texto correndo no topo
             var tickerBand = UiKit.Panel("Ticker", frame, Palette.Alpha(Palette.Shadow, 0.85f));
             UiKit.TopBand(UiKit.Rect(tickerBand.gameObject), 0, 38);
             tickerBand.gameObject.AddComponent<RectMask2D>();
-            var phrase = "ORIENTAR • INFORMAR • PROTEGER • EQUILIBRAR AS RELAÇÕES DE CONSUMO • ";
+            var phrase = "AO VIVO • SHOW DO PROCON • É INFRAÇÃO OU NÃO É? • CÓDIGO DE DEFESA DO CONSUMIDOR • ";
             var tickerText = UiKit.Label("TickerTexto", tickerBand.transform, phrase + phrase + phrase + phrase,
-                                         17, Palette.Cyan, TextAlignmentOptions.Left);
+                                         17, Palette.Yellow, TextAlignmentOptions.Left);
             tickerText.fontStyle = FontStyles.Bold;
             var tickerRect = tickerText.rectTransform;
             tickerRect.anchorMin = new Vector2(0f, 0f);
@@ -639,42 +640,63 @@ namespace Procon.EditorTools
             tickerFit.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
             controller.ticker = tickerRect;
 
-            // placa escura atras do titulo: sem ela o subtitulo some no ceu da fachada
-            var titlePlate = UiKit.Panel("PlacaTitulo", frame, Palette.Alpha(Palette.Shadow, 0.8f));
-            titlePlate.raycastTarget = false;
-            UiKit.TopBand(UiKit.Rect(titlePlate.gameObject), 50, 172, 380, 380);
+            // ---- letreiro do programa com moldura de lampadas
+            var sign = UiKit.Node("Letreiro", frame);
+            var signRect = UiKit.Rect(sign);
+            signRect.anchorMin = signRect.anchorMax = new Vector2(0.5f, 1f);
+            signRect.pivot = new Vector2(0.5f, 1f);
+            signRect.sizeDelta = new Vector2(1120f, 320f);
+            signRect.anchoredPosition = new Vector2(0f, -66f);
+            controller.title = signRect;
 
-            var title = UiKit.Label("Title", frame, "MISSÃO PROCON", 86, Palette.Yellow, TextAlignmentOptions.Center);
-            UiKit.TopBand(UiKit.Rect(title.gameObject), 56, 110);
-            controller.title = (RectTransform)title.transform;
+            var rim = UiKit.Panel("Moldura", sign.transform, Palette.Yellow);
+            UiKit.Full(UiKit.Rect(rim.gameObject));
+            var plate = UiKit.Panel("Placa", sign.transform, new Color(0.13f, 0.06f, 0.28f));
+            UiKit.Stretch(UiKit.Rect(plate.gameObject), 10, 10, 10, 10);
+            var bulbs = BulbFrame(sign.transform, 1120f, 320f, 34f);
+            var marquee = sign.AddComponent<Marquee>();
+            marquee.uiBulbs = bulbs;
+            marquee.on = new Color(1f, 0.9f, 0.55f);
+            marquee.off = new Color(0.45f, 0.28f, 0.12f);
 
-            var subtitle = UiKit.Label("Subtitle", frame, "FISCALIZAÇÃO DO CONSUMIDOR • CÓDIGO DE DEFESA DO CONSUMIDOR", 26, Palette.Cyan, TextAlignmentOptions.Center);
-            UiKit.TopBand(UiKit.Rect(subtitle.gameObject), 168, 44);
+            var showDo = UiKit.Label("ShowDo", sign.transform, "SHOW DO", 54, Palette.White, TextAlignmentOptions.Center);
+            showDo.fontStyle = FontStyles.Bold;
+            showDo.characterSpacing = 18f;
+            UiKit.Frac(showDo.rectTransform, 0.05f, 0.66f, 0.95f, 0.9f);
+            var title = UiKit.Label("Title", sign.transform, "PROCON", 150, Palette.Yellow, TextAlignmentOptions.Center);
+            title.fontStyle = FontStyles.Bold;
+            title.outlineWidth = 0.18f;
+            title.outlineColor = new Color32(120, 40, 10, 255);
+            UiKit.Frac(title.rectTransform, 0.05f, 0.14f, 0.95f, 0.72f);
+
+            var subtitle = UiKit.Label("Subtitle", frame, "O PROGRAMA DO CÓDIGO DE DEFESA DO CONSUMIDOR", 26, Palette.Cyan, TextAlignmentOptions.Center);
+            subtitle.fontStyle = FontStyles.Bold;
+            UiKit.TopBand(UiKit.Rect(subtitle.gameObject), 402, 40);
 
             // ---- titulo
             var titlePanel = UiKit.Node("TitlePanel", frame);
-            UiKit.Stretch(UiKit.Rect(titlePanel), 0, 250, 0, 130);
+            UiKit.Stretch(UiKit.Rect(titlePanel), 0, 460, 0, 100);
             controller.titlePanel = titlePanel;
 
             var menuList = UiKit.Node("Options", titlePanel.transform);
-            UiKit.Centered(UiKit.Rect(menuList), 560, 420, -110f);   // abaixo do letreiro da fachada
+            UiKit.Centered(UiKit.Rect(menuList), 520, 384);
             UiKit.VList(menuList, 16, 0);
 
-            controller.playButton = MenuButton(menuList.transform, "JOGAR", Palette.Blue, Palette.White);
-            controller.helpButton = MenuButton(menuList.transform, "COMO JOGAR", Palette.Mix(Palette.Ink, Palette.Shadow, 0.25f), Palette.White);
-            controller.creditsButton = MenuButton(menuList.transform, "CRÉDITOS", Palette.Mix(Palette.Ink, Palette.Shadow, 0.25f), Palette.White);
-            controller.quitButton = MenuButton(menuList.transform, "SAIR", Palette.Mix(Palette.Red, Palette.Shadow, 0.35f), Palette.White);
+            controller.playButton = MenuButton(menuList.transform, "JOGAR", Palette.Yellow, Palette.Ink);
+            controller.helpButton = MenuButton(menuList.transform, "COMO JOGAR", Palette.Mix(Palette.Ink2, Palette.Shadow, 0.2f), Palette.White);
+            controller.creditsButton = MenuButton(menuList.transform, "CRÉDITOS", Palette.Mix(Palette.Ink2, Palette.Shadow, 0.2f), Palette.White);
+            controller.quitButton = MenuButton(menuList.transform, "SAIR", Palette.Mix(Palette.Red, Palette.Shadow, 0.3f), Palette.White);
 
             // ---- dificuldade
             var levelPanel = UiKit.Node("LevelPanel", frame);
-            UiKit.Stretch(UiKit.Rect(levelPanel), 40, 240, 40, 130);
+            UiKit.Stretch(UiKit.Rect(levelPanel), 40, 452, 40, 96);
             controller.levelPanel = levelPanel;
 
             var levelTitle = UiKit.Label("LevelTitle", levelPanel.transform, "ESCOLHA A DIFICULDADE", 32, Palette.White, TextAlignmentOptions.Center);
-            UiKit.TopBand(UiKit.Rect(levelTitle.gameObject), 0, 52);
+            UiKit.TopBand(UiKit.Rect(levelTitle.gameObject), 0, 48);
 
             var cards = UiKit.Node("LevelCards", levelPanel.transform);
-            UiKit.TopBand(UiKit.Rect(cards), 64, 300);
+            UiKit.TopBand(UiKit.Rect(cards), 56, 270, 60, 60);
             UiKit.HList(cards, 18, 0);
 
             controller.levelOptions = new LevelOption[3];
@@ -685,18 +707,18 @@ namespace Procon.EditorTools
                 controller.levelOptions[i] = BuildLevelCard(cards.transform, keys[i], i + 1, definition);
             }
 
-            controller.levelStatus = UiKit.Label("LevelStatus", levelPanel.transform, "Escolha uma dificuldade para liberar a missão.", 22, Palette.Yellow, TextAlignmentOptions.Center);
-            UiKit.TopBand(UiKit.Rect(controller.levelStatus.gameObject), 380, 46);
+            controller.levelStatus = UiKit.Label("LevelStatus", levelPanel.transform, "Escolha uma dificuldade para começar o programa.", 22, Palette.Yellow, TextAlignmentOptions.Center);
+            UiKit.TopBand(UiKit.Rect(controller.levelStatus.gameObject), 334, 40);
 
             var levelButtons = UiKit.Node("LevelButtons", levelPanel.transform);
-            UiKit.Centered(UiKit.Rect(levelButtons), 720, 84);
+            UiKit.Centered(UiKit.Rect(levelButtons), 720, 80);
             UiKit.Rect(levelButtons).anchorMin = new Vector2(0.5f, 0f);
             UiKit.Rect(levelButtons).anchorMax = new Vector2(0.5f, 0f);
             UiKit.Rect(levelButtons).pivot = new Vector2(0.5f, 0f);
-            UiKit.Rect(levelButtons).anchoredPosition = new Vector2(0f, 12f);
+            UiKit.Rect(levelButtons).anchoredPosition = new Vector2(0f, 4f);
             UiKit.HList(levelButtons, 14, 0);
 
-            var start = UiKit.Button("StartButton", levelButtons.transform, "INICIAR MISSÃO", Palette.Green, Palette.Ink, 26);
+            var start = UiKit.Button("StartButton", levelButtons.transform, "COMEÇAR O SHOW", Palette.Yellow, Palette.Ink, 26);
             controller.startButton = start.button;
             var backLevel = UiKit.Button("BackButton", levelButtons.transform, "VOLTAR", Palette.Mix(Palette.Ink, Palette.Shadow, 0.3f), Palette.White, 24);
             controller.backFromLevelButton = backLevel.button;
@@ -705,21 +727,19 @@ namespace Procon.EditorTools
 
             // ---- como jogar
             controller.helpPanel = BuildTextPanel(frame, "HelpPanel", "COMO JOGAR",
-                "Você é fiscal do PROCON e visita cinco locais na mesma rodada.\n\n" +
-                "1. Em alguns casos abre um DOSSIÊ. Examine as três pistas (teclas 1, 2 e 3) antes de decidir.\n" +
-                "2. Leia a resposta do responsável pelo estabelecimento.\n" +
-                "3. Decida: a situação É INFRAÇÃO (tecla V) ou NÃO É INFRAÇÃO (tecla F).\n" +
-                "4. Leia a explicação e o artigo do CDC, e siga com ENTER.\n\n" +
-                "Cada acerto vale os pontos do nível escolhido. Acertos seguidos dão bônus de sequência,\n" +
-                "de 25 até 100 pontos extras. Um erro zera a sequência.\n\n" +
-                "ESC volta ao menu a qualquer momento.",
+                "Você é o participante do Show do PROCON. O apresentador mostra uma situação no telão.\n\n" +
+                "1. Leia a resposta do responsável pelo estabelecimento. Em alguns casos abre um DOSSIÊ:\n" +
+                "    examine as três pistas (teclas 1, 2 e 3) antes de decidir.\n" +
+                "2. Decida: a situação É INFRAÇÃO (tecla V) ou NÃO É INFRAÇÃO (tecla F).\n" +
+                "3. Leia a explicação e a base legal, e siga para a próxima pergunta com ENTER.\n\n" +
+                "Acertos seguidos dão bônus de sequência, de 25 até 100 pontos extras. ESC volta ao menu.",
                 out var backHelp);
             controller.backFromHelpButton = backHelp;
 
             controller.creditsPanel = BuildTextPanel(frame, "CreditsPanel", "CRÉDITOS",
-                "Missão PROCON — jogo educativo sobre o Código de Defesa do Consumidor.\n\n" +
+                "Show do PROCON — jogo educativo sobre o Código de Defesa do Consumidor.\n\n" +
                 "Conteúdo e casos: equipe do projeto.\n" +
-                "Versão Unity feita a partir do protótipo original do grupo.\n\n" +
+                "Versão Unity feita a partir do protótipo original do grupo (Missão PROCON).\n\n" +
                 "Os casos e as explicações citam artigos do CDC (Lei 8.078/1990) com fim educativo.\n" +
                 "O jogo não substitui orientação jurídica.",
                 out var backCredits);
@@ -727,7 +747,7 @@ namespace Procon.EditorTools
 
             // ---- audio (sempre visivel)
             var audioRow = UiKit.Node("AudioRow", frame);
-            UiKit.BottomBand(UiKit.Rect(audioRow), 20, 62, 40, 40);
+            UiKit.BottomBand(UiKit.Rect(audioRow), 20, 56, 40, 40);
             UiKit.HList(audioRow, 14, 0);
 
             var sfx = UiKit.Button("SfxButton", audioRow.transform, "EFEITOS: LIGADOS", Palette.Mix(Palette.Ink, Palette.Shadow, 0.25f), Palette.Cyan, 20);
@@ -738,6 +758,65 @@ namespace Procon.EditorTools
             hintLine.raycastTarget = false;
 
             EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene(), MenuScenePath);
+        }
+
+        /// <summary>Brilho redondo e suave, centrado na fracao (x, y) da tela.</summary>
+        static void Glow(Transform parent, string name, Color color, float x, float y, float size)
+        {
+            var glow = UiKit.Panel(name, parent, color);
+            glow.sprite = ShowBuilder.MenuSprite("brilho");
+            glow.raycastTarget = false;
+            var rect = UiKit.Rect(glow.gameObject);
+            rect.anchorMin = rect.anchorMax = new Vector2(x, y);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.sizeDelta = new Vector2(size, size);
+            rect.anchoredPosition = Vector2.zero;
+        }
+
+        /// <summary>Feixe de holofote preso no alto da tela, balancando.</summary>
+        static void Beam(Transform parent, string name, float x, Color color, float tilt, float offset)
+        {
+            var beam = UiKit.Panel(name, parent, color);
+            beam.sprite = ShowBuilder.MenuSprite("feixe");
+            beam.raycastTarget = false;
+            var rect = UiKit.Rect(beam.gameObject);
+            rect.anchorMin = rect.anchorMax = new Vector2(x, 1f);
+            rect.pivot = new Vector2(0.5f, 1f);
+            rect.sizeDelta = new Vector2(420f, 1250f);
+            rect.anchoredPosition = new Vector2(0f, 40f);
+            rect.localRotation = Quaternion.Euler(0f, 0f, tilt);
+            var sweep = beam.gameObject.AddComponent<Sweep>();
+            sweep.angle = 16f;
+            sweep.period = 7f;
+            sweep.offset = offset;
+        }
+
+        /// <summary>Lampadas em volta de um retangulo, no sentido horario.</summary>
+        static Graphic[] BulbFrame(Transform parent, float width, float height, float spacing)
+        {
+            var bulbs = new List<Graphic>();
+            var sprite = ShowBuilder.MenuSprite("lampada");
+            void Line(Vector2 from, Vector2 to)
+            {
+                var count = Mathf.Max(1, Mathf.RoundToInt(Vector2.Distance(from, to) / spacing));
+                for (var i = 0; i < count; i++)
+                {
+                    var bulb = UiKit.Panel("Lampada", parent, Color.white);
+                    bulb.sprite = sprite;
+                    bulb.raycastTarget = false;
+                    var rect = UiKit.Rect(bulb.gameObject);
+                    rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
+                    rect.sizeDelta = new Vector2(20f, 20f);
+                    rect.anchoredPosition = Vector2.Lerp(from, to, (float)i / count);
+                    bulbs.Add(bulb);
+                }
+            }
+            float x = width / 2f - 5f, y = height / 2f - 5f;
+            Line(new Vector2(-x, -y), new Vector2(-x, y));
+            Line(new Vector2(-x, y), new Vector2(x, y));
+            Line(new Vector2(x, y), new Vector2(x, -y));
+            Line(new Vector2(x, -y), new Vector2(-x, -y));
+            return bulbs.ToArray();
         }
 
         static Button MenuButton(Transform parent, string text, Color background, Color foreground)
@@ -777,7 +856,7 @@ namespace Procon.EditorTools
         static GameObject BuildTextPanel(Transform frame, string name, string heading, string body, out Button backButton)
         {
             var panel = UiKit.Node(name, frame);
-            UiKit.Stretch(UiKit.Rect(panel), 90, 240, 90, 120);
+            UiKit.Stretch(UiKit.Rect(panel), 90, 452, 90, 96);
 
             var background = panel.AddComponent<Image>();
             background.color = Palette.Mix(Palette.Ink, Palette.Shadow, 0.35f);

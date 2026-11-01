@@ -146,7 +146,7 @@ namespace Procon
         {
             GameSession.HasLevel = false;
             if (startButton != null) startButton.interactable = false;
-            if (levelStatus != null) levelStatus.text = "Escolha uma dificuldade para liberar a missão.";
+            if (levelStatus != null) levelStatus.text = "Escolha uma dificuldade para começar o programa.";
             PaintLevelButtons();
         }
 
