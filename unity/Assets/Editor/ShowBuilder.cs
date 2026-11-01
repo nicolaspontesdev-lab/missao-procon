@@ -39,7 +39,7 @@ namespace Procon.EditorTools
             var rig = new StudioRig();
 
             RenderSettings.ambientMode = AmbientMode.Flat;
-            RenderSettings.ambientLight = new Color(0.12f, 0.14f, 0.22f);
+            RenderSettings.ambientLight = new Color(0.15f, 0.17f, 0.27f);
             RenderSettings.skybox = null;
 
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(StudioBuilder.PrefabPath);
@@ -68,6 +68,7 @@ namespace Procon.EditorTools
             HostDesk(studio, podium);
             rig.presenter = BuildPresenter(new Vector3(podium.x, 0.22f, podium.z + 0.5f));
             DecorateStudio(studio, wallBounds, front, false);
+            StageLighting(podium, wallBounds, false);
             EnsureRenderQuality();
 
             BuildLights(wallBounds, podium);
@@ -130,7 +131,7 @@ namespace Procon.EditorTools
         {
             EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             RenderSettings.ambientMode = AmbientMode.Flat;
-            RenderSettings.ambientLight = new Color(0.09f, 0.11f, 0.2f);
+            RenderSettings.ambientLight = new Color(0.13f, 0.15f, 0.25f);
             RenderSettings.skybox = null;
 
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(StudioBuilder.PrefabPath);
@@ -144,6 +145,7 @@ namespace Procon.EditorTools
             HostDesk(studio, podium);
             BuildPresenter(new Vector3(podium.x, 0.22f, podium.z + 0.5f));
             DecorateStudio(studio, wall, front, true);
+            StageLighting(podium, wall, true);
             EnsureRenderQuality();
             Spot("Luz do apresentador", new Vector3(podium.x + 1.2f, 4.8f, podium.z - 3.5f), podium + Vector3.up * 1.5f,
                  new Color(1f, 0.9f, 0.75f), 18f, 26f);
@@ -473,21 +475,35 @@ namespace Procon.EditorTools
             Block(body, "Cinto", new Vector3(0.5f, 0.05f, 0.27f), new Vector3(0f, 0.92f, 0f), dark);
             Block(body, "Fivela", new Vector3(0.07f, 0.045f, 0.02f), new Vector3(0f, 0.92f, -0.14f), gold);
 
-            // paleto aberto: camisa, lapelas, gravata borboleta, botoes e lenco
+            // paleto: ombreiras, camisa em "V" afinando ate os botoes, lapelas curtas
+            // que se encontram, colarinho de pontas, gravata borboleta com nó e bolso com lenço
+            var bowTie = Material("Gravata borboleta", new Color(0.04f, 0.04f, 0.07f));
+            bowTie.SetFloat("_Smoothness", 0.6f);
             Block(body, "Paleto", new Vector3(0.56f, 0.66f, 0.3f), new Vector3(0f, 1.27f, 0f), jacket);
-            Block(body, "Camisa", new Vector3(0.16f, 0.5f, 0.02f), new Vector3(0f, 1.34f, -0.155f), white);
+            Block(body, "Ombreiras", new Vector3(0.62f, 0.08f, 0.31f), new Vector3(0f, 1.56f, 0f), jacket);
+            Block(body, "Camisa alta", new Vector3(0.2f, 0.16f, 0.02f), new Vector3(0f, 1.51f, -0.155f), white);
+            Block(body, "Camisa meio", new Vector3(0.13f, 0.14f, 0.02f), new Vector3(0f, 1.37f, -0.155f), white);
+            Block(body, "Camisa baixa", new Vector3(0.06f, 0.1f, 0.02f), new Vector3(0f, 1.26f, -0.155f), white);
             foreach (var side in new[] { -1f, 1f })
             {
-                var flap = Block(body, "Lapela", new Vector3(0.09f, 0.34f, 0.025f), new Vector3(side * 0.1f, 1.4f, -0.162f), lapel);
-                flap.transform.localRotation = Quaternion.Euler(0f, 0f, side * -16f);
-                var collar = Block(body, "Colarinho", new Vector3(0.08f, 0.05f, 0.03f), new Vector3(side * 0.05f, 1.56f, -0.155f), white);
-                collar.transform.localRotation = Quaternion.Euler(0f, 0f, side * 28f);
+                // em "V": o alto da lapela vai para fora, a ponta de baixo encontra a outra no meio
+                var flap = Block(body, "Lapela", new Vector3(0.075f, 0.3f, 0.02f), new Vector3(side * 0.09f, 1.42f, -0.165f), lapel);
+                flap.transform.localRotation = Quaternion.Euler(0f, 0f, -side * 20f);
+                var collar = Block(body, "Colarinho", new Vector3(0.07f, 0.045f, 0.02f), new Vector3(side * 0.05f, 1.585f, -0.166f), white);
+                collar.transform.localRotation = Quaternion.Euler(0f, 0f, side * -32f);
+                var wing = Block(body, "Asa da gravata", new Vector3(0.075f, 0.055f, 0.025f), new Vector3(side * 0.045f, 1.545f, -0.176f), bowTie);
+                wing.transform.localRotation = Quaternion.Euler(0f, 0f, -side * 12f);   // pontas para cima
             }
-            Block(body, "Gravata", new Vector3(0.17f, 0.07f, 0.03f), new Vector3(0f, 1.53f, -0.17f), gold);
-            Block(body, "Botao", new Vector3(0.035f, 0.035f, 0.012f), new Vector3(0f, 1.14f, -0.156f), gold);
-            Block(body, "Botao", new Vector3(0.035f, 0.035f, 0.012f), new Vector3(0f, 1.04f, -0.156f), gold);
-            Block(body, "Lenco", new Vector3(0.07f, 0.045f, 0.012f), new Vector3(0.18f, 1.46f, -0.157f), white);
-            Block(body, "Pescoco", new Vector3(0.14f, 0.08f, 0.14f), new Vector3(0f, 1.64f, 0f), skin);
+            Block(body, "Nó da gravata", new Vector3(0.032f, 0.036f, 0.03f), new Vector3(0f, 1.545f, -0.182f), bowTie);
+            Block(body, "Botao", new Vector3(0.032f, 0.032f, 0.012f), new Vector3(0f, 1.15f, -0.156f), gold);
+            Block(body, "Botao", new Vector3(0.032f, 0.032f, 0.012f), new Vector3(0f, 1.05f, -0.156f), gold);
+            Block(body, "Bolso", new Vector3(0.1f, 0.012f, 0.012f), new Vector3(0.19f, 1.36f, -0.156f), lapel);
+            Block(body, "Lenco", new Vector3(0.07f, 0.026f, 0.01f), new Vector3(0.19f, 1.375f, -0.158f), white);
+            var tip = Block(body, "Ponta do lenco", new Vector3(0.03f, 0.03f, 0.01f), new Vector3(0.19f, 1.39f, -0.159f), white);
+            tip.transform.localRotation = Quaternion.Euler(0f, 0f, 45f);
+            var neckSkin = Material("Pele pescoco", new Color(0.7f, 0.47f, 0.3f), 0.35f);
+            var neck = Block(body, "Pescoco", new Vector3(0.14f, 0.1f, 0.14f), new Vector3(0f, 1.64f, 0f), neckSkin);
+            neck.GetComponent<Renderer>().receiveShadows = false;   // sem a sombra da cabeca, que deixava o pescoco preto
 
             // cabeca: orelhas, nariz, sobrancelhas, olhos com pupila (piscam) e boca (fala)
             var head = Pivot(body, "Cabeca", new Vector3(0f, 1.68f, 0f));
@@ -654,6 +670,37 @@ namespace Procon.EditorTools
                 // refletores nas laterais, longe do telao, varrendo devagar
                 MovingSpot(10, new Vector3(-8.2f, 7.4f, -0.4f), new Color(0.3f, 0.6f, 1f));
                 MovingSpot(11, new Vector3(6.9f, 7.4f, -0.4f), new Color(1f, 0.82f, 0.4f));
+            }
+        }
+
+        /// <summary>
+        /// Iluminacao de estudio: luz principal quente e suave vinda da frente (da
+        /// volume ao palco e ao apresentador), contraluz azul atras do apresentador
+        /// para destacar o contorno, e pocas de luz coloridas no chao brilhante.
+        /// </summary>
+        static void StageLighting(Vector3 podium, Bounds wall, bool menu)
+        {
+            var key = new GameObject("Luz principal").AddComponent<Light>();
+            key.type = LightType.Directional;
+            key.color = new Color(1f, 0.93f, 0.84f);
+            key.intensity = 0.55f;
+            key.shadows = LightShadows.Soft;
+            key.shadowStrength = 0.6f;
+            key.transform.rotation = Quaternion.Euler(38f, 18f, 0f);
+
+            var rim = Spot("Contraluz do apresentador", podium + new Vector3(-0.9f, 3.6f, 2.6f), podium + Vector3.up * 1.6f,
+                           new Color(0.35f, 0.7f, 1f), 14f, 32f);
+            rim.range = 9f;
+
+            // pocas de luz no chao: nas laterais do telao e na frente do palco
+            var pools = menu
+                ? new[] { new Vector3(-4.6f, 0.22f, -3f), new Vector3(4.6f, 0.22f, -3f), new Vector3(0f, 0.22f, -4.2f) }
+                : new[] { new Vector3(wall.min.x + 1.2f, 0.22f, 0.6f), new Vector3(wall.center.x + 1.5f, 0.22f, 0.9f), new Vector3(wall.max.x - 0.8f, 0.22f, 0.6f) };
+            var colors = new[] { new Color(0.3f, 0.6f, 1f), new Color(1f, 0.85f, 0.55f), new Color(0.3f, 0.85f, 1f) };
+            for (var i = 0; i < pools.Length; i++)
+            {
+                var pool = Spot("Poca de luz " + (i + 1), pools[i] + new Vector3(0f, 6.5f, -0.4f), pools[i], colors[i], 22f, 30f);
+                pool.range = 10f;
             }
         }
 
