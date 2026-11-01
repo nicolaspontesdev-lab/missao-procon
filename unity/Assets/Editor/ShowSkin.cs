@@ -46,7 +46,7 @@ namespace Procon.EditorTools
             Write("fundo_telao", 320, 180, 0, (x, y) =>
             {
                 var d = Vector2.Distance(new Vector2(x, y), new Vector2(160f, 110f)) / 190f;
-                var c = Color.Lerp(new Color(0.24f, 0.08f, 0.48f), new Color(0.03f, 0.04f, 0.14f), Mathf.SmoothStep(0f, 1f, d));
+                var c = Color.Lerp(new Color(0.06f, 0.18f, 0.45f), new Color(0.02f, 0.04f, 0.13f), Mathf.SmoothStep(0f, 1f, d));
                 c.a = 1f;
                 return c;
             });
@@ -219,11 +219,11 @@ namespace Procon.EditorTools
             if (subtitle != null) { subtitle.color = Gold; TextShadow(subtitle); }
 
             MenuButton(m.playButton, Gold, Palette.Ink);
-            MenuButton(m.helpButton, new Color(0.14f, 0.1f, 0.38f, 0.95f), Color.white);
+            MenuButton(m.helpButton, new Color(0.1f, 0.17f, 0.42f, 0.95f), Color.white);
             MenuButton(m.creditsButton, new Color(0.14f, 0.1f, 0.38f, 0.95f), Color.white);
             MenuButton(m.quitButton, new Color(0.55f, 0.1f, 0.2f, 0.95f), Color.white);
             MenuButton(m.startButton, Gold, Palette.Ink);
-            MenuButton(m.backFromLevelButton, new Color(0.14f, 0.1f, 0.38f, 0.95f), Color.white);
+            MenuButton(m.backFromLevelButton, new Color(0.1f, 0.17f, 0.42f, 0.95f), Color.white);
             MenuButton(m.sfxButton, new Color(0.05f, 0.04f, 0.14f, 0.9f), Palette.Cyan);
 
             foreach (var option in m.levelOptions)
@@ -239,7 +239,7 @@ namespace Procon.EditorTools
             foreach (var panel in new[] { m.helpPanel, m.creditsPanel })
             {
                 if (panel == null) continue;
-                Plate(panel.GetComponent<Image>(), new Color(0.06f, 0.04f, 0.18f, 0.94f), Gold, 1.2f, false);
+                Plate(panel.GetComponent<Image>(), new Color(0.04f, 0.07f, 0.18f, 0.94f), Gold, 1.2f, false);
                 Bulbs(panel.transform, 26, 10, 14f, 3f);
             }
             foreach (var back in new[] { m.backFromHelpButton, m.backFromCreditsButton })

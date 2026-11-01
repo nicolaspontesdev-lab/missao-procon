@@ -349,8 +349,8 @@ namespace Procon.EditorTools
 
         // Paleta reduzida da rodada: azul-noite translucido, dourado de destaque,
         // branco para leitura; verde e vermelho so nas respostas.
-        static readonly Color Night = new Color(0.06f, 0.05f, 0.17f, 0.92f);
-        static readonly Color NightLight = new Color(0.12f, 0.11f, 0.3f, 0.95f);
+        static readonly Color Night = new Color(0.04f, 0.07f, 0.17f, 0.92f);
+        static readonly Color NightLight = new Color(0.09f, 0.15f, 0.33f, 0.95f);
         static readonly Color Gold = new Color(1f, 0.8f, 0.28f);
         static readonly Color GoldLine = new Color(1f, 0.8f, 0.28f, 0.6f);
 
@@ -634,7 +634,7 @@ namespace Procon.EditorTools
         static void BuildFeedback(Transform overlay, GameController controller)
         {
             var card = UiKit.Panel("Resultado", overlay, Night);
-            ShowSkin.Plate(card, new Color(0.06f, 0.05f, 0.17f, 0.96f), GoldLine, 1.4f, false);
+            ShowSkin.Plate(card, new Color(0.04f, 0.07f, 0.17f, 0.96f), GoldLine, 1.4f, false);
             var rect = card.rectTransform;
             rect.anchorMin = new Vector2(0.35f, 0f);
             rect.anchorMax = new Vector2(0.97f, 0f);
@@ -688,12 +688,12 @@ namespace Procon.EditorTools
 
         static void BuildFinalPanel(Transform overlay, GameController controller)
         {
-            var dim = UiKit.Panel("FinalPanel", overlay, new Color(0.02f, 0.01f, 0.06f, 0.94f));
+            var dim = UiKit.Panel("FinalPanel", overlay, new Color(0.01f, 0.02f, 0.06f, 0.94f));
             UiKit.Full(dim.rectTransform);
             controller.finalPanel = dim.gameObject;
 
             var card = UiKit.Panel("Card", dim.transform, Night);
-            ShowSkin.Plate(card, new Color(0.08f, 0.06f, 0.22f, 0.98f), Gold, 1.2f, false);
+            ShowSkin.Plate(card, new Color(0.05f, 0.09f, 0.22f, 0.98f), Gold, 1.2f, false);
             UiKit.Centered(card.rectTransform, 1000, 560);
             var list = UiKit.VList(card.gameObject, 16, 40);
             list.childAlignment = TextAnchor.UpperCenter;
@@ -758,18 +758,16 @@ namespace Procon.EditorTools
             var tickerBand = UiKit.Panel("Ticker", frame, Palette.Alpha(Palette.Shadow, 0.85f));
             UiKit.TopBand(UiKit.Rect(tickerBand.gameObject), 0, 38);
             tickerBand.gameObject.AddComponent<RectMask2D>();
-            var phrase = "AO VIVO • SHOW DO PROCON • É INFRAÇÃO OU NÃO É? • CÓDIGO DE DEFESA DO CONSUMIDOR • ";
-            var tickerText = UiKit.Label("TickerTexto", tickerBand.transform, phrase + phrase + phrase + phrase,
-                                         17, Palette.Yellow, TextAlignmentOptions.Left);
+            // frase fixa e centralizada: correndo, ela aparecia cortada nas duas pontas da tela
+            var tickerText = UiKit.Label("TickerTexto", tickerBand.transform,
+                                         "AO VIVO  •  SHOW DO PROCON  •  É INFRAÇÃO OU NÃO É?  •  CÓDIGO DE DEFESA DO CONSUMIDOR",
+                                         17, Palette.Yellow, TextAlignmentOptions.Center);
             tickerText.fontStyle = FontStyles.Bold;
-            var tickerRect = tickerText.rectTransform;
-            tickerRect.anchorMin = new Vector2(0f, 0f);
-            tickerRect.anchorMax = new Vector2(0f, 1f);
-            tickerRect.pivot = new Vector2(0f, 0.5f);
-            tickerRect.anchoredPosition = Vector2.zero;
-            var tickerFit = tickerText.gameObject.AddComponent<ContentSizeFitter>();
-            tickerFit.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
-            controller.ticker = tickerRect;
+            tickerText.enableWordWrapping = false;
+            tickerText.enableAutoSizing = true;
+            tickerText.fontSizeMin = 11f;
+            tickerText.fontSizeMax = 17f;
+            UiKit.Stretch(tickerText.rectTransform, 24, 0, 24, 0);
 
             var subtitle = UiKit.Label("Subtitle", frame, "O PROGRAMA DO CÓDIGO DE DEFESA DO CONSUMIDOR", 26, Palette.Cyan, TextAlignmentOptions.Center);
             subtitle.fontStyle = FontStyles.Bold;

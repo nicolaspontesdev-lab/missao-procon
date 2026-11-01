@@ -39,7 +39,7 @@ namespace Procon.EditorTools
             var rig = new StudioRig();
 
             RenderSettings.ambientMode = AmbientMode.Flat;
-            RenderSettings.ambientLight = new Color(0.16f, 0.13f, 0.24f);
+            RenderSettings.ambientLight = new Color(0.12f, 0.14f, 0.22f);
             RenderSettings.skybox = null;
 
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(StudioBuilder.PrefabPath);
@@ -89,21 +89,27 @@ namespace Procon.EditorTools
         /// </summary>
         static void DimLedWalls(GameObject studio)
         {
-            var led = Material("LED do telao", new Color(0.08f, 0.03f, 0.18f), 0.6f);
-            led.SetColor("_BaseColor", new Color(0.08f, 0.03f, 0.18f));
-            led.SetColor("_EmissionColor", new Color(0.08f, 0.03f, 0.18f) * 0.6f);
+            var led = Material("LED do telao", new Color(0.03f, 0.08f, 0.22f), 0.6f);
+            led.SetColor("_BaseColor", new Color(0.03f, 0.08f, 0.22f));
+            led.SetColor("_EmissionColor", new Color(0.03f, 0.08f, 0.22f) * 0.6f);
             led.SetFloat("_Smoothness", 0.1f);
             EditorUtility.SetDirty(led);
+            // "Studioaccent" (frente do pulpito e faixa do palco) sai do gerador em
+            // roxo claro com emissao 1,4: com o bloom estoura e fica rosa/lilas
+            var accent = Material("Destaque do palco", new Color(0.08f, 0.28f, 0.7f), 0.35f);
+            accent.SetColor("_BaseColor", new Color(0.08f, 0.28f, 0.7f));
+            accent.SetColor("_EmissionColor", new Color(0.08f, 0.28f, 0.7f) * 0.35f);
+            EditorUtility.SetDirty(accent);
             foreach (var renderer in studio.GetComponentsInChildren<MeshRenderer>(true))
             {
                 var materials = renderer.sharedMaterials;
                 var changed = false;
                 for (var i = 0; i < materials.Length; i++)
-                    if (materials[i] != null && materials[i].name.StartsWith("LED"))
-                    {
-                        materials[i] = led;
-                        changed = true;
-                    }
+                {
+                    if (materials[i] == null) continue;
+                    if (materials[i].name.StartsWith("LED")) { materials[i] = led; changed = true; }
+                    else if (materials[i].name.StartsWith("Studioaccent")) { materials[i] = accent; changed = true; }
+                }
                 if (changed) renderer.sharedMaterials = materials;
             }
         }
@@ -119,7 +125,7 @@ namespace Procon.EditorTools
         {
             EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             RenderSettings.ambientMode = AmbientMode.Flat;
-            RenderSettings.ambientLight = new Color(0.12f, 0.09f, 0.2f);
+            RenderSettings.ambientLight = new Color(0.09f, 0.11f, 0.2f);
             RenderSettings.skybox = null;
 
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(StudioBuilder.PrefabPath);
@@ -172,7 +178,7 @@ namespace Procon.EditorTools
             }
 
             // holofotes de show: luz real com cone de luz visivel, varrendo o palco
-            var colors = new[] { new Color(1f, 0.3f, 0.75f), new Color(0.3f, 0.85f, 1f), new Color(1f, 0.8f, 0.3f), new Color(0.6f, 0.35f, 1f) };
+            var colors = new[] { new Color(0.25f, 0.55f, 1f), new Color(0.3f, 0.85f, 1f), new Color(1f, 0.8f, 0.3f), new Color(0.85f, 0.9f, 1f) };
             var xs = new[] { -5.2f, -1.9f, 1.9f, 5.2f };
             for (var i = 0; i < xs.Length; i++)
                 MovingSpot(i, new Vector3(xs[i], 7.2f, -0.6f), colors[i]);
@@ -244,7 +250,12 @@ namespace Procon.EditorTools
         {
             var path = ArtFolder + "/Materiais/" + name + ".mat";
             var material = AssetDatabase.LoadAssetAtPath<Material>(path);
-            if (material != null) return material;
+            if (material != null)
+            {
+                material.SetColor("_BaseColor", color * 0.28f);   // a cor do feixe acompanha a do holofote
+                EditorUtility.SetDirty(material);
+                return material;
+            }
             if (!AssetDatabase.IsValidFolder(ArtFolder + "/Materiais")) AssetDatabase.CreateFolder(ArtFolder, "Materiais");
 
             var texturePath = ArtFolder + "/feixe3d.png";
@@ -311,10 +322,10 @@ namespace Procon.EditorTools
 
         static void BuildLights(Bounds wall, Vector3 podium)
         {
-            Spot("Luz roxa", new Vector3(-6.5f, 6.5f, -1.5f), new Vector3(wall.min.x, wall.center.y, wall.center.z),
-                 new Color(0.62f, 0.35f, 1f), 2.5f, 40f);
+            Spot("Luz azul", new Vector3(-6.5f, 6.5f, -1.5f), new Vector3(wall.min.x, wall.center.y, wall.center.z),
+                 new Color(0.3f, 0.55f, 1f), 1.2f, 40f);
             Spot("Luz ciano", new Vector3(6.5f, 6.5f, -1.5f), new Vector3(wall.max.x, wall.center.y, wall.center.z),
-                 new Color(0.3f, 0.85f, 1f), 2.5f, 40f);
+                 new Color(0.3f, 0.85f, 1f), 1.2f, 40f);
             Spot("Luz do apresentador", new Vector3(podium.x + 1.2f, 4.8f, podium.z - 3.5f), podium + Vector3.up * 1.5f,
                  new Color(1f, 0.9f, 0.75f), 9f, 26f);
         }
