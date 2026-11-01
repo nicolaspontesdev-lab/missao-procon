@@ -15,11 +15,17 @@ namespace Procon
         public Transform head;
         public Transform armScreen;
         public Transform armMic;
+        [Tooltip("Grupo dos olhos: pisca achatando na vertical.")]
+        public Transform eyes;
+        [Tooltip("Boca: abre e fecha enquanto ele fala.")]
+        public Transform mouth;
 
         Vector3 bodyBase;
         Quaternion headBase, screenBase, micBase;
         Coroutine acting;
         bool busy;
+        Vector3 mouthBase;
+        float nextBlink, talkUntil;
 
         void Awake()
         {
@@ -27,6 +33,26 @@ namespace Procon
             if (head != null) headBase = head.localRotation;
             if (armScreen != null) screenBase = armScreen.localRotation;
             if (armMic != null) micBase = armMic.localRotation;
+            if (mouth != null) mouthBase = mouth.localScale;
+            nextBlink = Random.Range(2f, 4f);
+        }
+
+        void LateUpdate()
+        {
+            // piscar: a cada 2 a 5 segundos os olhos fecham por um instante
+            if (eyes != null)
+            {
+                var closed = Time.time > nextBlink && Time.time < nextBlink + 0.12f;
+                eyes.localScale = new Vector3(1f, closed ? 0.12f : 1f, 1f);
+                if (Time.time > nextBlink + 0.12f) nextBlink = Time.time + Random.Range(2f, 5f);
+            }
+            // falar: a boca abre e fecha enquanto ele apresenta
+            if (mouth != null)
+            {
+                var talking = Time.time < talkUntil;
+                var open = talking ? 1f + Mathf.Abs(Mathf.Sin(Time.time * 14f)) * 2.2f : 1f;
+                mouth.localScale = new Vector3(mouthBase.x, mouthBase.y * open, mouthBase.z);
+            }
         }
 
         void Update()
@@ -39,10 +65,18 @@ namespace Procon
         }
 
         /// <summary>Pergunta nova: vira para o telao e aponta.</summary>
-        public void Introduce() => Play(IntroduceRoutine());
+        public void Introduce()
+        {
+            talkUntil = Time.time + 1.6f;
+            Play(IntroduceRoutine());
+        }
 
         /// <summary>Reacao a resposta do jogador.</summary>
-        public void React(bool correct) => Play(correct ? CheerRoutine(1) : LamentRoutine());
+        public void React(bool correct)
+        {
+            talkUntil = Time.time + 0.9f;
+            Play(correct ? CheerRoutine(1) : LamentRoutine());
+        }
 
         /// <summary>Fim do programa: comemora duas vezes.</summary>
         public void Celebrate() => Play(CheerRoutine(2));

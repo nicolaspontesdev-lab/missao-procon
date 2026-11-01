@@ -64,11 +64,11 @@ namespace Procon.EditorTools
             var camera = BuildCamera(target, 10.65f, 0.35f, 40f);
 
             // apresentador na frente do palco, mais perto da camera, fora da area do telao
-            var lectern = studio.transform.Find("Presentation lectern");
             var podium = new Vector3(target.x - 2.7f, 0.22f, -0.98f);
-            if (lectern != null) lectern.position = new Vector3(podium.x, lectern.position.y, podium.z);
-            rig.presenter = BuildPresenter(new Vector3(podium.x, 0.22f, podium.z + 0.48f));
-            if (lectern != null) LecternSign(lectern);
+            HostDesk(studio, podium);
+            rig.presenter = BuildPresenter(new Vector3(podium.x, 0.22f, podium.z + 0.5f));
+            DecorateStudio(studio, wallBounds, front, false);
+            EnsureRenderQuality();
 
             BuildLights(wallBounds, podium);
             BuildBulbs(wallBounds, front);
@@ -100,6 +100,10 @@ namespace Procon.EditorTools
             accent.SetColor("_BaseColor", new Color(0.08f, 0.28f, 0.7f));
             accent.SetColor("_EmissionColor", new Color(0.08f, 0.28f, 0.7f) * 0.35f);
             EditorUtility.SetDirty(accent);
+            var deck = Material("Piso do palco", new Color(0.04f, 0.06f, 0.13f));
+            deck.SetFloat("_Smoothness", 0.82f);
+            deck.SetFloat("_Metallic", 0.2f);
+            EditorUtility.SetDirty(deck);
             foreach (var renderer in studio.GetComponentsInChildren<MeshRenderer>(true))
             {
                 var materials = renderer.sharedMaterials;
@@ -109,6 +113,7 @@ namespace Procon.EditorTools
                     if (materials[i] == null) continue;
                     if (materials[i].name.StartsWith("LED")) { materials[i] = led; changed = true; }
                     else if (materials[i].name.StartsWith("Studioaccent")) { materials[i] = accent; changed = true; }
+                    else if (materials[i].name.StartsWith("Studiobody")) { materials[i] = deck; changed = true; }
                 }
                 if (changed) renderer.sharedMaterials = materials;
             }
@@ -135,12 +140,13 @@ namespace Procon.EditorTools
             var wall = Bounds(studio.transform.Find("Main LED backdrop"));
             var front = wall.min.z - 0.015f;
 
-            var lectern = studio.transform.Find("Presentation lectern");
             var podium = new Vector3(wall.min.x - 0.56f, 0.22f, 1.3f);
-            if (lectern != null) { lectern.position = new Vector3(podium.x, lectern.position.y, podium.z); LecternSign(lectern); }
-            BuildPresenter(new Vector3(podium.x, 0.22f, podium.z + 0.48f));
+            HostDesk(studio, podium);
+            BuildPresenter(new Vector3(podium.x, 0.22f, podium.z + 0.5f));
+            DecorateStudio(studio, wall, front, true);
+            EnsureRenderQuality();
             Spot("Luz do apresentador", new Vector3(podium.x + 1.2f, 4.8f, podium.z - 3.5f), podium + Vector3.up * 1.5f,
-                 new Color(1f, 0.9f, 0.75f), 12f, 26f);
+                 new Color(1f, 0.9f, 0.75f), 18f, 26f);
 
             // camera aberta: o palco inteiro, o telao e o titulo na frente dele
             var target = new Vector3(0f, wall.center.y - 0.2f, front);
@@ -170,9 +176,8 @@ namespace Procon.EditorTools
             if (titlePrefab != null)
             {
                 var title = (GameObject)PrefabUtility.InstantiatePrefab(titlePrefab);
-                title.transform.position = new Vector3(0f, wall.center.y + 0.15f, front - 1.1f);
+                title.transform.position = new Vector3(0f, wall.center.y + 0.15f, front - 0.2f);
                 title.transform.localScale = Vector3.one * 1.05f;
-                title.AddComponent<Hover>();
                 Spot("Luz do titulo", new Vector3(0f, 6.8f, front - 6f), title.transform.position + Vector3.up * 0.6f,
                      new Color(1f, 0.92f, 0.8f), 28f, 34f);
             }
@@ -196,6 +201,13 @@ namespace Procon.EditorTools
             light.spotAngle = 24f;
             light.range = 14f;
             light.shadows = LightShadows.None;
+
+            var housing = Material("Lata do refletor", new Color(0.05f, 0.06f, 0.08f));
+            var lens = Material("Lente do refletor", color, 3f);
+            var can = Block(node.transform, "Lata", new Vector3(0.32f, 0.32f, 0.42f), new Vector3(0f, 0f, -0.18f), housing);
+            Block(node.transform, "Lente", new Vector3(0.26f, 0.26f, 0.02f), new Vector3(0f, 0f, 0.035f), lens);
+            Block(node.transform, "Aleta", new Vector3(0.36f, 0.02f, 0.1f), new Vector3(0f, 0.17f, 0.06f), housing);
+            can.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
 
             var beam = new GameObject("Feixe");
             beam.transform.SetParent(node.transform, false);
@@ -326,11 +338,12 @@ namespace Procon.EditorTools
                  new Color(0.3f, 0.55f, 1f), 1.2f, 40f);
             Spot("Luz ciano", new Vector3(6.5f, 6.5f, -1.5f), new Vector3(wall.max.x, wall.center.y, wall.center.z),
                  new Color(0.3f, 0.85f, 1f), 1.2f, 40f);
-            Spot("Luz do apresentador", new Vector3(podium.x + 1.2f, 4.8f, podium.z - 3.5f), podium + Vector3.up * 1.5f,
-                 new Color(1f, 0.9f, 0.75f), 9f, 26f);
+            var hostLight = Spot("Luz do apresentador", new Vector3(podium.x + 1.2f, 4.8f, podium.z - 3.5f), podium + Vector3.up * 1.5f,
+                 new Color(1f, 0.9f, 0.75f), 15f, 26f);
+            hostLight.shadows = LightShadows.Soft;
         }
 
-        static void Spot(string name, Vector3 position, Vector3 target, Color color, float intensity, float angle)
+        static Light Spot(string name, Vector3 position, Vector3 target, Color color, float intensity, float angle)
         {
             var node = new GameObject(name);
             node.transform.position = position;
@@ -342,6 +355,7 @@ namespace Procon.EditorTools
             light.spotAngle = angle;
             light.range = 16f;
             light.shadows = LightShadows.None;
+            return light;
         }
 
         /// <summary>Lampadas em volta do telao, acendendo em sequencia.</summary>
@@ -397,6 +411,22 @@ namespace Procon.EditorTools
                 foreach (var component in profile.components) AssetDatabase.AddObjectToAsset(component, profile);
                 AssetDatabase.SaveAssets();
             }
+            if (!profile.Has<Tonemapping>())
+            {
+                var tone = profile.Add<Tonemapping>(true);
+                tone.mode.Override(TonemappingMode.ACES);
+                AssetDatabase.AddObjectToAsset(tone, profile);
+            }
+            if (!profile.Has<ColorAdjustments>())
+            {
+                var color = profile.Add<ColorAdjustments>(true);
+                color.postExposure.Override(0.35f);
+                color.contrast.Override(14f);
+                color.saturation.Override(12f);
+                AssetDatabase.AddObjectToAsset(color, profile);
+            }
+            EditorUtility.SetDirty(profile);
+            AssetDatabase.SaveAssets();
             var node = new GameObject("Pos-processamento");
             var volume = node.AddComponent<Volume>();
             volume.isGlobal = true;
@@ -413,13 +443,18 @@ namespace Procon.EditorTools
         static Presenter BuildPresenter(Vector3 feet)
         {
             var jacket = Material("Paleto", new Color(0.58f, 0.09f, 0.2f));
+            var lapel = Material("Lapela", new Color(0.36f, 0.05f, 0.12f));
             var pants = Material("Calca", new Color(0.08f, 0.09f, 0.18f));
             var skin = Material("Pele", new Color(0.76f, 0.52f, 0.34f));
+            var skinShade = Material("Pele sombra", new Color(0.62f, 0.4f, 0.25f));
             var hair = Material("Cabelo", new Color(0.17f, 0.1f, 0.07f));
             var white = Material("Camisa", new Color(0.95f, 0.95f, 0.92f));
             var gold = Material("Dourado", new Color(1f, 0.78f, 0.24f), 0.6f);
             var dark = Material("Detalhe", new Color(0.05f, 0.05f, 0.08f));
             var metal = Material("Microfone", new Color(0.7f, 0.72f, 0.76f));
+            jacket.SetFloat("_Smoothness", 0.45f);
+            gold.SetFloat("_Metallic", 0.8f);
+            metal.SetFloat("_Metallic", 0.9f);
 
             var root = new GameObject("Apresentador");
             root.transform.position = feet;
@@ -429,38 +464,212 @@ namespace Procon.EditorTools
             body.SetParent(root.transform, false);
             presenter.body = body;
 
+            // pernas, sapatos e cinto
             foreach (var side in new[] { -1f, 1f })
-                Block(body, "Perna", new Vector3(0.17f, 0.9f, 0.2f), new Vector3(side * 0.11f, 0.45f, 0f), pants);
-            Block(body, "Paleto", new Vector3(0.56f, 0.66f, 0.3f), new Vector3(0f, 1.23f, 0f), jacket);
-            Block(body, "Camisa", new Vector3(0.14f, 0.5f, 0.02f), new Vector3(0f, 1.3f, -0.155f), white);
-            Block(body, "Gravata", new Vector3(0.17f, 0.07f, 0.03f), new Vector3(0f, 1.5f, -0.17f), gold);
-            Block(body, "Pescoco", new Vector3(0.14f, 0.08f, 0.14f), new Vector3(0f, 1.6f, 0f), skin);
+            {
+                Block(body, "Perna", new Vector3(0.17f, 0.86f, 0.2f), new Vector3(side * 0.11f, 0.49f, 0f), pants);
+                Block(body, "Sapato", new Vector3(0.19f, 0.08f, 0.3f), new Vector3(side * 0.11f, 0.04f, -0.04f), dark);
+            }
+            Block(body, "Cinto", new Vector3(0.5f, 0.05f, 0.27f), new Vector3(0f, 0.92f, 0f), dark);
+            Block(body, "Fivela", new Vector3(0.07f, 0.045f, 0.02f), new Vector3(0f, 0.92f, -0.14f), gold);
 
-            var head = Pivot(body, "Cabeca", new Vector3(0f, 1.64f, 0f));
-            Block(head, "Rosto", new Vector3(0.36f, 0.38f, 0.34f), new Vector3(0f, 0.19f, 0f), skin);
-            Block(head, "Cabelo", new Vector3(0.38f, 0.1f, 0.36f), new Vector3(0f, 0.4f, 0f), hair);
-            Block(head, "Nuca", new Vector3(0.38f, 0.26f, 0.06f), new Vector3(0f, 0.27f, 0.17f), hair);
+            // paleto aberto: camisa, lapelas, gravata borboleta, botoes e lenco
+            Block(body, "Paleto", new Vector3(0.56f, 0.66f, 0.3f), new Vector3(0f, 1.27f, 0f), jacket);
+            Block(body, "Camisa", new Vector3(0.16f, 0.5f, 0.02f), new Vector3(0f, 1.34f, -0.155f), white);
             foreach (var side in new[] { -1f, 1f })
-                Block(head, "Olho", new Vector3(0.05f, 0.05f, 0.02f), new Vector3(side * 0.08f, 0.22f, -0.175f), dark);
-            Block(head, "Sorriso", new Vector3(0.13f, 0.03f, 0.02f), new Vector3(0f, 0.1f, -0.175f), dark);
+            {
+                var flap = Block(body, "Lapela", new Vector3(0.09f, 0.34f, 0.025f), new Vector3(side * 0.1f, 1.4f, -0.162f), lapel);
+                flap.transform.localRotation = Quaternion.Euler(0f, 0f, side * -16f);
+                var collar = Block(body, "Colarinho", new Vector3(0.08f, 0.05f, 0.03f), new Vector3(side * 0.05f, 1.56f, -0.155f), white);
+                collar.transform.localRotation = Quaternion.Euler(0f, 0f, side * 28f);
+            }
+            Block(body, "Gravata", new Vector3(0.17f, 0.07f, 0.03f), new Vector3(0f, 1.53f, -0.17f), gold);
+            Block(body, "Botao", new Vector3(0.035f, 0.035f, 0.012f), new Vector3(0f, 1.14f, -0.156f), gold);
+            Block(body, "Botao", new Vector3(0.035f, 0.035f, 0.012f), new Vector3(0f, 1.04f, -0.156f), gold);
+            Block(body, "Lenco", new Vector3(0.07f, 0.045f, 0.012f), new Vector3(0.18f, 1.46f, -0.157f), white);
+            Block(body, "Pescoco", new Vector3(0.14f, 0.08f, 0.14f), new Vector3(0f, 1.64f, 0f), skin);
+
+            // cabeca: orelhas, nariz, sobrancelhas, olhos com pupila (piscam) e boca (fala)
+            var head = Pivot(body, "Cabeca", new Vector3(0f, 1.68f, 0f));
+            Block(head, "Rosto", new Vector3(0.36f, 0.38f, 0.34f), new Vector3(0f, 0.19f, 0f), skin);
+            foreach (var side in new[] { -1f, 1f })
+            {
+                Block(head, "Orelha", new Vector3(0.05f, 0.1f, 0.08f), new Vector3(side * 0.195f, 0.19f, 0.01f), skinShade);
+                Block(head, "Sobrancelha", new Vector3(0.09f, 0.025f, 0.02f), new Vector3(side * 0.085f, 0.3f, -0.176f), hair);
+                Block(head, "Costeleta", new Vector3(0.03f, 0.1f, 0.12f), new Vector3(side * 0.18f, 0.29f, -0.06f), hair);
+            }
+            Block(head, "Nariz", new Vector3(0.06f, 0.08f, 0.05f), new Vector3(0f, 0.17f, -0.19f), skinShade);
+            Block(head, "Cabelo", new Vector3(0.38f, 0.1f, 0.36f), new Vector3(0f, 0.4f, 0f), hair);
+            Block(head, "Topete", new Vector3(0.3f, 0.06f, 0.08f), new Vector3(0.03f, 0.37f, -0.16f), hair);
+            Block(head, "Nuca", new Vector3(0.38f, 0.26f, 0.06f), new Vector3(0f, 0.27f, 0.17f), hair);
+            var eyes = Pivot(head, "Olhos", new Vector3(0f, 0.235f, -0.172f));
+            foreach (var side in new[] { -1f, 1f })
+            {
+                Block(eyes, "Olho", new Vector3(0.075f, 0.055f, 0.012f), new Vector3(side * 0.085f, 0f, 0f), white);
+                Block(eyes, "Pupila", new Vector3(0.035f, 0.045f, 0.012f), new Vector3(side * 0.085f + 0.01f, 0f, -0.006f), dark);
+            }
+            presenter.eyes = eyes;
+            presenter.mouth = Block(head, "Boca", new Vector3(0.12f, 0.025f, 0.02f), new Vector3(0f, 0.09f, -0.175f), dark).transform;
             presenter.head = head;
 
-            // braco do telao (+X) e braco do microfone (-X), girando no ombro
-            presenter.armScreen = Arm(body, 1f, jacket, skin);
+            // bracos girando no ombro: o do telao (+X) e o do microfone (-X)
+            presenter.armScreen = Arm(body, 1f, jacket, white, skin);
             presenter.armScreen.localRotation = Quaternion.Euler(0f, 0f, 8f);
-            presenter.armMic = Arm(body, -1f, jacket, skin);
+            presenter.armMic = Arm(body, -1f, jacket, white, skin);
             presenter.armMic.localRotation = Quaternion.Euler(55f, 0f, -6f);
             var mic = Block(presenter.armMic, "Microfone", new Vector3(0.05f, 0.2f, 0.05f), new Vector3(0f, -0.72f, 0f), dark);
             Block(mic.transform, "Globo", new Vector3(1.8f, 0.45f, 1.8f), new Vector3(0f, -0.55f, 0f), metal);
+            Block(mic.transform, "Anel", new Vector3(1.3f, 0.12f, 1.3f), new Vector3(0f, -0.3f, 0f), gold);
+
+            foreach (var renderer in root.GetComponentsInChildren<Renderer>())
+                renderer.shadowCastingMode = ShadowCastingMode.On;
             return presenter;
         }
 
-        static Transform Arm(Transform body, float side, Material sleeve, Material skin)
+        static Transform Arm(Transform body, float side, Material sleeve, Material cuff, Material skin)
         {
-            var shoulder = Pivot(body, side > 0 ? "Braco do telao" : "Braco do microfone", new Vector3(side * 0.36f, 1.52f, 0f));
-            Block(shoulder, "Manga", new Vector3(0.15f, 0.6f, 0.17f), new Vector3(0f, -0.28f, 0f), sleeve);
-            Block(shoulder, "Mao", new Vector3(0.13f, 0.12f, 0.13f), new Vector3(0f, -0.62f, 0f), skin);
+            var shoulder = Pivot(body, side > 0 ? "Braco do telao" : "Braco do microfone", new Vector3(side * 0.36f, 1.56f, 0f));
+            Block(shoulder, "Manga", new Vector3(0.15f, 0.56f, 0.17f), new Vector3(0f, -0.28f, 0f), sleeve);
+            Block(shoulder, "Punho", new Vector3(0.16f, 0.05f, 0.18f), new Vector3(0f, -0.57f, 0f), cuff);
+            Block(shoulder, "Mao", new Vector3(0.13f, 0.12f, 0.13f), new Vector3(0f, -0.65f, 0f), skin);
             return shoulder;
+        }
+
+        // ================================================================== balcao do apresentador
+
+        /// <summary>
+        /// Balcao de apresentador no lugar do pulpito gerado: rodape, corpo escuro
+        /// brilhante, frente de LED azul, filetes dourados, tampo e a placa do
+        /// programa presa na frente. O texto fica sobre a placa, sem flutuar.
+        /// </summary>
+        static void HostDesk(GameObject studio, Vector3 floor)
+        {
+            var old = studio.transform.Find("Presentation lectern");
+            if (old != null) old.gameObject.SetActive(false);
+
+            var body = Material("Balcao", new Color(0.04f, 0.05f, 0.1f));
+            body.SetFloat("_Smoothness", 0.8f);
+            body.SetFloat("_Metallic", 0.3f);
+            var panel = Material("Balcao LED", new Color(0.03f, 0.12f, 0.36f), 0.45f);
+            panel.SetColor("_BaseColor", new Color(0.03f, 0.12f, 0.36f));
+            panel.SetColor("_EmissionColor", new Color(0.03f, 0.12f, 0.36f) * 0.45f);
+            panel.SetFloat("_Smoothness", 0.85f);
+            var trim = Material("Filete dourado", new Color(1f, 0.78f, 0.3f), 0.8f);
+            trim.SetFloat("_Metallic", 0.8f);
+            var plate = Material("Placa do balcao", new Color(0.01f, 0.01f, 0.03f));
+            plate.SetFloat("_Smoothness", 0.9f);
+
+            var root = new GameObject("Balcao do apresentador").transform;
+            root.position = floor;
+            const float width = 1.36f, depth = 0.72f, height = 1.12f;
+            float front = -depth / 2f;
+
+            Block(root, "Rodape", new Vector3(width + 0.08f, 0.08f, depth + 0.08f), new Vector3(0f, 0.04f, 0f), body);
+            Block(root, "Filete do rodape", new Vector3(width + 0.09f, 0.015f, depth + 0.09f), new Vector3(0f, 0.085f, 0f), trim);
+            Block(root, "Corpo", new Vector3(width, height - 0.14f, depth), new Vector3(0f, 0.09f + (height - 0.14f) / 2f, 0f), body);
+            Block(root, "Frente de LED", new Vector3(width - 0.16f, height - 0.36f, 0.02f), new Vector3(0f, 0.12f + (height - 0.36f) / 2f + 0.08f, front - 0.01f), panel);
+            foreach (var side in new[] { -1f, 1f })
+                Block(root, "Coluna dourada", new Vector3(0.03f, height - 0.14f, 0.03f), new Vector3(side * (width / 2f - 0.02f), 0.09f + (height - 0.14f) / 2f, front - 0.012f), trim);
+            Block(root, "Tampo", new Vector3(width + 0.12f, 0.06f, depth + 0.14f), new Vector3(0f, height - 0.02f, -0.02f), body);
+            Block(root, "Filete do tampo", new Vector3(width + 0.13f, 0.012f, depth + 0.15f), new Vector3(0f, height - 0.055f, -0.02f), trim);
+
+            // placa encostada na frente de LED, e o texto encostado na placa
+            var plateY = 0.12f + (height - 0.36f) / 2f + 0.16f;
+            var plateZ = front - 0.03f;
+            Block(root, "Placa", new Vector3(width - 0.34f, 0.24f, 0.02f), new Vector3(0f, plateY, plateZ), plate);
+            var node = new GameObject("Nome do programa");
+            node.transform.SetParent(root, false);
+            node.transform.localPosition = new Vector3(0f, plateY, plateZ - 0.0115f);
+            var text = node.AddComponent<TextMeshPro>();
+            text.text = "SHOW DO PROCON";
+            text.fontStyle = FontStyles.Bold;
+            text.alignment = TextAlignmentOptions.Center;
+            text.color = new Color(1f, 0.82f, 0.3f);
+            text.rectTransform.sizeDelta = new Vector2(width - 0.42f, 0.18f);
+            text.enableWordWrapping = false;
+            text.enableAutoSizing = true;
+            text.fontSizeMin = 0.3f;
+            text.fontSizeMax = 1.4f;
+        }
+
+        // ================================================================== estudio
+
+        /// <summary>
+        /// Parede de fundo com colunas de luz, faixas de LED correndo nos paineis
+        /// laterais, faixa de luz na beira do palco, circulo de luz no chao do
+        /// apresentador e dois refletores com feixe nas laterais.
+        /// </summary>
+        static void DecorateStudio(GameObject studio, Bounds wall, float front, bool menu)
+        {
+            var root = new GameObject("Cenario do estudio").transform;
+            var backWall = Material("Parede do estudio", new Color(0.02f, 0.03f, 0.07f));
+            var cyan = Material("Coluna de luz ciano", new Color(0.2f, 0.75f, 1f), 1.5f);
+            var blue = Material("Coluna de luz azul", new Color(0.15f, 0.35f, 1f), 1.5f);
+            cyan.SetColor("_EmissionColor", new Color(0.2f, 0.75f, 1f) * 1.5f);
+            blue.SetColor("_EmissionColor", new Color(0.15f, 0.35f, 1f) * 1.5f);
+            var stripLight = Material("Faixa de LED", new Color(0.3f, 0.8f, 1f), 3f);
+
+            // parede de fundo e colunas de luz (aparecem atras do apresentador e nas laterais)
+            var backZ = wall.max.z + 1.4f;
+            Block(root, "Parede de fundo", new Vector3(26f, 10f, 0.2f), new Vector3(0f, 4.5f, backZ), backWall);
+            var xs = new[] { -10.6f, -9.2f, -7.8f, -6.4f, 6.4f, 7.8f, 9.2f, 10.6f };
+            for (var i = 0; i < xs.Length; i++)
+            {
+                Block(root, "Coluna de luz", new Vector3(0.14f, 6.4f, 0.06f), new Vector3(xs[i], 3.6f, backZ - 0.13f), i % 2 == 0 ? cyan : blue);
+                Block(root, "Moldura da coluna", new Vector3(0.3f, 6.6f, 0.04f), new Vector3(xs[i], 3.6f, backZ - 0.1f), backWall);
+            }
+            Block(root, "Faixa alta", new Vector3(26f, 0.08f, 0.06f), new Vector3(0f, 7.2f, backZ - 0.13f), blue);
+            Block(root, "Faixa baixa", new Vector3(26f, 0.08f, 0.06f), new Vector3(0f, 0.5f, backZ - 0.13f), blue);
+
+            // faixas de luz correndo nos dois paineis laterais
+            foreach (var name in new[] { "Left LED wing", "Right LED wing" })
+            {
+                var wing = studio.transform.Find(name);
+                if (wing == null) continue;
+                var bounds = Bounds(wing);
+                var holder = new GameObject("Faixas " + name).transform;
+                holder.SetParent(wing, true);
+                var strips = new List<Renderer>();
+                for (var k = 0; k < 9; k++)
+                {
+                    var y = Mathf.Lerp(bounds.min.y + 0.3f, bounds.max.y - 0.3f, k / 8f);
+                    var strip = Block(holder, "Faixa", new Vector3(bounds.size.x * 0.8f, 0.05f, 0.02f), Vector3.zero, stripLight);
+                    strip.transform.position = new Vector3(bounds.center.x, y, bounds.min.z - 0.02f);
+                    strip.transform.rotation = wing.rotation;
+                    strips.Add(strip.GetComponent<Renderer>());
+                }
+                var chase = holder.gameObject.AddComponent<Marquee>();
+                chase.bulbs = strips.ToArray();
+                chase.on = new Color(0.3f, 0.8f, 1f);
+                chase.off = new Color(0.03f, 0.08f, 0.15f);
+                chase.glow = 3f;
+                chase.stepSeconds = 0.22f;
+            }
+
+            // faixa de luz na beira do palco, embaixo do telao
+            Block(root, "Beira do palco", new Vector3(wall.size.x + 1.2f, 0.03f, 0.05f), new Vector3(wall.center.x, 0.235f, front - 0.6f), stripLight);
+
+            if (!menu)
+            {
+                // refletores nas laterais, longe do telao, varrendo devagar
+                MovingSpot(10, new Vector3(-8.2f, 7.4f, -0.4f), new Color(0.3f, 0.6f, 1f));
+                MovingSpot(11, new Vector3(6.9f, 7.4f, -0.4f), new Color(1f, 0.82f, 0.4f));
+            }
+        }
+
+        /// <summary>
+        /// Sombras das luzes de palco no renderer 3D. (Oclusao de ambiente foi
+        /// testada e tirada: ao ligar e desligar, a imagem estourava em ciano.)
+        /// </summary>
+        static void EnsureRenderQuality()
+        {
+            var urp = AssetDatabase.LoadAssetAtPath<UniversalRenderPipelineAsset>("Assets/Settings/UniversalRP.asset");
+            if (urp != null)
+            {
+                var so = new SerializedObject(urp);
+                var shadows = so.FindProperty("m_AdditionalLightShadowsSupported");
+                if (shadows != null && !shadows.boolValue) { shadows.boolValue = true; so.ApplyModifiedProperties(); }
+            }
         }
 
         static Transform Pivot(Transform parent, string name, Vector3 position)
@@ -481,22 +690,6 @@ namespace Procon.EditorTools
             block.transform.localScale = size;
             block.GetComponent<Renderer>().sharedMaterial = material;
             return block;
-        }
-
-        static void LecternSign(Transform lectern)
-        {
-            var bounds = Bounds(lectern);
-            var node = new GameObject("Placa do pulpito");
-            node.transform.position = new Vector3(bounds.center.x, bounds.max.y - 0.2f, bounds.min.z - 0.01f);
-            var text = node.AddComponent<TextMeshPro>();
-            text.text = "PROCON";
-            text.fontStyle = FontStyles.Bold;
-            text.alignment = TextAlignmentOptions.Center;
-            text.color = new Color(1f, 0.82f, 0.3f);
-            text.rectTransform.sizeDelta = new Vector2(bounds.size.x * 0.85f, 0.3f);
-            text.enableAutoSizing = true;
-            text.fontSizeMin = 0.5f;
-            text.fontSizeMax = 2.2f;
         }
 
         // ================================================================== telao e faixa
