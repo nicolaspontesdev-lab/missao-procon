@@ -40,6 +40,8 @@ namespace Procon
         public RectTransform progressFill;
         public RectTransform routeBar;
         public TMP_Text routeStopTemplate;
+        [Tooltip("Pilula com fundo em volta do texto da parada; se vazio, copia so o texto.")]
+        public GameObject routeStopRoot;
 
         [Header("Cena")]
         [Tooltip("Um palco por ambiente. Só o do caso atual fica ligado.")]
@@ -135,6 +137,7 @@ namespace Procon
             GameSession.LoadPreferences();
 
             if (routeStopTemplate != null) routeStopTemplate.gameObject.SetActive(false);
+            if (routeStopRoot != null) routeStopRoot.SetActive(false);
             if (reviewItemTemplate != null) reviewItemTemplate.gameObject.SetActive(false);
 
             WireButtons();
@@ -229,10 +232,13 @@ namespace Procon
 
             for (var i = 0; i < round.StopCount; i++)
             {
-                var stop = Instantiate(routeStopTemplate, routeBar);
-                stop.gameObject.SetActive(true);
+                var stop = routeStopRoot != null
+                    ? Instantiate(routeStopRoot, routeBar)
+                    : Instantiate(routeStopTemplate, routeBar).gameObject;
+                stop.SetActive(true);
+                foreach (var text in stop.GetComponentsInChildren<TMP_Text>(true)) text.gameObject.SetActive(true);
                 stop.name = "RouteStop" + i;
-                spawned.Add(stop.gameObject);
+                spawned.Add(stop);
             }
         }
 
@@ -240,15 +246,23 @@ namespace Procon
         {
             for (var i = 0; i < spawned.Count; i++)
             {
-                var label = spawned[i] != null ? spawned[i].GetComponent<TMP_Text>() : null;
+                var label = spawned[i] != null ? spawned[i].GetComponentInChildren<TMP_Text>() : null;
                 if (label == null) continue;
 
                 var scenario = database.Scenario(round.stops[i].scenario);
                 label.text = (i + 1).ToString("00") + " " + scenario.label;
 
                 if (i < activeStop) label.color = Palette.Green;
-                else if (i == activeStop) label.color = Palette.Yellow;
-                else label.color = Palette.Alpha(Palette.White, 0.45f);
+                else if (i == activeStop) label.color = Palette.Ink;
+                else label.color = Palette.Alpha(Palette.White, 0.5f);
+
+                // pilula: verde ja visitado, dourada a atual, apagada as proximas
+                var pill = spawned[i].GetComponent<Image>();
+                if (pill != null)
+                    pill.color = i < activeStop ? Palette.Alpha(Palette.GreenDark, 0.85f)
+                               : i == activeStop ? Palette.Yellow
+                               : Palette.Alpha(Palette.Shadow, 0.6f);
+                if (i < activeStop) label.color = Palette.White;
             }
         }
 

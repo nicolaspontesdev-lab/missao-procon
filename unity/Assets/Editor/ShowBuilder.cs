@@ -77,6 +77,171 @@ namespace Procon.EditorTools
             return rig;
         }
 
+        // ================================================================== menu em 3D
+
+        /// <summary>
+        /// Palco do menu: o mesmo estudio, com o titulo em letras 3D flutuando na
+        /// frente do telao, quatro holofotes coloridos com feixe visivel varrendo o
+        /// palco e as lampadas acesas. A interface do menu fica por cima.
+        /// </summary>
+        public static void BuildMenuStage()
+        {
+            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            RenderSettings.ambientMode = AmbientMode.Flat;
+            RenderSettings.ambientLight = new Color(0.12f, 0.09f, 0.2f);
+            RenderSettings.skybox = null;
+
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(StudioBuilder.PrefabPath);
+            if (prefab == null) return;
+            var studio = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+            var wall = Bounds(studio.transform.Find("Main LED backdrop"));
+            var front = wall.min.z - 0.015f;
+
+            var lectern = studio.transform.Find("Presentation lectern");
+            var podium = new Vector3(wall.min.x - 0.56f, 0.22f, 1.3f);
+            if (lectern != null) { lectern.position = new Vector3(podium.x, lectern.position.y, podium.z); LecternSign(lectern); }
+            BuildPresenter(new Vector3(podium.x, 0.22f, podium.z + 0.48f));
+
+            // camera aberta: o palco inteiro, o telao e o titulo na frente dele
+            var target = new Vector3(0f, wall.center.y - 0.2f, front);
+            var node = new GameObject("Main Camera");
+            node.tag = "MainCamera";
+            var camera = node.AddComponent<Camera>();
+            camera.clearFlags = CameraClearFlags.SolidColor;
+            camera.backgroundColor = new Color(0.02f, 0.01f, 0.05f);
+            camera.fieldOfView = 50f;
+            node.AddComponent<AudioListener>();
+            var data = node.AddComponent<UniversalAdditionalCameraData>();
+            data.SetRenderer(StudioRenderer);
+            data.renderPostProcessing = true;
+            data.antialiasing = AntialiasingMode.SubpixelMorphologicalAntiAliasing;
+            node.transform.position = target + new Vector3(0f, 0.6f, -10.5f);
+            node.transform.LookAt(target);
+            var drift = node.AddComponent<CameraDrift>();
+            drift.target = target;
+            drift.amplitude = new Vector3(0.35f, 0.1f, 0.15f);
+            drift.period = 16f;
+
+            BuildBulbs(wall, front);
+            BuildVolume();
+
+            // titulo 3D na metade de cima do telao, balancando devagar
+            var titlePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(StudioBuilder.TitlePath);
+            if (titlePrefab != null)
+            {
+                var title = (GameObject)PrefabUtility.InstantiatePrefab(titlePrefab);
+                title.transform.position = new Vector3(0f, wall.center.y + 0.15f, front - 1.1f);
+                title.transform.localScale = Vector3.one * 1.05f;
+                title.AddComponent<Hover>();
+                Spot("Luz do titulo", new Vector3(0f, 6.8f, front - 6f), title.transform.position + Vector3.up * 0.6f,
+                     new Color(1f, 0.92f, 0.8f), 28f, 34f);
+            }
+
+            // holofotes de show: luz real com cone de luz visivel, varrendo o palco
+            var colors = new[] { new Color(1f, 0.3f, 0.75f), new Color(0.3f, 0.85f, 1f), new Color(1f, 0.8f, 0.3f), new Color(0.6f, 0.35f, 1f) };
+            var xs = new[] { -5.2f, -1.9f, 1.9f, 5.2f };
+            for (var i = 0; i < xs.Length; i++)
+                MovingSpot(i, new Vector3(xs[i], 7.2f, -0.6f), colors[i]);
+        }
+
+        static void MovingSpot(int index, Vector3 position, Color color)
+        {
+            var node = new GameObject("Holofote " + (index + 1));
+            node.transform.position = position;
+            node.transform.rotation = Quaternion.LookRotation(new Vector3(-position.x * 0.35f, -position.y, 1.5f));
+            var light = node.AddComponent<Light>();
+            light.type = LightType.Spot;
+            light.color = color;
+            light.intensity = 40f;
+            light.spotAngle = 24f;
+            light.range = 14f;
+            light.shadows = LightShadows.None;
+
+            var beam = new GameObject("Feixe");
+            beam.transform.SetParent(node.transform, false);
+            beam.transform.localScale = new Vector3(1.45f, 1.45f, 8.5f);
+            beam.AddComponent<MeshFilter>().sharedMesh = ConeMesh();
+            var renderer = beam.AddComponent<MeshRenderer>();
+            renderer.sharedMaterial = BeamMaterial("Feixe " + (index + 1), color);
+            renderer.shadowCastingMode = ShadowCastingMode.Off;
+
+            var sweep = node.AddComponent<LightSweep>();
+            sweep.phase = index * 1.7f;
+            sweep.yaw = 22f;
+            sweep.pitch = 10f;
+            sweep.period = 5.5f + index * 0.8f;
+        }
+
+        /// <summary>Cone aberto que nasce na lampada (origem) e abre para +Z.</summary>
+        static Mesh ConeMesh()
+        {
+            const string path = ArtFolder + "/Feixe.asset";
+            var mesh = AssetDatabase.LoadAssetAtPath<Mesh>(path);
+            if (mesh != null) return mesh;
+            const int segments = 28;
+            var vertices = new List<Vector3>();
+            var uvs = new List<Vector2>();
+            var triangles = new List<int>();
+            for (var i = 0; i <= segments; i++)
+            {
+                var a = i * Mathf.PI * 2f / segments;
+                vertices.Add(new Vector3(Mathf.Cos(a) * 0.04f, Mathf.Sin(a) * 0.04f, 0f));
+                uvs.Add(new Vector2((float)i / segments, 0f));
+                vertices.Add(new Vector3(Mathf.Cos(a), Mathf.Sin(a), 1f));
+                uvs.Add(new Vector2((float)i / segments, 1f));
+            }
+            for (var i = 0; i < segments; i++)
+            {
+                int a = i * 2, b = a + 1, c = a + 2, d = a + 3;
+                triangles.AddRange(new[] { a, b, c, c, b, d });
+            }
+            mesh = new Mesh { name = "Feixe de luz" };
+            mesh.SetVertices(vertices);
+            mesh.SetUVs(0, uvs);
+            mesh.SetTriangles(triangles, 0);
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
+            AssetDatabase.CreateAsset(mesh, path);
+            return mesh;
+        }
+
+        /// <summary>Material aditivo, sem profundidade: o feixe so soma luz, forte na lampada e sumindo na ponta.</summary>
+        static Material BeamMaterial(string name, Color color)
+        {
+            var path = ArtFolder + "/Materiais/" + name + ".mat";
+            var material = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (material != null) return material;
+            if (!AssetDatabase.IsValidFolder(ArtFolder + "/Materiais")) AssetDatabase.CreateFolder(ArtFolder, "Materiais");
+
+            var texturePath = ArtFolder + "/feixe3d.png";
+            if (!File.Exists(texturePath))
+            {
+                var gradient = new Texture2D(8, 256, TextureFormat.RGBA32, false);
+                for (var y = 0; y < 256; y++)
+                {
+                    var k = Mathf.Pow(1f - y / 255f, 1.8f);
+                    for (var x = 0; x < 8; x++) gradient.SetPixel(x, y, new Color(k, k, k, 1f));
+                }
+                File.WriteAllBytes(texturePath, gradient.EncodeToPNG());
+                Object.DestroyImmediate(gradient);
+                AssetDatabase.ImportAsset(texturePath);
+            }
+
+            material = new Material(Shader.Find("Universal Render Pipeline/Unlit")) { name = name };
+            material.SetFloat("_Surface", 1f);
+            material.SetFloat("_Blend", 2f);
+            material.SetFloat("_SrcBlend", (float)BlendMode.One);
+            material.SetFloat("_DstBlend", (float)BlendMode.One);
+            material.SetFloat("_ZWrite", 0f);
+            material.SetFloat("_Cull", 0f);
+            material.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            material.renderQueue = (int)RenderQueue.Transparent;
+            material.SetTexture("_BaseMap", AssetDatabase.LoadAssetAtPath<Texture2D>(texturePath));
+            material.SetColor("_BaseColor", color * 0.28f);
+            AssetDatabase.CreateAsset(material, path);
+            return material;
+        }
+
         static Bounds Bounds(Transform node)
         {
             var renderers = node.GetComponentsInChildren<Renderer>();
@@ -366,7 +531,7 @@ namespace Procon.EditorTools
 
         // ================================================================== materiais e arte do menu
 
-        static Material Material(string name, Color color, float emission = 0f)
+        internal static Material Material(string name, Color color, float emission = 0f)
         {
             var path = ArtFolder + "/Materiais/" + name + ".mat";
             var material = AssetDatabase.LoadAssetAtPath<Material>(path);

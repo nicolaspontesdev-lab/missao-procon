@@ -76,6 +76,115 @@ namespace Procon.EditorTools
             Debug.Log("Missao PROCON: estudio salvo em " + PrefabPath);
         }
 
+        public const string TitlePath = Folder + "/Letreiro3D.prefab";
+        const string TitleMeshes = Folder + "/Letras";
+
+        /// <summary>
+        /// Titulo "SHOW DO / PROCON" em letras 3D extrudadas, feitas com a
+        /// ferramenta de letras deformaveis do llm-tools: cada letra ganha uma
+        /// deformacao de volume propria (abre em cima, curva e torce alternando) e
+        /// as letras ficam em arco, como logotipo de programa de auditorio.
+        /// </summary>
+        [MenuItem("Missao PROCON/5 - Gerar titulo 3D (precisa do llm-tools)")]
+        public static void GenerateTitle()
+        {
+            var letters = Type.GetType("LlmTools.DeformableTextTools, LlmTools.Editor");
+            var json = Type.GetType("Newtonsoft.Json.Linq.JObject, Newtonsoft.Json");
+            if (letters == null || json == null)
+            {
+                EditorUtility.DisplayDialog("Missão PROCON", "Instale o pacote llm-tools-unity só para gerar o título; depois pode remover.", "OK");
+                return;
+            }
+
+            Directory(Folder);
+            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            EditorSceneManager.SaveScene(scene, Workshop);
+            if (AssetDatabase.IsValidFolder(GeneratedByTool)) AssetDatabase.DeleteAsset(GeneratedByTool);
+
+            var root = new GameObject("Letreiro 3D");
+            var top = Word(letters, json, "SHOW DO", 0.62f, 4.2f, 0.22f, (i, n) =>
+                "{\"op\":\"warp\",\"twist\":" + (i % 2 == 0 ? 10 : -10) + ",\"bend\":0,\"taper\":0.88,\"slices\":10}");
+            var bottom = Word(letters, json, "PROCON", 1.25f, 6.4f, 0.38f, (i, n) =>
+                "{\"op\":\"warp\",\"twist\":" + (i % 2 == 0 ? 6 : -6) + ",\"bend\":" + (i % 2 == 0 ? 12 : -12) + ",\"taper\":1.28,\"slices\":14}");
+            top.transform.SetParent(root.transform, false);
+            bottom.transform.SetParent(root.transform, false);
+            top.transform.localPosition = new Vector3(0f, 1.5f, 0f);
+
+            Arch(top.transform, 0.12f, 6f);
+            Arch(bottom.transform, 0.32f, 9f);
+
+            StripToolComponents(root);
+            Paint(top, ShowBuilder.Material("Letra prata", new Color(0.95f, 0.96f, 1f), 0.45f), 0.6f);
+            Paint(bottom, ShowBuilder.Material("Letra dourada", new Color(1f, 0.74f, 0.2f), 0.35f), 0.85f);
+
+            if (AssetDatabase.IsValidFolder(GeneratedByTool))
+            {
+                if (AssetDatabase.IsValidFolder(TitleMeshes)) AssetDatabase.DeleteAsset(TitleMeshes);
+                var error = AssetDatabase.MoveAsset(GeneratedByTool, TitleMeshes);
+                if (!string.IsNullOrEmpty(error)) Debug.LogError("Missao PROCON: " + error);
+            }
+            PrefabUtility.SaveAsPrefabAsset(root, TitlePath);
+            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            AssetDatabase.DeleteAsset(Workshop);
+            AssetDatabase.SaveAssets();
+            Debug.Log("Missao PROCON: titulo salvo em " + TitlePath);
+        }
+
+        /// <summary>Cria uma palavra e aplica a deformacao 3D de cada letra pela propria ferramenta.</summary>
+        static GameObject Word(Type tools, Type json, string text, float height, float width, float depth, Func<int, int, string> warp)
+        {
+            var result = Invoke(tools, json, "llm_create_deformable_text",
+                "{\"text\":\"" + text + "\",\"name\":\"" + text + "\",\"height\":" + F(height) + ",\"width\":" + F(width) +
+                ",\"depth\":" + F(depth) + ",\"spacing\":0.06,\"samples\":10,\"color\":\"#FFFFFF\"}");
+            var raw = result.ToString();
+            var rows = System.Text.RegularExpressions.Regex.Matches(raw.Substring(raw.IndexOf("\"Rows\"")),
+                "\\[\\s*(\\d+),\\s*\"(.*?)\",\\s*\"(r:\\d+)\"");
+            var visible = 0;
+            foreach (System.Text.RegularExpressions.Match row in rows)
+            {
+                if (string.IsNullOrWhiteSpace(row.Groups[2].Value)) continue;
+                Invoke(Type.GetType("LlmTools.DeformableTextTools, LlmTools.Editor"), json, "llm_deform_letter",
+                    "{\"id\":\"" + row.Groups[3].Value + "\",\"operations\":[" + warp(visible, rows.Count) + "]}");
+                visible++;
+            }
+            var created = FindNewest(text);
+            if (created == null) throw new InvalidOperationException("Nao achei a palavra " + text);
+            return created;
+        }
+
+        /// <summary>Sobe o meio da palavra e inclina as pontas: arco de logotipo.</summary>
+        static void Arch(Transform word, float rise, float tilt)
+        {
+            float extent = 0f;
+            foreach (Transform letter in word) extent = Mathf.Max(extent, Mathf.Abs(letter.localPosition.x));
+            if (extent <= 0f) return;
+            foreach (Transform letter in word)
+            {
+                var k = letter.localPosition.x / extent;
+                letter.localPosition += Vector3.up * rise * (1f - k * k);
+                letter.localRotation = Quaternion.Euler(0f, 0f, -k * tilt) * letter.localRotation;
+            }
+        }
+
+        static void Paint(GameObject word, Material material, float metallic)
+        {
+            material.SetFloat("_Metallic", metallic);
+            material.SetFloat("_Smoothness", 0.72f);
+            EditorUtility.SetDirty(material);
+            foreach (var renderer in word.GetComponentsInChildren<MeshRenderer>(true))
+            {
+                renderer.sharedMaterial = material;
+                renderer.SetPropertyBlock(null);
+            }
+        }
+
+        static object Invoke(Type tools, Type json, string tool, string arguments)
+        {
+            var parse = json.GetMethod("Parse", new[] { typeof(string) });
+            var handle = tools.GetMethod("Handle", BindingFlags.Public | BindingFlags.Static);
+            return handle.Invoke(null, new[] { tool, parse.Invoke(null, new object[] { arguments }) });
+        }
+
         static GameObject Call(Type tools, Type json, string tool, string arguments)
         {
             var parse = json.GetMethod("Parse", new[] { typeof(string) });

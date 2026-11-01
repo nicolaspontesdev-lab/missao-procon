@@ -302,6 +302,29 @@ namespace Procon.EditorTools
             return cabinet.transform;
         }
 
+        /// <summary>Canvas da interface por cima de uma cena 3D que ja tem camera.</summary>
+        static Transform NewOverlay()
+        {
+            var canvasNode = new GameObject("Canvas", typeof(RectTransform));
+            var canvas = canvasNode.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            var scaler = canvasNode.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920f, 1080f);
+            scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+            scaler.matchWidthOrHeight = 0.5f;
+            canvasNode.AddComponent<GraphicRaycaster>();
+
+            var eventNode = new GameObject("EventSystem");
+            eventNode.AddComponent<EventSystem>();
+            eventNode.AddComponent<InputSystemUIInputModule>();
+
+            var cabinet = UiKit.Panel("Cabinet", canvasNode.transform, Color.clear);
+            cabinet.raycastTarget = false;
+            UiKit.Stretch(UiKit.Rect(cabinet.gameObject), 24, 24, 24, 24);
+            return cabinet.transform;
+        }
+
         static void RegisterScenes()
         {
             EditorBuildSettings.scenes = new[]
@@ -387,6 +410,7 @@ namespace Procon.EditorTools
             BuildSceneColumn(body.transform, controller);
             BuildDialogColumn(body.transform, controller);
             BuildFinalPanel(frame, controller);
+            ShowSkin.SkinGame(frame, controller);
 
             EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene(), GameScenePath);
         }
@@ -606,22 +630,13 @@ namespace Procon.EditorTools
         static void BuildMenuScene(CaseDatabase database)
         {
             ShowBuilder.EnsureMenuArt();
-            var frame = NewScene("Cabinet");
-            frame.GetComponent<Image>().color = new Color(0.09f, 0.05f, 0.2f);
-            frame.gameObject.AddComponent<RectMask2D>();     // holofotes e brilhos nao vazam
+            ShowBuilder.BuildMenuStage();       // palco 3D: titulo em letras 3D, holofotes e lampadas
+            var frame = NewOverlay();
 
             var controllerNode = new GameObject("MenuController");
             var controller = controllerNode.AddComponent<MenuController>();
             controller.database = database;
             controller.gameSceneName = "01_Jogo";
-
-            // ---- palco: brilhos coloridos, chao iluminado e dois holofotes indo e voltando
-            Glow(frame, "Brilho roxo", new Color(0.55f, 0.25f, 1f, 0.55f), 0.5f, 0.78f, 1500f);
-            Glow(frame, "Brilho magenta", new Color(1f, 0.25f, 0.6f, 0.35f), 0.08f, 0.05f, 900f);
-            Glow(frame, "Brilho ciano", new Color(0.25f, 0.8f, 1f, 0.3f), 0.92f, 0.05f, 900f);
-            Glow(frame, "Chao do palco", new Color(1f, 0.8f, 0.4f, 0.25f), 0.5f, -0.02f, 1300f);
-            Beam(frame, "Holofote esquerdo", 0.12f, new Color(1f, 0.85f, 0.5f, 0.22f), -25f, 0f);
-            Beam(frame, "Holofote direito", 0.88f, new Color(0.5f, 0.85f, 1f, 0.22f), 25f, 2.5f);
 
             // ---- faixa de texto correndo no topo
             var tickerBand = UiKit.Panel("Ticker", frame, Palette.Alpha(Palette.Shadow, 0.85f));
@@ -640,47 +655,18 @@ namespace Procon.EditorTools
             tickerFit.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
             controller.ticker = tickerRect;
 
-            // ---- letreiro do programa com moldura de lampadas
-            var sign = UiKit.Node("Letreiro", frame);
-            var signRect = UiKit.Rect(sign);
-            signRect.anchorMin = signRect.anchorMax = new Vector2(0.5f, 1f);
-            signRect.pivot = new Vector2(0.5f, 1f);
-            signRect.sizeDelta = new Vector2(1120f, 320f);
-            signRect.anchoredPosition = new Vector2(0f, -66f);
-            controller.title = signRect;
-
-            var rim = UiKit.Panel("Moldura", sign.transform, Palette.Yellow);
-            UiKit.Full(UiKit.Rect(rim.gameObject));
-            var plate = UiKit.Panel("Placa", sign.transform, new Color(0.13f, 0.06f, 0.28f));
-            UiKit.Stretch(UiKit.Rect(plate.gameObject), 10, 10, 10, 10);
-            var bulbs = BulbFrame(sign.transform, 1120f, 320f, 34f);
-            var marquee = sign.AddComponent<Marquee>();
-            marquee.uiBulbs = bulbs;
-            marquee.on = new Color(1f, 0.9f, 0.55f);
-            marquee.off = new Color(0.45f, 0.28f, 0.12f);
-
-            var showDo = UiKit.Label("ShowDo", sign.transform, "SHOW DO", 54, Palette.White, TextAlignmentOptions.Center);
-            showDo.fontStyle = FontStyles.Bold;
-            showDo.characterSpacing = 18f;
-            UiKit.Frac(showDo.rectTransform, 0.05f, 0.66f, 0.95f, 0.9f);
-            var title = UiKit.Label("Title", sign.transform, "PROCON", 150, Palette.Yellow, TextAlignmentOptions.Center);
-            title.fontStyle = FontStyles.Bold;
-            title.outlineWidth = 0.18f;
-            title.outlineColor = new Color32(120, 40, 10, 255);
-            UiKit.Frac(title.rectTransform, 0.05f, 0.14f, 0.95f, 0.72f);
-
             var subtitle = UiKit.Label("Subtitle", frame, "O PROGRAMA DO CÓDIGO DE DEFESA DO CONSUMIDOR", 26, Palette.Cyan, TextAlignmentOptions.Center);
             subtitle.fontStyle = FontStyles.Bold;
-            UiKit.TopBand(UiKit.Rect(subtitle.gameObject), 402, 40);
+            UiKit.TopBand(UiKit.Rect(subtitle.gameObject), 506, 40);
 
             // ---- titulo
             var titlePanel = UiKit.Node("TitlePanel", frame);
-            UiKit.Stretch(UiKit.Rect(titlePanel), 0, 460, 0, 100);
+            UiKit.Stretch(UiKit.Rect(titlePanel), 0, 560, 0, 90);
             controller.titlePanel = titlePanel;
 
             var menuList = UiKit.Node("Options", titlePanel.transform);
-            UiKit.Centered(UiKit.Rect(menuList), 520, 384);
-            UiKit.VList(menuList, 16, 0);
+            UiKit.Centered(UiKit.Rect(menuList), 520, 332);
+            UiKit.VList(menuList, 12, 0);
 
             controller.playButton = MenuButton(menuList.transform, "JOGAR", Palette.Yellow, Palette.Ink);
             controller.helpButton = MenuButton(menuList.transform, "COMO JOGAR", Palette.Mix(Palette.Ink2, Palette.Shadow, 0.2f), Palette.White);
@@ -689,14 +675,14 @@ namespace Procon.EditorTools
 
             // ---- dificuldade
             var levelPanel = UiKit.Node("LevelPanel", frame);
-            UiKit.Stretch(UiKit.Rect(levelPanel), 40, 452, 40, 96);
+            UiKit.Stretch(UiKit.Rect(levelPanel), 40, 556, 40, 70);
             controller.levelPanel = levelPanel;
 
             var levelTitle = UiKit.Label("LevelTitle", levelPanel.transform, "ESCOLHA A DIFICULDADE", 32, Palette.White, TextAlignmentOptions.Center);
             UiKit.TopBand(UiKit.Rect(levelTitle.gameObject), 0, 48);
 
             var cards = UiKit.Node("LevelCards", levelPanel.transform);
-            UiKit.TopBand(UiKit.Rect(cards), 56, 270, 60, 60);
+            UiKit.TopBand(UiKit.Rect(cards), 52, 222, 60, 60);
             UiKit.HList(cards, 18, 0);
 
             controller.levelOptions = new LevelOption[3];
@@ -708,10 +694,10 @@ namespace Procon.EditorTools
             }
 
             controller.levelStatus = UiKit.Label("LevelStatus", levelPanel.transform, "Escolha uma dificuldade para começar o programa.", 22, Palette.Yellow, TextAlignmentOptions.Center);
-            UiKit.TopBand(UiKit.Rect(controller.levelStatus.gameObject), 334, 40);
+            UiKit.TopBand(UiKit.Rect(controller.levelStatus.gameObject), 280, 40);
 
             var levelButtons = UiKit.Node("LevelButtons", levelPanel.transform);
-            UiKit.Centered(UiKit.Rect(levelButtons), 720, 80);
+            UiKit.Centered(UiKit.Rect(levelButtons), 720, 70);
             UiKit.Rect(levelButtons).anchorMin = new Vector2(0.5f, 0f);
             UiKit.Rect(levelButtons).anchorMax = new Vector2(0.5f, 0f);
             UiKit.Rect(levelButtons).pivot = new Vector2(0.5f, 0f);
@@ -757,72 +743,14 @@ namespace Procon.EditorTools
             var hintLine = UiKit.Label("Hint", audioRow.transform, "ENTER joga • ESC sai", 18, Palette.Alpha(Palette.White, 0.45f), TextAlignmentOptions.Center);
             hintLine.raycastTarget = false;
 
+            ShowSkin.SkinMenu(frame, controller);
             EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene(), MenuScenePath);
-        }
-
-        /// <summary>Brilho redondo e suave, centrado na fracao (x, y) da tela.</summary>
-        static void Glow(Transform parent, string name, Color color, float x, float y, float size)
-        {
-            var glow = UiKit.Panel(name, parent, color);
-            glow.sprite = ShowBuilder.MenuSprite("brilho");
-            glow.raycastTarget = false;
-            var rect = UiKit.Rect(glow.gameObject);
-            rect.anchorMin = rect.anchorMax = new Vector2(x, y);
-            rect.pivot = new Vector2(0.5f, 0.5f);
-            rect.sizeDelta = new Vector2(size, size);
-            rect.anchoredPosition = Vector2.zero;
-        }
-
-        /// <summary>Feixe de holofote preso no alto da tela, balancando.</summary>
-        static void Beam(Transform parent, string name, float x, Color color, float tilt, float offset)
-        {
-            var beam = UiKit.Panel(name, parent, color);
-            beam.sprite = ShowBuilder.MenuSprite("feixe");
-            beam.raycastTarget = false;
-            var rect = UiKit.Rect(beam.gameObject);
-            rect.anchorMin = rect.anchorMax = new Vector2(x, 1f);
-            rect.pivot = new Vector2(0.5f, 1f);
-            rect.sizeDelta = new Vector2(420f, 1250f);
-            rect.anchoredPosition = new Vector2(0f, 40f);
-            rect.localRotation = Quaternion.Euler(0f, 0f, tilt);
-            var sweep = beam.gameObject.AddComponent<Sweep>();
-            sweep.angle = 16f;
-            sweep.period = 7f;
-            sweep.offset = offset;
-        }
-
-        /// <summary>Lampadas em volta de um retangulo, no sentido horario.</summary>
-        static Graphic[] BulbFrame(Transform parent, float width, float height, float spacing)
-        {
-            var bulbs = new List<Graphic>();
-            var sprite = ShowBuilder.MenuSprite("lampada");
-            void Line(Vector2 from, Vector2 to)
-            {
-                var count = Mathf.Max(1, Mathf.RoundToInt(Vector2.Distance(from, to) / spacing));
-                for (var i = 0; i < count; i++)
-                {
-                    var bulb = UiKit.Panel("Lampada", parent, Color.white);
-                    bulb.sprite = sprite;
-                    bulb.raycastTarget = false;
-                    var rect = UiKit.Rect(bulb.gameObject);
-                    rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
-                    rect.sizeDelta = new Vector2(20f, 20f);
-                    rect.anchoredPosition = Vector2.Lerp(from, to, (float)i / count);
-                    bulbs.Add(bulb);
-                }
-            }
-            float x = width / 2f - 5f, y = height / 2f - 5f;
-            Line(new Vector2(-x, -y), new Vector2(-x, y));
-            Line(new Vector2(-x, y), new Vector2(x, y));
-            Line(new Vector2(x, y), new Vector2(x, -y));
-            Line(new Vector2(x, -y), new Vector2(-x, -y));
-            return bulbs.ToArray();
         }
 
         static Button MenuButton(Transform parent, string text, Color background, Color foreground)
         {
             var parts = UiKit.Button(text.Replace(" ", "") + "Button", parent, text, background, foreground, 28);
-            UiKit.Height(parts.root, 84);
+            UiKit.Height(parts.root, 74);
             return parts.button;
         }
 
@@ -856,7 +784,7 @@ namespace Procon.EditorTools
         static GameObject BuildTextPanel(Transform frame, string name, string heading, string body, out Button backButton)
         {
             var panel = UiKit.Node(name, frame);
-            UiKit.Stretch(UiKit.Rect(panel), 90, 452, 90, 96);
+            UiKit.Stretch(UiKit.Rect(panel), 120, 540, 120, 70);
 
             var background = panel.AddComponent<Image>();
             background.color = Palette.Mix(Palette.Ink, Palette.Shadow, 0.35f);
