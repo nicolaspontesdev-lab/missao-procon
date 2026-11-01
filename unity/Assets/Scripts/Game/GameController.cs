@@ -474,6 +474,10 @@ namespace Procon
             var isCorrect = playerSaysViolation == current.isViolation;
             PaintAnswerButtons(current.isViolation, playerSaysViolation);
 
+            // resultado da pergunta: os botoes saem e o cartao da explicacao entra no lugar deles
+            if (answerRow != null) answerRow.SetActive(false);
+            if (investigationPanel != null) investigationPanel.SetActive(false);
+
             var earned = 0;
             if (isCorrect)
             {
@@ -587,6 +591,7 @@ namespace Procon
             PaintRouteBar(round.StopCount);
             RenderReview();
 
+            if (feedbackPanel != null) feedbackPanel.SetActive(false);   // a tela final aparece sozinha
             if (finalPanel != null) finalPanel.SetActive(true);
             ChiptuneAudio.Instance.Play("finish");
             if (presenter != null) presenter.Celebrate();

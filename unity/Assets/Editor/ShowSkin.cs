@@ -26,6 +26,10 @@ namespace Procon.EditorTools
 
         static Sprite plate, plateRim, pill, pillRim, disc, ring, gloss, backdrop, rays, bulb;
 
+        public static Sprite PillSprite => pill;
+        public static Sprite DiscSprite => disc;
+        public static Sprite BackdropSprite => backdrop;
+
         // ================================================================== sprites
 
         /// <summary>Desenha os sprites da interface (uma vez) e prepara o 9-slice.</summary>
@@ -203,192 +207,6 @@ namespace Procon.EditorTools
             return image;
         }
 
-        // ================================================================== tela do jogo
-
-        public static void SkinGame(Transform frame, GameController c)
-        {
-            EnsureSprites();
-
-            // ---- fundo do telao: luz roxa no centro e raios girando devagar
-            var canvas = frame.parent;
-            var background = canvas.Find("Background")?.GetComponent<Image>();
-            if (background != null)
-            {
-                background.sprite = backdrop;
-                background.color = Color.white;
-                var sun = Decor(background.transform, "Raios", rays, new Color(1f, 0.85f, 0.45f, 0.07f), Image.Type.Simple, 1f);
-                var sunRect = sun.rectTransform;
-                sunRect.anchorMin = sunRect.anchorMax = new Vector2(0.5f, 0.35f);
-                sunRect.sizeDelta = new Vector2(2200f, 2200f);
-                var sweep = sun.gameObject.AddComponent<Sweep>();
-                sweep.angle = 8f;
-                sweep.period = 24f;
-                canvas.gameObject.AddComponent<RectMask2D>();
-            }
-            var cabinet = frame.GetComponent<Image>();
-            if (cabinet != null) cabinet.color = Color.clear;
-
-            // ---- faixa do titulo
-            var topBar = frame.Find("TopBar")?.GetComponent<Image>();
-            Plate(topBar, new Color(0.05f, 0.03f, 0.16f, 0.88f), Gold, 2f);
-            var title = topBar != null ? topBar.transform.Find("Title")?.GetComponent<TMP_Text>() : null;
-            if (title != null) { title.fontStyle = FontStyles.Bold; title.fontSize = 40; title.color = Gold; TextShadow(title); }
-            Badge(c.levelBadge, new Color(0.35f, 0.15f, 0.7f, 0.95f), Gold);
-            if (c.locationBadge != null) c.locationBadge.fontStyle = FontStyles.Bold;
-
-            // ---- placar em pilulas
-            var hud = frame.Find("Hud");
-            if (hud != null)
-            {
-                hud.GetComponent<Image>().color = Color.clear;
-                var list = hud.GetComponent<HorizontalLayoutGroup>();
-                if (list != null) { list.spacing = 14f; list.padding = new RectOffset(4, 4, 6, 6); }
-                foreach (var value in new[] { c.caseCounter, c.scoreValue, c.correctValue, c.wrongValue, c.comboBadge })
-                    StatPill(value, value == c.scoreValue);
-            }
-
-            // ---- progresso: trilho arredondado e enchimento dourado
-            var track = frame.Find("ProgressTrack")?.GetComponent<Image>();
-            if (track != null)
-            {
-                Plate(track, new Color(0.03f, 0.02f, 0.1f, 0.9f), GoldSoft, 5f, false, true);
-                var rect = track.rectTransform;
-                rect.offsetMax = new Vector2(rect.offsetMax.x, rect.offsetMax.y + 2f);
-            }
-            if (c.progressFill != null)
-            {
-                var fill = c.progressFill.GetComponent<Image>();
-                fill.sprite = pill; fill.type = Image.Type.Sliced; fill.pixelsPerUnitMultiplier = 5f;
-                fill.color = Gold;
-            }
-
-            // ---- rota: cada parada vira uma pilula
-            if (c.routeBar != null && c.routeStopTemplate != null)
-            {
-                var stop = UiKit.Node("ParadaModelo", c.routeBar);
-                var pillImage = stop.AddComponent<Image>();
-                pillImage.sprite = pill; pillImage.type = Image.Type.Sliced; pillImage.pixelsPerUnitMultiplier = 2.2f;
-                pillImage.color = Palette.Alpha(Palette.Shadow, 0.6f);
-                pillImage.raycastTarget = false;
-                c.routeStopTemplate.transform.SetParent(stop.transform, false);
-                UiKit.Full(c.routeStopTemplate.rectTransform);
-                c.routeStopTemplate.fontStyle = FontStyles.Bold;
-                c.routeStopTemplate.fontSize = 17;
-                c.routeStopRoot = stop;
-            }
-
-            // ---- coluna da pergunta
-            var dialog = ImageOf(c.dialogScroll);
-            Plate(dialog, Glass, GoldSoft, 1.4f, false);
-            if (c.caseTag != null) c.caseTag.fontStyle = FontStyles.Bold;
-            if (c.questionText != null) { c.questionText.fontSize = 30; c.questionText.fontStyle = FontStyles.Bold; }
-            if (c.instructionText != null) { c.instructionText.fontStyle = FontStyles.Bold; c.instructionText.color = Gold; }
-
-            AnswerButton(c.violationButton, c.violationBackground, "É INFRAÇÃO", "V");
-            AnswerButton(c.lawfulButton, c.lawfulBackground, "NÃO É INFRAÇÃO", "F");
-
-            foreach (var clue in c.clues)
-            {
-                if (clue == null) continue;
-                Plate(ImageOf(clue.button), GlassLight, Neon, 2.4f);
-                if (clue.icon != null) { clue.icon.sprite = disc; clue.icon.preserveAspect = true; }
-                if (clue.card != null) Plate(clue.card.GetComponent<Image>(), new Color(0.12f, 0.15f, 0.42f, 0.95f), Neon, 2.4f, false);
-            }
-
-            if (c.feedbackPanel != null)
-            {
-                Plate(c.feedbackPanel.GetComponent<Image>(), new Color(0.08f, 0.05f, 0.24f, 0.97f), Gold, 1.6f, false);
-                if (c.feedbackStripe != null)
-                {
-                    c.feedbackStripe.sprite = pill; c.feedbackStripe.type = Image.Type.Sliced;
-                    c.feedbackStripe.pixelsPerUnitMultiplier = 4f;
-                    var stripeLayout = c.feedbackStripe.GetComponent<LayoutElement>();
-                    if (stripeLayout != null) stripeLayout.preferredHeight = 10f;
-                }
-                if (c.feedbackTitle != null) { c.feedbackTitle.fontSize = 34; c.feedbackTitle.fontStyle = FontStyles.Bold; }
-                if (c.feedbackPoints != null) c.feedbackPoints.fontStyle = FontStyles.Bold;
-            }
-            if (c.nextButton != null)
-            {
-                Plate(c.nextButton.GetComponent<Image>(), Gold, new Color(1f, 0.95f, 0.75f), 1.3f, true, true);
-                if (c.nextButtonLabel != null) { c.nextButtonLabel.color = Palette.Ink; c.nextButtonLabel.fontStyle = FontStyles.Bold; }
-            }
-
-            // ---- coluna do cenario: placa do local e o cenario com lampadas, como um monitor do palco
-            if (c.locationName != null)
-            {
-                Plate(c.locationName.transform.parent.GetComponent<Image>(), new Color(0.05f, 0.03f, 0.16f, 0.9f), GoldSoft, 1.8f);
-                c.locationName.fontStyle = FontStyles.Bold;
-            }
-            if (c.stages != null && c.stages.Length > 0)
-            {
-                var box = c.stages[0].transform.parent;
-                Plate(box.GetComponent<Image>(), new Color(0.02f, 0.01f, 0.06f, 1f), Gold, 1.6f, false);
-                Bulbs(box, 22, 13, 12f, 3f);
-            }
-            if (c.visitLine != null) { c.visitLine.color = Gold; c.visitLine.fontStyle = FontStyles.Bold; }
-
-            SkinFinal(c);
-        }
-
-        static void Badge(TMP_Text label, Color fill, Color rim)
-        {
-            if (label == null) return;
-            var holder = UiKit.Node(label.name + "Selo", label.transform.parent);
-            var rect = UiKit.Rect(holder);
-            var source = label.rectTransform;
-            rect.anchorMin = rect.anchorMax = new Vector2((source.anchorMin.x + source.anchorMax.x) / 2f, 0.5f);
-            rect.pivot = new Vector2(0.5f, 0.5f);
-            rect.sizeDelta = new Vector2(260f, 50f);
-            holder.transform.SetSiblingIndex(label.transform.GetSiblingIndex());
-            Plate(EnsureImage(holder), fill, rim, 1.6f, true, true);
-            label.fontStyle = FontStyles.Bold;
-            label.color = Color.white;
-        }
-
-        static void StatPill(TMP_Text value, bool highlight)
-        {
-            if (value == null) return;
-            var node = value.transform.parent.gameObject;
-            Plate(EnsureImage(node), highlight ? new Color(0.28f, 0.16f, 0.05f, 0.95f) : new Color(0.06f, 0.05f, 0.2f, 0.9f),
-                  highlight ? Gold : Neon, 2.2f);
-            value.fontStyle = FontStyles.Bold;
-            if (highlight) value.fontSize = 30;
-        }
-
-        static void AnswerButton(Button button, Image background, string text, string key)
-        {
-            if (button == null || background == null) return;
-            Plate(background, background.color, Gold, 1.2f, true, true);
-            var label = button.GetComponentInChildren<TMP_Text>();
-            if (label != null)
-            {
-                label.text = text;
-                label.enableWordWrapping = false;
-                label.enableAutoSizing = true;
-                label.fontSizeMin = 18f;
-                label.fontSizeMax = 30f;
-                label.fontStyle = FontStyles.Bold;
-                UiKit.Stretch(label.rectTransform, 86, 6, 16, 6);
-            }
-            // selo redondo com a tecla, como as letras das alternativas dos programas de perguntas
-            var badge = UiKit.Panel("Tecla", button.transform, new Color(0.06f, 0.04f, 0.16f, 0.95f));
-            badge.sprite = disc;
-            badge.raycastTarget = false;
-            var rect = badge.rectTransform;
-            rect.anchorMin = rect.anchorMax = new Vector2(0f, 0.5f);
-            rect.pivot = new Vector2(0f, 0.5f);
-            rect.sizeDelta = new Vector2(62f, 62f);
-            rect.anchoredPosition = new Vector2(16f, 0f);
-            var badgeRing = UiKit.Panel("Anel", badge.transform, Gold);
-            badgeRing.sprite = ring;
-            badgeRing.raycastTarget = false;
-            UiKit.Full(badgeRing.rectTransform);
-            var letter = UiKit.Label("Letra", badge.transform, key, 32, Gold, TextAlignmentOptions.Center);
-            letter.fontStyle = FontStyles.Bold;
-            UiKit.Full(letter.rectTransform);
-        }
-
         // ================================================================== menu
 
         public static void SkinMenu(Transform frame, MenuController m)
@@ -436,33 +254,5 @@ namespace Procon.EditorTools
             if (label != null) { label.color = text; label.fontStyle = FontStyles.Bold; }
         }
 
-        static void SkinFinal(GameController c)
-        {
-            if (c.finalPanel == null) return;
-            var overlay = c.finalPanel.GetComponent<Image>();
-            overlay.color = new Color(0.04f, 0.02f, 0.1f, 0.9f);
-            var card = c.finalPanel.transform.Find("Card")?.GetComponent<Image>();
-            if (card == null) return;
-            Plate(card, new Color(0.12f, 0.06f, 0.3f, 0.98f), Gold, 1f);
-            Bulbs(card.transform, 28, 12, 16f, 4f);
-
-            var title = card.transform.Find("Title")?.GetComponent<TMP_Text>();
-            if (title != null) { title.fontSize = 54; title.fontStyle = FontStyles.Bold; title.color = Gold; }
-            if (c.rankLabel != null) c.rankLabel.fontStyle = FontStyles.Bold;
-            foreach (var value in new[] { c.finalAnswered, c.finalScore, c.finalCorrect, c.finalWrong, c.finalPercent })
-                StatPill(value, value == c.finalScore);
-
-            Plate(ImageOf(c.reviewButton), Palette.Orange, Gold, 1.3f, true, true);
-            Plate(ImageOf(c.restartButton), Gold, new Color(1f, 0.95f, 0.75f), 1.3f, true, true);
-            var restartLabel = c.restartButton != null ? c.restartButton.GetComponentInChildren<TMP_Text>() : null;
-            if (restartLabel != null) restartLabel.color = Palette.Ink;
-            Plate(ImageOf(c.menuButton), new Color(0.1f, 0.08f, 0.26f), Gold, 1.3f, true, true);
-            foreach (var button in new[] { c.reviewButton, c.restartButton, c.menuButton })
-            {
-                var label = button != null ? button.GetComponentInChildren<TMP_Text>() : null;
-                if (label != null) label.fontStyle = FontStyles.Bold;
-            }
-            if (c.reviewPanel != null) Plate(c.reviewPanel.GetComponent<Image>(), Glass, GoldSoft, 1.6f, false);
-        }
     }
 }

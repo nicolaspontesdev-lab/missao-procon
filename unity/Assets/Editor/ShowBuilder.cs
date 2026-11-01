@@ -26,9 +26,9 @@ namespace Procon.EditorTools
 
         public struct StudioRig
         {
-            public Transform screen;        // moldura da interface dentro do telao
+            public Transform screen;        // Canvas do telao (World Space): pergunta e ilustracao
+            public Transform overlay;       // Canvas da tela: botoes, placar, resultado
             public Presenter presenter;
-            public TextMeshProUGUI presenterLine;
         }
 
         // ================================================================== estudio
@@ -50,31 +50,62 @@ namespace Procon.EditorTools
             }
             var studio = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
 
-            // o telao principal: a interface vai na frente dele, do mesmo tamanho
+            DimLedWalls(studio);
+
+            // o telao principal: o Canvas do telao vai na frente dele, do mesmo tamanho
             var wall = studio.transform.Find("Main LED backdrop");
             var wallBounds = Bounds(wall);
             var front = wallBounds.min.z - 0.015f;
             var screenCenter = new Vector3(wallBounds.center.x, wallBounds.center.y, front);
 
-            // apresentador atras do pulpito, a esquerda e fora do telao
+            // enquadramento: telao na parte de cima e a direita (60% da largura),
+            // apresentador inteiro no palco a esquerda e o chao livre embaixo para os botoes
+            var target = new Vector3(screenCenter.x - 2.49f, 2f, front);
+            var camera = BuildCamera(target, 10.65f, 0.35f, 40f);
+
+            // apresentador na frente do palco, mais perto da camera, fora da area do telao
             var lectern = studio.transform.Find("Presentation lectern");
-            var podium = new Vector3(wallBounds.min.x - 0.56f, 0.22f, 1.3f);
+            var podium = new Vector3(target.x - 2.7f, 0.22f, -0.98f);
             if (lectern != null) lectern.position = new Vector3(podium.x, lectern.position.y, podium.z);
             rig.presenter = BuildPresenter(new Vector3(podium.x, 0.22f, podium.z + 0.48f));
             if (lectern != null) LecternSign(lectern);
 
-            var camera = BuildCamera(screenCenter);
             BuildLights(wallBounds, podium);
             BuildBulbs(wallBounds, front);
             BuildVolume();
 
             rig.screen = BuildScreenCanvas(camera, screenCenter, wallBounds.size.x * 0.965f);
-            rig.presenterLine = BuildOverlay();
+            rig.overlay = BuildOverlay();
 
             var events = new GameObject("EventSystem");
             events.AddComponent<EventSystem>();
             events.AddComponent<InputSystemUIInputModule>();
             return rig;
+        }
+
+        /// <summary>
+        /// Os paineis de LED do estudio saem do gerador num roxo claro e forte, que
+        /// estoura atras do titulo e das letras. Aqui ficam num roxo fundo.
+        /// </summary>
+        static void DimLedWalls(GameObject studio)
+        {
+            var led = Material("LED do telao", new Color(0.08f, 0.03f, 0.18f), 0.6f);
+            led.SetColor("_BaseColor", new Color(0.08f, 0.03f, 0.18f));
+            led.SetColor("_EmissionColor", new Color(0.08f, 0.03f, 0.18f) * 0.6f);
+            led.SetFloat("_Smoothness", 0.1f);
+            EditorUtility.SetDirty(led);
+            foreach (var renderer in studio.GetComponentsInChildren<MeshRenderer>(true))
+            {
+                var materials = renderer.sharedMaterials;
+                var changed = false;
+                for (var i = 0; i < materials.Length; i++)
+                    if (materials[i] != null && materials[i].name.StartsWith("LED"))
+                    {
+                        materials[i] = led;
+                        changed = true;
+                    }
+                if (changed) renderer.sharedMaterials = materials;
+            }
         }
 
         // ================================================================== menu em 3D
@@ -94,6 +125,7 @@ namespace Procon.EditorTools
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(StudioBuilder.PrefabPath);
             if (prefab == null) return;
             var studio = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+            DimLedWalls(studio);
             var wall = Bounds(studio.transform.Find("Main LED backdrop"));
             var front = wall.min.z - 0.015f;
 
@@ -101,6 +133,8 @@ namespace Procon.EditorTools
             var podium = new Vector3(wall.min.x - 0.56f, 0.22f, 1.3f);
             if (lectern != null) { lectern.position = new Vector3(podium.x, lectern.position.y, podium.z); LecternSign(lectern); }
             BuildPresenter(new Vector3(podium.x, 0.22f, podium.z + 0.48f));
+            Spot("Luz do apresentador", new Vector3(podium.x + 1.2f, 4.8f, podium.z - 3.5f), podium + Vector3.up * 1.5f,
+                 new Color(1f, 0.9f, 0.75f), 12f, 26f);
 
             // camera aberta: o palco inteiro, o telao e o titulo na frente dele
             var target = new Vector3(0f, wall.center.y - 0.2f, front);
@@ -250,14 +284,14 @@ namespace Procon.EditorTools
             return bounds;
         }
 
-        static Camera BuildCamera(Vector3 screenCenter)
+        static Camera BuildCamera(Vector3 target, float distance, float rise, float fov)
         {
             var node = new GameObject("Main Camera");
             node.tag = "MainCamera";
             var camera = node.AddComponent<Camera>();
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.backgroundColor = new Color(0.03f, 0.02f, 0.07f);
-            camera.fieldOfView = 42f;
+            camera.fieldOfView = fov;
             camera.nearClipPlane = 0.1f;
             camera.farClipPlane = 60f;
             node.AddComponent<AudioListener>();
@@ -267,20 +301,20 @@ namespace Procon.EditorTools
             data.renderPostProcessing = true;
             data.antialiasing = AntialiasingMode.SubpixelMorphologicalAntiAliasing;
 
-            // um pouco para a esquerda do centro do telao: o apresentador cabe no quadro
-            var target = screenCenter + new Vector3(-1.2f, -0.15f, 0f);
-            node.transform.position = target + new Vector3(0f, 0.05f, -8.6f);
+            node.transform.position = target + new Vector3(0f, rise, -distance);
             node.transform.LookAt(target);
-            node.AddComponent<CameraDrift>().target = target;
+            var drift = node.AddComponent<CameraDrift>();
+            drift.target = target;
+            drift.amplitude = new Vector3(0.06f, 0.02f, 0f);
             return camera;
         }
 
         static void BuildLights(Bounds wall, Vector3 podium)
         {
             Spot("Luz roxa", new Vector3(-6.5f, 6.5f, -1.5f), new Vector3(wall.min.x, wall.center.y, wall.center.z),
-                 new Color(0.62f, 0.35f, 1f), 6f, 40f);
+                 new Color(0.62f, 0.35f, 1f), 2.5f, 40f);
             Spot("Luz ciano", new Vector3(6.5f, 6.5f, -1.5f), new Vector3(wall.max.x, wall.center.y, wall.center.z),
-                 new Color(0.3f, 0.85f, 1f), 6f, 40f);
+                 new Color(0.3f, 0.85f, 1f), 2.5f, 40f);
             Spot("Luz do apresentador", new Vector3(podium.x + 1.2f, 4.8f, podium.z - 3.5f), podium + Vector3.up * 1.5f,
                  new Color(1f, 0.9f, 0.75f), 9f, 26f);
         }
@@ -458,7 +492,7 @@ namespace Procon.EditorTools
 
         static Transform BuildScreenCanvas(Camera camera, Vector3 center, float width)
         {
-            const float pixelsWide = 1500f, pixelsHigh = 844f;
+            const float pixelsWide = 1280f, pixelsHigh = 720f;
             var node = new GameObject("Telao (interface)", typeof(RectTransform));
             var canvas = node.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.WorldSpace;
@@ -471,18 +505,13 @@ namespace Procon.EditorTools
             rect.position = center;
             rect.rotation = Quaternion.identity;
             rect.localScale = Vector3.one * (width / pixelsWide);
-
-            var background = UiKit.Panel("Background", node.transform, Palette.Ink);
-            UiKit.Full(UiKit.Rect(background.gameObject));
-            var cabinet = UiKit.Panel("Cabinet", node.transform, Palette.Ink2);
-            UiKit.Stretch(UiKit.Rect(cabinet.gameObject), 12, 12, 12, 12);
-            return cabinet.transform;
+            return node.transform;
         }
 
-        /// <summary>Faixa de baixo com a fala do apresentador e o selo AO VIVO.</summary>
-        static TextMeshProUGUI BuildOverlay()
+        /// <summary>Canvas da tela, por cima do estudio: botoes, placar e resultado.</summary>
+        static Transform BuildOverlay()
         {
-            var node = new GameObject("Tela (faixas de TV)", typeof(RectTransform));
+            var node = new GameObject("Tela (controles)", typeof(RectTransform));
             var canvas = node.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = 10;
@@ -490,43 +519,8 @@ namespace Procon.EditorTools
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920f, 1080f);
             scaler.matchWidthOrHeight = 0.5f;
-
-            var band = UiKit.Panel("Faixa do apresentador", node.transform, new Color(0.07f, 0.04f, 0.16f, 0.92f));
-            band.raycastTarget = false;
-            UiKit.BottomBand(UiKit.Rect(band.gameObject), 18, 96, 60, 60);
-            var stripe = UiKit.Panel("Filete", band.transform, Palette.Yellow);
-            stripe.raycastTarget = false;
-            UiKit.TopBand(UiKit.Rect(stripe.gameObject), 0, 5);
-
-            var tag = UiKit.Panel("Selo", band.transform, Palette.Yellow);
-            tag.raycastTarget = false;
-            var tagRect = UiKit.Rect(tag.gameObject);
-            tagRect.anchorMin = new Vector2(0f, 0f);
-            tagRect.anchorMax = new Vector2(0f, 1f);
-            tagRect.pivot = new Vector2(0f, 0.5f);
-            tagRect.offsetMin = new Vector2(0f, 0f);
-            tagRect.offsetMax = new Vector2(260f, -5f);
-            var tagText = UiKit.Label("Texto", tag.transform, "APRESENTADOR", 26, Palette.Ink, TextAlignmentOptions.Center);
-            tagText.fontStyle = FontStyles.Bold;
-            UiKit.Full(tagText.rectTransform);
-
-            var line = UiKit.Label("Fala", band.transform, "Bem-vindos ao Show do PROCON!", 30, Palette.White, TextAlignmentOptions.Left);
-            UiKit.Stretch(line.rectTransform, 290, 10, 24, 5);
-            line.enableAutoSizing = true;
-            line.fontSizeMin = 20f;
-            line.fontSizeMax = 30f;
-
-            var live = UiKit.Panel("Ao vivo", node.transform, Palette.Red);
-            live.raycastTarget = false;
-            var liveRect = UiKit.Rect(live.gameObject);
-            liveRect.anchorMin = liveRect.anchorMax = new Vector2(0f, 1f);
-            liveRect.pivot = new Vector2(0f, 1f);
-            liveRect.sizeDelta = new Vector2(150f, 44f);
-            liveRect.anchoredPosition = new Vector2(28f, -24f);
-            var liveText = UiKit.Label("Texto", live.transform, "● AO VIVO", 24, Palette.White, TextAlignmentOptions.Center);
-            liveText.fontStyle = FontStyles.Bold;
-            UiKit.Full(liveText.rectTransform);
-            return line;
+            node.AddComponent<GraphicRaycaster>();
+            return node.transform;
         }
 
         // ================================================================== materiais e arte do menu

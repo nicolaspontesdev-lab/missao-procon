@@ -409,6 +409,15 @@ namespace Procon.EditorTools
                                             TextAlignmentOptions.Center);
             UiKit.Frac(UiKit.Rect(subtitleLabel.gameObject), 0.03f, 0.10f, 0.97f, 0.44f);
             subtitleLabel.fontStyle = FontStyles.Bold;
+
+            // o palco tambem aparece pequeno (no telao do estudio): o letreiro encolhe para caber
+            foreach (var label in new[] { titleLabel, subtitleLabel })
+            {
+                label.enableWordWrapping = false;
+                label.enableAutoSizing = true;
+                label.fontSizeMin = 6f;
+                label.fontSizeMax = label.fontSize;
+            }
         }
 
         /// <summary>

@@ -347,11 +347,21 @@ namespace Procon.EditorTools
 
         // ================================================================== cena do jogo
 
+        // Paleta reduzida da rodada: azul-noite translucido, dourado de destaque,
+        // branco para leitura; verde e vermelho so nas respostas.
+        static readonly Color Night = new Color(0.06f, 0.05f, 0.17f, 0.92f);
+        static readonly Color NightLight = new Color(0.12f, 0.11f, 0.3f, 0.95f);
+        static readonly Color Gold = new Color(1f, 0.8f, 0.28f);
+        static readonly Color GoldLine = new Color(1f, 0.8f, 0.28f, 0.6f);
+
         static void BuildGameScene(CaseDatabase database, CaseVisualBook visualBook)
         {
-            // estudio de TV em 3D; a interface 2D do jogo vai dentro do telao
+            ShowSkin.EnsureSprites();
+
+            // estudio 3D; o telao mostra so a pergunta e a ilustracao, os controles
+            // ficam numa camada da tela, embaixo, ao lado do apresentador
             var rig = ShowBuilder.BuildStudioScene();
-            var frame = rig.screen != null ? rig.screen : NewScene("Cabinet");
+            if (rig.screen == null) return;
 
             var controllerNode = new GameObject("GameController");
             var controller = controllerNode.AddComponent<GameController>();
@@ -359,270 +369,376 @@ namespace Procon.EditorTools
             controller.visualBook = visualBook;
             controller.menuSceneName = "00_Menu";
             controller.presenter = rig.presenter;
-            controller.presenterLine = rig.presenterLine;
 
-            // ---- topo
-            var topBar = UiKit.Panel("TopBar", frame, Palette.Shadow);
-            UiKit.TopBand(UiKit.Rect(topBar.gameObject), 0, 84);
+            var evidence = BuildScreen(rig.screen, controller);
+            BuildScoreCard(rig.overlay, controller);
+            BuildControls(rig.overlay, controller, evidence);
+            BuildFeedback(rig.overlay, controller);
+            BuildFinalPanel(rig.overlay, controller);
 
-            var title = UiKit.Label("Title", topBar.transform, "SHOW DO PROCON", 36, Palette.Yellow, TextAlignmentOptions.Left);
-            UiKit.Frac(UiKit.Rect(title.gameObject), 0.012f, 0f, 0.35f, 1f);
+            EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene(), GameScenePath);
+        }
 
-            controller.levelBadge = UiKit.Label("LevelBadge", topBar.transform, "NÍVEL", 24, Palette.Cyan, TextAlignmentOptions.Center);
-            UiKit.Frac(UiKit.Rect(controller.levelBadge.gameObject), 0.36f, 0f, 0.64f, 1f);
+        /// <summary>Retangulo fixo medido a partir do canto de cima a esquerda do pai.</summary>
+        static void Box(RectTransform rect, float x, float y, float width, float height)
+        {
+            rect.anchorMin = rect.anchorMax = new Vector2(0f, 1f);
+            rect.pivot = new Vector2(0f, 1f);
+            rect.anchoredPosition = new Vector2(x, -y);
+            rect.sizeDelta = new Vector2(width, height);
+        }
 
-            controller.locationBadge = UiKit.Label("LocationBadge", topBar.transform, "LOCAL", 24, Palette.White, TextAlignmentOptions.Right);
-            UiKit.Frac(UiKit.Rect(controller.locationBadge.gameObject), 0.65f, 0f, 0.988f, 1f);
+        static TextMeshProUGUI Text(string name, Transform parent, string text, float size, Color color,
+                                    TextAlignmentOptions alignment = TextAlignmentOptions.TopLeft, bool bold = false)
+        {
+            var label = UiKit.Label(name, parent, text, size, color, alignment);
+            if (bold) label.fontStyle = FontStyles.Bold;
+            label.overflowMode = TextOverflowModes.Ellipsis;
+            return label;
+        }
 
-            // ---- placar
-            var hud = UiKit.Panel("Hud", frame, Palette.Mix(Palette.Ink, Palette.Shadow, 0.45f));
-            UiKit.TopBand(UiKit.Rect(hud.gameObject), 84, 76);
-            UiKit.HList(hud.gameObject, 10, 10);
+        static void Pill(Image image, Color color, float corner = 1.4f)
+        {
+            image.sprite = ShowSkin.PillSprite;
+            image.type = Image.Type.Sliced;
+            image.pixelsPerUnitMultiplier = corner;
+            image.color = color;
+        }
 
-            controller.caseCounter = Stat(hud.transform, "CASO", "1/15", Palette.White);
-            controller.scoreValue = Stat(hud.transform, "PONTOS", "0000", Palette.Yellow);
-            controller.correctValue = Stat(hud.transform, "ACERTOS", "0", Palette.Green);
-            controller.wrongValue = Stat(hud.transform, "ERROS", "0", Palette.Red);
-            controller.comboBadge = Stat(hud.transform, "SEQUÊNCIA", "COMBO x0", Palette.Cyan);
+        // ------------------------------------------------------------------ telao
 
-            // ---- progresso
-            var track = UiKit.Panel("ProgressTrack", frame, Palette.Shadow);
-            UiKit.TopBand(UiKit.Rect(track.gameObject), 160, 12);
-            var fill = UiKit.Panel("ProgressFill", track.transform, Palette.Cyan);
-            var fillRect = UiKit.Rect(fill.gameObject);
+        /// <summary>
+        /// Telao (1280 x 720): local no alto, pergunta grande a esquerda e o
+        /// cenario 2D original pequeno a direita, como apoio visual.
+        /// </summary>
+        static Transform BuildScreen(Transform screen, GameController controller)
+        {
+            var background = UiKit.Panel("Fundo", screen, Color.white);
+            background.sprite = ShowSkin.BackdropSprite;
+            background.raycastTarget = false;
+            UiKit.Full(background.rectTransform);
+
+            controller.locationName = Text("Local", screen, "LOCAL", 40, Gold, TextAlignmentOptions.Left, true);
+            Box(controller.locationName.rectTransform, 44, 18, 620, 52);
+            controller.locationSubtitle = Text("Assunto", screen, "ASSUNTO", 24, Palette.Cyan, TextAlignmentOptions.Right, true);
+            Box(controller.locationSubtitle.rectTransform, 660, 28, 576, 36);
+            var line = UiKit.Panel("Linha", screen, GoldLine);
+            line.raycastTarget = false;
+            Box(line.rectTransform, 44, 80, 1192, 3);
+
+            // ---- pergunta: uma coluna que se ajusta ao texto (quem fala, pergunta,
+            // pista e evidencias do dossie), sem posicoes fixas que se sobreponham
+            var column = UiKit.Node("ColunaDaPergunta", screen);
+            Box(UiKit.Rect(column), 44, 100, 580, 540);
+            UiKit.VList(column, 10, 0).childAlignment = TextAnchor.UpperLeft;
+            column.AddComponent<RectMask2D>();
+
+            controller.speakerLabel = Text("QuemFala", column.transform, "RESPOSTA DO RESPONSÁVEL", 24, Palette.Cyan, TextAlignmentOptions.Left, true);
+            controller.questionText = Text("Pergunta", column.transform, "Texto do caso.", 38, Color.white, TextAlignmentOptions.TopLeft, true);
+            controller.questionText.overflowMode = TextOverflowModes.Overflow;
+            controller.questionText.lineSpacing = -2f;
+            controller.hintText = Text("Pista", column.transform, "PISTA:", 24, Palette.Orange, TextAlignmentOptions.TopLeft, true);
+            controller.hintText.overflowMode = TextOverflowModes.Overflow;
+
+            // evidencias do dossie, aparecem uma a uma embaixo da pergunta
+            var evidence = UiKit.Node("Evidencias", column.transform);
+            UiKit.VList(evidence, 8, 0).childAlignment = TextAnchor.UpperLeft;
+            UiKit.FitHeight(evidence);
+            controller.clues = new ClueSlot[3];
+
+            controller.instructionText = Text("Instrucao", screen, "HÁ INFRAÇÃO NESTA SITUAÇÃO?", 30, Gold, TextAlignmentOptions.Left, true);
+            Box(controller.instructionText.rectTransform, 44, 652, 580, 46);
+            controller.instructionText.enableWordWrapping = false;
+            controller.instructionText.enableAutoSizing = true;
+            controller.instructionText.fontSizeMin = 18f;
+            controller.instructionText.fontSizeMax = 30f;
+
+            // ---- ilustracao: o cenario 2D original, pequeno, com uma borda so
+            var box = UiKit.Panel("SceneBox", screen, new Color(0.02f, 0.01f, 0.06f, 1f));
+            Box(box.rectTransform, 652, 118, 584, 344);
+            var rim = UiKit.Panel("Borda", box.transform, Gold);
+            rim.raycastTarget = false;
+            var rimRect = rim.rectTransform;
+            UiKit.Full(rimRect);
+            rimRect.offsetMin = new Vector2(-4f, -4f);
+            rimRect.offsetMax = new Vector2(4f, 4f);
+            rim.transform.SetAsFirstSibling();
+            var hole = UiKit.Panel("Moldura", box.transform, new Color(0.02f, 0.01f, 0.06f, 1f));
+            hole.raycastTarget = false;
+            UiKit.Full(hole.rectTransform);
+            hole.transform.SetSiblingIndex(1);
+            controller.stages = StageArt.BuildAll(box.transform, controller.database).ToArray();
+
+            controller.visitLine = Text("Visita", screen, "VISITA 1 DE 5", 22, Gold, TextAlignmentOptions.Center, true);
+            Box(controller.visitLine.rectTransform, 652, 474, 584, 32);
+            return evidence.transform;
+        }
+
+        // ------------------------------------------------------------------ placar discreto
+
+        static void BuildScoreCard(Transform overlay, GameController controller)
+        {
+            var card = UiKit.Panel("Placar", overlay, Night);
+            card.raycastTarget = false;
+            ShowSkin.Plate(card, Night, GoldLine, 1.8f, false);
+            Box(card.rectTransform, 28, 24, 460, 150);
+
+            var live = UiKit.Panel("AoVivo", card.transform, Palette.Red);
+            live.raycastTarget = false;
+            Pill(live, Palette.Red, 3f);
+            Box(live.rectTransform, 18, 16, 150, 36);
+            var liveText = Text("Texto", live.transform, "● AO VIVO", 20, Color.white, TextAlignmentOptions.Center, true);
+            UiKit.Full(liveText.rectTransform);
+
+            controller.levelBadge = Text("Nivel", card.transform, "FÁCIL", 24, Gold, TextAlignmentOptions.Right, true);
+            Box(controller.levelBadge.rectTransform, 180, 16, 262, 36);
+
+            var questionCaption = Text("PerguntaLegenda", card.transform, "PERGUNTA", 16, Palette.Alpha(Color.white, 0.6f), TextAlignmentOptions.Left, true);
+            Box(questionCaption.rectTransform, 20, 64, 150, 20);
+            controller.caseCounter = Text("Pergunta", card.transform, "1/15", 34, Color.white, TextAlignmentOptions.Left, true);
+            Box(controller.caseCounter.rectTransform, 20, 84, 150, 40);
+
+            var scoreCaption = Text("PontosLegenda", card.transform, "PONTOS", 16, Palette.Alpha(Color.white, 0.6f), TextAlignmentOptions.Left, true);
+            Box(scoreCaption.rectTransform, 170, 64, 150, 20);
+            controller.scoreValue = Text("Pontos", card.transform, "0000", 34, Gold, TextAlignmentOptions.Left, true);
+            Box(controller.scoreValue.rectTransform, 170, 84, 150, 40);
+
+            controller.comboBadge = Text("Combo", card.transform, "COMBO x0", 20, Palette.Cyan, TextAlignmentOptions.Right, true);
+            Box(controller.comboBadge.rectTransform, 300, 90, 142, 30);
+
+            var track = UiKit.Panel("Progresso", card.transform, new Color(1f, 1f, 1f, 0.12f));
+            track.raycastTarget = false;
+            Pill(track, new Color(1f, 1f, 1f, 0.12f), 6f);
+            Box(track.rectTransform, 20, 130, 420, 8);
+            var fill = UiKit.Panel("Enchimento", track.transform, Gold);
+            fill.raycastTarget = false;
+            Pill(fill, Gold, 6f);
+            var fillRect = fill.rectTransform;
             fillRect.anchorMin = Vector2.zero;
             fillRect.anchorMax = new Vector2(0.05f, 1f);
             fillRect.offsetMin = Vector2.zero;
             fillRect.offsetMax = Vector2.zero;
             controller.progressFill = fillRect;
-
-            // ---- rota
-            var routeBar = UiKit.Node("RouteBar", frame);
-            UiKit.TopBand(UiKit.Rect(routeBar), 172, 48, 8, 8);
-            UiKit.HList(routeBar, 8, 6);
-            controller.routeBar = UiKit.Rect(routeBar);
-            controller.routeStopTemplate = UiKit.Label("RouteStopTemplate", routeBar.transform, "00 LOCAL", 19, Palette.White, TextAlignmentOptions.Center);
-
-            // ---- corpo
-            var body = UiKit.Node("Body", frame);
-            UiKit.Stretch(UiKit.Rect(body), 16, 228, 16, 16);
-
-            BuildSceneColumn(body.transform, controller);
-            BuildDialogColumn(body.transform, controller);
-            BuildFinalPanel(frame, controller);
-            ShowSkin.SkinGame(frame, controller);
-
-            EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene(), GameScenePath);
         }
 
-        static TextMeshProUGUI Stat(Transform parent, string caption, string value, Color color)
+        // ------------------------------------------------------------------ controles da rodada
+
+        /// <summary>
+        /// Embaixo, a direita do apresentador: pistas do dossie (quando houver) e os
+        /// dois botoes de resposta. Crescem para cima, sem cobrir o apresentador.
+        /// </summary>
+        static void BuildControls(Transform overlay, GameController controller, Transform evidence)
         {
-            var node = UiKit.Node(caption, parent);
-            var captionLabel = UiKit.Label("Caption", node.transform, caption, 16, Palette.Alpha(Palette.White, 0.5f), TextAlignmentOptions.Center);
-            UiKit.Frac(UiKit.Rect(captionLabel.gameObject), 0f, 0.52f, 1f, 1f);
-            var valueLabel = UiKit.Label("Value", node.transform, value, 26, color, TextAlignmentOptions.Center);
-            UiKit.Frac(UiKit.Rect(valueLabel.gameObject), 0f, 0f, 1f, 0.55f);
-            return valueLabel;
-        }
+            var controls = UiKit.Node("Controles", overlay);
+            var rect = UiKit.Rect(controls);
+            rect.anchorMin = new Vector2(0.35f, 0f);
+            rect.anchorMax = new Vector2(0.97f, 0f);
+            rect.pivot = new Vector2(0.5f, 0f);
+            rect.anchoredPosition = new Vector2(0f, 30f);
+            rect.sizeDelta = new Vector2(0f, rect.sizeDelta.y);   // largura so pelas ancoras
+            var list = UiKit.VList(controls, 12, 0);
+            list.childAlignment = TextAnchor.LowerCenter;
+            UiKit.FitHeight(controls);
 
-        static void BuildSceneColumn(Transform parent, GameController controller)
-        {
-            var column = UiKit.Node("SceneColumn", parent);
-            var columnRect = UiKit.Rect(column);
-            columnRect.anchorMin = new Vector2(0.51f, 0f);
-            columnRect.anchorMax = Vector2.one;
-            columnRect.offsetMin = Vector2.zero;
-            columnRect.offsetMax = Vector2.zero;
-
-            var header = UiKit.Panel("LocationHeader", column.transform, Palette.Shadow);
-            UiKit.TopBand(UiKit.Rect(header.gameObject), 0, 88);
-            controller.locationName = UiKit.Label("LocationName", header.transform, "LOCAL", 30, Palette.Yellow, TextAlignmentOptions.Left);
-            UiKit.Frac(UiKit.Rect(controller.locationName.gameObject), 0.04f, 0.45f, 0.98f, 0.95f);
-            controller.locationSubtitle = UiKit.Label("LocationSubtitle", header.transform, "SUBTÍTULO", 19, Palette.Cyan, TextAlignmentOptions.Left);
-            UiKit.Frac(UiKit.Rect(controller.locationSubtitle.gameObject), 0.04f, 0.06f, 0.98f, 0.46f);
-
-            var box = UiKit.Panel("SceneBox", column.transform, Palette.Shadow);
-            var boxRect = UiKit.Rect(box.gameObject);
-            boxRect.anchorMin = Vector2.zero;
-            boxRect.anchorMax = Vector2.one;
-            boxRect.offsetMin = new Vector2(0f, 56f);
-            boxRect.offsetMax = new Vector2(0f, -96f);
-
-            // cinco palcos com a arte extraida do HTML; so o do caso atual fica ligado
-            controller.stages = StageArt.BuildAll(box.transform, controller.database).ToArray();
-
-            controller.visitLine = UiKit.Label("VisitLine", column.transform, "VISITA 1 DE 5", 20, Palette.Cyan, TextAlignmentOptions.Center);
-            UiKit.BottomBand(UiKit.Rect(controller.visitLine.gameObject), 8, 44);
-        }
-
-        static void BuildDialogColumn(Transform parent, GameController controller)
-        {
-            var column = UiKit.Node("DialogColumn", parent);
-            var columnRect = UiKit.Rect(column);
-            columnRect.anchorMin = Vector2.zero;
-            columnRect.anchorMax = new Vector2(0.49f, 1f);
-            columnRect.offsetMin = Vector2.zero;
-            columnRect.offsetMax = Vector2.zero;
-
-            var scroll = UiKit.VScroll("DialogScroll", column.transform, Palette.Mix(Palette.Ink, Palette.Shadow, 0.35f), out var content);
-            UiKit.Full(UiKit.Rect(scroll.gameObject));
-            controller.dialogScroll = scroll;
-
-            UiKit.VList(content.gameObject, 14, 20).childAlignment = TextAnchor.UpperLeft;
-            UiKit.FitHeight(content.gameObject);
-
-            controller.caseTag = UiKit.Label("CaseTag", content, "LOCAL • CASO 1/3", 19, Palette.Yellow);
-            controller.speakerLabel = UiKit.Label("SpeakerLabel", content, "RESPOSTA DO RESPONSÁVEL", 21, Palette.Cyan);
-            controller.questionText = UiKit.Label("QuestionText", content, "Texto do caso.", 28, Palette.White);
-            controller.hintText = UiKit.Label("HintText", content, "PISTA:", 19, Palette.Orange);
-
-            // ---- investigacao
-            var investigation = UiKit.Node("InvestigationPanel", content);
-            UiKit.VList(investigation, 10, 0).childAlignment = TextAnchor.UpperLeft;
+            // ---- pistas do dossie
+            var investigation = UiKit.Node("Pistas", controls.transform);
+            UiKit.VList(investigation, 6, 0);
             UiKit.FitHeight(investigation);
             controller.investigationPanel = investigation;
 
-            controller.investigationStatus = UiKit.Label("InvestigationStatus", investigation.transform, "ARQUIVO ABERTO", 19, Palette.Cyan);
+            controller.investigationStatus = Text("Situacao", investigation.transform, "DOSSIÊ ABERTO", 22, Palette.Cyan, TextAlignmentOptions.Center, true);
+            UiKit.Height(controller.investigationStatus.gameObject, 30);
 
-            var clueRow = UiKit.Node("ClueRow", investigation.transform);
-            UiKit.HList(clueRow, 10, 0);
-            UiKit.Height(clueRow, 104);
+            var clueRow = UiKit.Node("BotoesDasPistas", investigation.transform);
+            UiKit.HList(clueRow, 12, 0);
+            UiKit.Height(clueRow, 76);
+            for (var i = 0; i < 3; i++) controller.clues[i] = BuildClue(clueRow.transform, evidence, i);
 
-            var cards = UiKit.Node("EvidenceCards", investigation.transform);
-            UiKit.VList(cards, 8, 0).childAlignment = TextAnchor.UpperLeft;
-            UiKit.FitHeight(cards);
-
-            controller.clues = new ClueSlot[3];
-            for (var i = 0; i < 3; i++) controller.clues[i] = BuildClue(clueRow.transform, cards.transform, i);
-
-            // ---- resposta
-            controller.instructionText = UiKit.Label("InstructionText", content, "HÁ INFRAÇÃO NESTA SITUAÇÃO?", 23, Palette.Yellow);
-
-            var answerRow = UiKit.Node("AnswerRow", content);
-            UiKit.HList(answerRow, 14, 0);
-            UiKit.Height(answerRow, 104);
+            // ---- respostas
+            var answerRow = UiKit.Node("Respostas", controls.transform);
+            UiKit.HList(answerRow, 22, 0);
+            UiKit.Height(answerRow, 116);
             controller.answerRow = answerRow;
 
-            var violation = UiKit.Button("ViolationButton", answerRow.transform, "É INFRAÇÃO\n<size=60%>tecla V</size>", Palette.Mix(Palette.Red, Palette.Shadow, 0.25f), Palette.White, 26);
+            var violation = AnswerButton(answerRow.transform, "ViolationButton", "É INFRAÇÃO", "V", Palette.Mix(Palette.Red, Palette.Shadow, 0.25f));
             controller.violationButton = violation.button;
             controller.violationBackground = violation.background;
-
-            var lawful = UiKit.Button("LawfulButton", answerRow.transform, "NÃO É INFRAÇÃO\n<size=60%>tecla F</size>", Palette.Mix(Palette.Green, Palette.Shadow, 0.25f), Palette.White, 26);
+            var lawful = AnswerButton(answerRow.transform, "LawfulButton", "NÃO É INFRAÇÃO", "F", Palette.Mix(Palette.Green, Palette.Shadow, 0.25f));
             controller.lawfulButton = lawful.button;
             controller.lawfulBackground = lawful.background;
+        }
 
-            // ---- feedback
-            var feedback = UiKit.Node("FeedbackPanel", content);
-            var feedbackImage = feedback.AddComponent<Image>();
-            feedbackImage.color = Palette.Mix(Palette.Ink2, Palette.Shadow, 0.35f);
-            UiKit.VList(feedback, 8, 16).childAlignment = TextAnchor.UpperLeft;
-            UiKit.FitHeight(feedback);
-            controller.feedbackPanel = feedback;
+        static UiKit.ButtonParts AnswerButton(Transform parent, string name, string text, string key, Color color)
+        {
+            var parts = UiKit.Button(name, parent, text, color, Color.white, 36);
+            Pill(parts.background, color, 1.1f);
+            parts.label.fontStyle = FontStyles.Bold;
+            parts.label.enableWordWrapping = false;
+            parts.label.enableAutoSizing = true;
+            parts.label.fontSizeMin = 22f;
+            parts.label.fontSizeMax = 36f;
+            UiKit.Stretch(parts.label.rectTransform, 108, 8, 28, 8);
 
-            var stripe = UiKit.Panel("Stripe", feedback.transform, Palette.GreenDark);
-            UiKit.Height(stripe.gameObject, 8);
-            controller.feedbackStripe = stripe;
-
-            controller.feedbackTitle = UiKit.Label("FeedbackTitle", feedback.transform, "CORRETO", 27, Palette.Green);
-            controller.feedbackPoints = UiKit.Label("FeedbackPoints", feedback.transform, "+0 PONTOS", 22, Palette.Yellow);
-            controller.feedbackText = UiKit.Label("FeedbackText", feedback.transform, "Explicação.", 21, Palette.White);
-            controller.feedbackReference = UiKit.Label("FeedbackReference", feedback.transform, "BASE EDUCATIVA:", 17, Palette.Cyan);
-
-            var next = UiKit.Button("NextButton", feedback.transform, "PRÓXIMA PERGUNTA", Palette.Blue, Palette.White, 24);
-            UiKit.Height(next.root, 74);
-            controller.nextButton = next.button;
-            controller.nextButtonLabel = next.label;
+            // tecla num selo redondo a esquerda, como a letra das alternativas
+            var badge = UiKit.Panel("Tecla", parts.root.transform, new Color(0f, 0f, 0f, 0.35f));
+            badge.sprite = ShowSkin.DiscSprite;
+            badge.raycastTarget = false;
+            var badgeRect = badge.rectTransform;
+            badgeRect.anchorMin = badgeRect.anchorMax = new Vector2(0f, 0.5f);
+            badgeRect.pivot = new Vector2(0f, 0.5f);
+            badgeRect.sizeDelta = new Vector2(72f, 72f);
+            badgeRect.anchoredPosition = new Vector2(20f, 0f);
+            var letter = Text("Letra", badge.transform, key, 36, Gold, TextAlignmentOptions.Center, true);
+            UiKit.Full(letter.rectTransform);
+            return parts;
         }
 
         static ClueSlot BuildClue(Transform buttonParent, Transform cardParent, int index)
         {
-            var parts = UiKit.Button("Clue" + (index + 1), buttonParent, "", Palette.Mix(Palette.Ink2, Palette.Shadow, 0.2f), Palette.White, 16);
+            var parts = UiKit.Button("Clue" + (index + 1), buttonParent, "", NightLight, Color.white, 18);
+            Pill(parts.background, NightLight, 2f);
             UnityEngine.Object.DestroyImmediate(parts.label.gameObject);
 
             var icon = UiKit.Panel("Icon", parts.root.transform, Palette.Alpha(Palette.Cyan, 0.55f));
-            UiKit.Frac(UiKit.Rect(icon.gameObject), 0.07f, 0.66f, 0.24f, 0.90f);
+            icon.sprite = ShowSkin.DiscSprite;
+            icon.raycastTarget = false;
+            var iconRect = icon.rectTransform;
+            iconRect.anchorMin = iconRect.anchorMax = new Vector2(0f, 0.5f);
+            iconRect.pivot = new Vector2(0f, 0.5f);
+            iconRect.sizeDelta = new Vector2(22f, 22f);
+            iconRect.anchoredPosition = new Vector2(22f, 0f);
 
-            var label = UiKit.Label("Label", parts.root.transform, "Pista", 17, Palette.White, TextAlignmentOptions.TopLeft);
-            UiKit.Frac(UiKit.Rect(label.gameObject), 0.28f, 0.34f, 0.95f, 0.94f);
+            var label = Text("Label", parts.root.transform, "Pista", 20, Color.white, TextAlignmentOptions.Left, true);
+            UiKit.Stretch(label.rectTransform, 56, 8, 16, 30);
+            var hotkey = Text("Hotkey", parts.root.transform, "TECLA " + (index + 1), 17, Gold, TextAlignmentOptions.Left);
+            UiKit.Stretch(hotkey.rectTransform, 56, 44, 16, 6);
 
-            var hotkey = UiKit.Label("Hotkey", parts.root.transform, "TECLA " + (index + 1) + " • EXAMINAR", 14, Palette.Yellow, TextAlignmentOptions.BottomLeft);
-            UiKit.Frac(UiKit.Rect(hotkey.gameObject), 0.07f, 0.06f, 0.95f, 0.30f);
-
-            var card = UiKit.Node("EvidenceCard" + (index + 1), cardParent);
-            var cardImage = card.AddComponent<Image>();
-            cardImage.color = Palette.Mix(Palette.Ink2, Palette.Blue, 0.18f);
-            UiKit.VList(card, 4, 12).childAlignment = TextAnchor.UpperLeft;
+            // a evidencia revelada aparece no telao, embaixo da pergunta
+            var card = UiKit.Node("Evidencia" + (index + 1), cardParent);
+            UiKit.VList(card, 2, 0).childAlignment = TextAnchor.UpperLeft;
             UiKit.FitHeight(card);
-
-            var cardTitle = UiKit.Label("CardTitle", card.transform, "Título", 19, Palette.Yellow);
-            var cardBody = UiKit.Label("CardBody", card.transform, "Conteúdo", 19, Palette.White);
+            var cardTitle = Text("CardTitle", card.transform, "Título", 24, Gold, TextAlignmentOptions.TopLeft, true);
+            var cardBody = Text("CardBody", card.transform, "Conteúdo", 24, Color.white);
+            cardBody.overflowMode = TextOverflowModes.Overflow;
             card.SetActive(false);
 
             return new ClueSlot
             {
-                button = parts.button,
-                icon = icon,
-                label = label,
-                hotkey = hotkey,
-                card = card,
-                cardTitle = cardTitle,
-                cardBody = cardBody
+                button = parts.button, icon = icon, label = label, hotkey = hotkey,
+                card = card, cardTitle = cardTitle, cardBody = cardBody
             };
         }
 
-        static void BuildFinalPanel(Transform frame, GameController controller)
+        // ------------------------------------------------------------------ resultado da pergunta
+
+        static void BuildFeedback(Transform overlay, GameController controller)
         {
-            var overlay = UiKit.Panel("FinalPanel", frame, Palette.Alpha(Palette.Shadow, 0.95f));
-            UiKit.Full(UiKit.Rect(overlay.gameObject));
-            controller.finalPanel = overlay.gameObject;
+            var card = UiKit.Panel("Resultado", overlay, Night);
+            ShowSkin.Plate(card, new Color(0.06f, 0.05f, 0.17f, 0.96f), GoldLine, 1.4f, false);
+            var rect = card.rectTransform;
+            rect.anchorMin = new Vector2(0.35f, 0f);
+            rect.anchorMax = new Vector2(0.97f, 0f);
+            rect.pivot = new Vector2(0.5f, 0f);
+            rect.anchoredPosition = new Vector2(0f, 30f);
+            rect.sizeDelta = new Vector2(0f, rect.sizeDelta.y);
+            var list = UiKit.VList(card.gameObject, 10, 26);
+            list.padding = new RectOffset(34, 34, 22, 26);
+            list.childAlignment = TextAnchor.UpperLeft;
+            UiKit.FitHeight(card.gameObject);
+            controller.feedbackPanel = card.gameObject;
 
-            var card = UiKit.Panel("Card", overlay.transform, Palette.Ink2);
-            UiKit.Centered(UiKit.Rect(card.gameObject), 1240, 800);
-            UiKit.VList(card.gameObject, 12, 26);
-            UiKit.FitHeight(card.gameObject);   // cresce so quando abre a revisao
+            var stripe = UiKit.Panel("Faixa", card.transform, Palette.GreenDark);
+            stripe.raycastTarget = false;
+            Pill(stripe, Palette.GreenDark, 8f);
+            UiKit.Height(stripe.gameObject, 6);
+            controller.feedbackStripe = stripe;
 
-            var title = UiKit.Label("Title", card.transform, "FIM DO PROGRAMA", 44, Palette.Yellow, TextAlignmentOptions.Center);
-            UiKit.Height(title.gameObject, 58);
+            // titulo e pontos a esquerda, botao de proxima a direita
+            var header = UiKit.Node("Cabecalho", card.transform);
+            var headerList = UiKit.HList(header, 20, 0);
+            headerList.childForceExpandWidth = false;
+            UiKit.Height(header, 78);
 
-            controller.rankLabel = UiKit.Label("RankLabel", card.transform, "PATENTE", 30, Palette.Cyan, TextAlignmentOptions.Center);
-            UiKit.Height(controller.rankLabel.gameObject, 44);
+            var titles = UiKit.Node("Titulos", header.transform);
+            UiKit.VList(titles, 0, 0).childAlignment = TextAnchor.MiddleLeft;
+            titles.AddComponent<LayoutElement>().flexibleWidth = 1f;
+            controller.feedbackTitle = Text("FeedbackTitle", titles.transform, "CORRETO!", 40, Palette.Green, TextAlignmentOptions.Left, true);
+            UiKit.Height(controller.feedbackTitle.gameObject, 46);
+            controller.feedbackPoints = Text("FeedbackPoints", titles.transform, "+0 PONTOS", 24, Gold, TextAlignmentOptions.Left, true);
+            UiKit.Height(controller.feedbackPoints.gameObject, 30);
+
+            var next = UiKit.Button("NextButton", header.transform, "PRÓXIMA PERGUNTA", Gold, Palette.Ink, 26);
+            Pill(next.background, Gold, 1.3f);
+            next.label.fontStyle = FontStyles.Bold;
+            var nextLayout = next.root.AddComponent<LayoutElement>();
+            nextLayout.preferredWidth = 400f;
+            nextLayout.minWidth = 400f;
+            controller.nextButton = next.button;
+            controller.nextButtonLabel = next.label;
+
+            controller.feedbackText = Text("FeedbackText", card.transform, "Explicação.", 27, Color.white);
+            controller.feedbackText.overflowMode = TextOverflowModes.Overflow;
+            controller.feedbackReference = Text("FeedbackReference", card.transform, "BASE EDUCATIVA:", 21, Palette.Cyan);
+            controller.feedbackReference.overflowMode = TextOverflowModes.Overflow;
+
+            card.gameObject.SetActive(false);
+        }
+
+        // ------------------------------------------------------------------ resultado final
+
+        static void BuildFinalPanel(Transform overlay, GameController controller)
+        {
+            var dim = UiKit.Panel("FinalPanel", overlay, new Color(0.02f, 0.01f, 0.06f, 0.94f));
+            UiKit.Full(dim.rectTransform);
+            controller.finalPanel = dim.gameObject;
+
+            var card = UiKit.Panel("Card", dim.transform, Night);
+            ShowSkin.Plate(card, new Color(0.08f, 0.06f, 0.22f, 0.98f), Gold, 1.2f, false);
+            UiKit.Centered(card.rectTransform, 1000, 560);
+            var list = UiKit.VList(card.gameObject, 16, 40);
+            list.childAlignment = TextAnchor.UpperCenter;
+            UiKit.FitHeight(card.gameObject);
+
+            var title = Text("Title", card.transform, "FIM DO PROGRAMA", 58, Gold, TextAlignmentOptions.Center, true);
+            UiKit.Height(title.gameObject, 70);
+            controller.rankLabel = Text("RankLabel", card.transform, "PATENTE", 30, Palette.Cyan, TextAlignmentOptions.Center, true);
+            UiKit.Height(controller.rankLabel.gameObject, 40);
 
             var stats = UiKit.Node("Stats", card.transform);
-            UiKit.HList(stats, 12, 0);
-            UiKit.Height(stats, 110);
-            controller.finalAnswered = Stat(stats.transform, "PERGUNTAS", "0", Palette.White);
-            controller.finalScore = Stat(stats.transform, "PONTOS", "0000", Palette.Yellow);
-            controller.finalCorrect = Stat(stats.transform, "ACERTOS", "0", Palette.Green);
-            controller.finalWrong = Stat(stats.transform, "ERROS", "0", Palette.Red);
-            controller.finalPercent = Stat(stats.transform, "APROVEITAMENTO", "0%", Palette.Cyan);
+            UiKit.HList(stats, 16, 0);
+            UiKit.Height(stats, 120);
+            controller.finalScore = FinalStat(stats.transform, "PONTOS", Gold);
+            controller.finalCorrect = FinalStat(stats.transform, "ACERTOS", Palette.Green);
+            controller.finalWrong = FinalStat(stats.transform, "ERROS", Palette.Red);
 
-            controller.finalSummary = UiKit.Label("Summary", card.transform, "Resumo", 19, Palette.Alpha(Palette.White, 0.75f), TextAlignmentOptions.Center);
-            UiKit.Height(controller.finalSummary.gameObject, 34);
+            controller.finalSummary = Text("Summary", card.transform, "Resumo", 22, Palette.Alpha(Color.white, 0.75f), TextAlignmentOptions.Center);
+            UiKit.Height(controller.finalSummary.gameObject, 32);
 
             var buttons = UiKit.Node("Buttons", card.transform);
-            UiKit.HList(buttons, 12, 0);
-            UiKit.Height(buttons, 78);
-
-            var review = UiKit.Button("ReviewButton", buttons.transform, "REVISAR ERROS", Palette.Orange, Palette.Ink, 22);
-            controller.reviewButton = review.button;
-            controller.reviewButtonLabel = review.label;
-
-            var restart = UiKit.Button("RestartButton", buttons.transform, "JOGAR DE NOVO", Palette.Blue, Palette.White, 22);
+            UiKit.HList(buttons, 20, 0);
+            UiKit.Height(buttons, 84);
+            var restart = UiKit.Button("RestartButton", buttons.transform, "JOGAR DE NOVO", Gold, Palette.Ink, 28);
+            Pill(restart.background, Gold, 1.3f);
+            restart.label.fontStyle = FontStyles.Bold;
             controller.restartButton = restart.button;
-
-            var menu = UiKit.Button("MenuButton", buttons.transform, "VOLTAR AO MENU", Palette.Mix(Palette.Ink, Palette.Shadow, 0.3f), Palette.White, 22);
+            var menu = UiKit.Button("MenuButton", buttons.transform, "VOLTAR AO MENU", NightLight, Color.white, 28);
+            Pill(menu.background, NightLight, 1.3f);
+            menu.label.fontStyle = FontStyles.Bold;
             controller.menuButton = menu.button;
 
-            var reviewScroll = UiKit.VScroll("ReviewPanel", card.transform, Palette.Mix(Palette.Ink, Palette.Shadow, 0.4f), out var reviewContent);
-            UiKit.Height(reviewScroll.gameObject, 340);
-            controller.reviewPanel = reviewScroll.gameObject;
+            dim.gameObject.SetActive(false);
+        }
 
-            UiKit.VList(reviewContent.gameObject, 10, 12).childAlignment = TextAnchor.UpperLeft;
-            UiKit.FitHeight(reviewContent.gameObject);
-            controller.reviewList = reviewContent;
-            controller.reviewItemTemplate = UiKit.Label("ReviewItemTemplate", reviewContent, "Caso", 19, Palette.White);
-
-            overlay.gameObject.SetActive(false);
+        static TextMeshProUGUI FinalStat(Transform parent, string caption, Color color)
+        {
+            var node = UiKit.Panel(caption, parent, NightLight);
+            node.raycastTarget = false;
+            ShowSkin.Plate(node, NightLight, Palette.Alpha(color, 0.5f), 2f, false);
+            var captionLabel = Text("Legenda", node.transform, caption, 20, Palette.Alpha(Color.white, 0.65f), TextAlignmentOptions.Center, true);
+            UiKit.Frac(captionLabel.rectTransform, 0f, 0.62f, 1f, 0.92f);
+            var value = Text("Valor", node.transform, "0", 48, color, TextAlignmentOptions.Center, true);
+            UiKit.Frac(value.rectTransform, 0f, 0.08f, 1f, 0.66f);
+            return value;
         }
 
         // ================================================================== cena do menu
@@ -665,12 +781,11 @@ namespace Procon.EditorTools
             controller.titlePanel = titlePanel;
 
             var menuList = UiKit.Node("Options", titlePanel.transform);
-            UiKit.Centered(UiKit.Rect(menuList), 520, 332);
+            UiKit.Centered(UiKit.Rect(menuList), 520, 246);
             UiKit.VList(menuList, 12, 0);
 
             controller.playButton = MenuButton(menuList.transform, "JOGAR", Palette.Yellow, Palette.Ink);
             controller.helpButton = MenuButton(menuList.transform, "COMO JOGAR", Palette.Mix(Palette.Ink2, Palette.Shadow, 0.2f), Palette.White);
-            controller.creditsButton = MenuButton(menuList.transform, "CRÉDITOS", Palette.Mix(Palette.Ink2, Palette.Shadow, 0.2f), Palette.White);
             controller.quitButton = MenuButton(menuList.transform, "SAIR", Palette.Mix(Palette.Red, Palette.Shadow, 0.3f), Palette.White);
 
             // ---- dificuldade
@@ -722,18 +837,10 @@ namespace Procon.EditorTools
                 out var backHelp);
             controller.backFromHelpButton = backHelp;
 
-            controller.creditsPanel = BuildTextPanel(frame, "CreditsPanel", "CRÉDITOS",
-                "Show do PROCON — jogo educativo sobre o Código de Defesa do Consumidor.\n\n" +
-                "Conteúdo e casos: equipe do projeto.\n" +
-                "Versão Unity feita a partir do protótipo original do grupo (Missão PROCON).\n\n" +
-                "Os casos e as explicações citam artigos do CDC (Lei 8.078/1990) com fim educativo.\n" +
-                "O jogo não substitui orientação jurídica.",
-                out var backCredits);
-            controller.backFromCreditsButton = backCredits;
 
             // ---- audio (sempre visivel)
             var audioRow = UiKit.Node("AudioRow", frame);
-            UiKit.BottomBand(UiKit.Rect(audioRow), 20, 56, 40, 40);
+            UiKit.BottomBand(UiKit.Rect(audioRow), 20, 50, 40, 1060);
             UiKit.HList(audioRow, 14, 0);
 
             var sfx = UiKit.Button("SfxButton", audioRow.transform, "EFEITOS: LIGADOS", Palette.Mix(Palette.Ink, Palette.Shadow, 0.25f), Palette.Cyan, 20);
