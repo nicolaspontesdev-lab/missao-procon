@@ -185,7 +185,8 @@ namespace Procon
 
         void StartRound()
         {
-            round = RoundBuilder.Build(database, GameSession.Level);
+            round = RoundBuilder.Build(database, GameSession.Level, GameSession.FirstScenario);
+            GameSession.FirstScenario = null;
 
             if (round.Total == 0)
             {

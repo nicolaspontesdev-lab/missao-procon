@@ -173,6 +173,8 @@ namespace Procon.EditorTools
 
             Place(root, "Tampo", "tampo", pieces, manifest);
 
+            CoverWithTeamArt(root, scenario, stage);
+
             var slots = new List<StageSlot>();
             foreach (var spec in Slots) slots.Add(MakeSlot(root, spec, manifest));
             stage.slots = slots;
@@ -209,7 +211,152 @@ namespace Procon.EditorTools
             stage.flash = flash;
 
             BuildVisitBanner(root, stage);
+            if (LoadSprite("fundo_" + scenario) != null) RearrangeForTeamArt(root, stage, manifest);
             return stage;
+        }
+
+        /// <summary>
+        /// Cenario pintado pela equipe (fundo_&lt;cenario&gt;.png): uma imagem so, do
+        /// tamanho do palco, que substitui parede, decoracao, placa, relogio, piso e
+        /// balcao. As pecas continuam no lugar, invisiveis, so para segurar os textos
+        /// por cima. Fiscal e responsavel ficam entre a imagem e o balcao recortado
+        /// dela (frente_&lt;cenario&gt;.png).
+        /// </summary>
+        static void CoverWithTeamArt(Transform root, string scenario, StageView stage)
+        {
+            var sprite = LoadSprite("fundo_" + scenario);
+            if (sprite == null) return;
+
+            foreach (var name in new[] { "Parede", "Decoracao", "Placa", "Relogio", "Piso", "Balcao", "Tampo" })
+            {
+                var piece = root.Find(name);
+                if (piece != null && piece.TryGetComponent<Image>(out var image)) image.enabled = false;
+            }
+
+            var cover = UiKit.Panel("FundoEquipe", root, Color.white);
+            cover.sprite = sprite;
+            cover.raycastTarget = false;
+            UiKit.Full(UiKit.Rect(cover.gameObject));
+            cover.transform.SetAsFirstSibling();
+
+            // o balcao recortado da mesma imagem vai na frente dos personagens,
+            // como o balcao do jogo: sem ele os dois parecem flutuar sobre o tampo
+            var front = LoadSprite("frente_" + scenario);
+            var top = root.Find("Tampo");
+            if (front != null && top != null)
+            {
+                var counter = UiKit.Panel("BalcaoEquipe", root, Color.white);
+                counter.sprite = front;
+                counter.raycastTarget = false;
+                UiKit.Full(UiKit.Rect(counter.gameObject));
+                counter.transform.SetSiblingIndex(top.GetSiblingIndex() + 1);
+            }
+
+            // a imagem ja traz as etiquetas em branco: so o texto vai dentro delas,
+            // sem a etiqueta do jogo por cima (medidas em px do palco de 900x530)
+            WriteInBlank(root, "Decoracao/Rotulo", 67.3f, 42.8f, 268.2f, 69.7f, DecorLabelSize);
+            WriteInBlank(root, "Balcao/Letreiro", 340.4f, 421.4f, 578.9f, 451.3f, CounterLabelSize);
+
+            // a placa da imagem e mais baixa que a do jogo: nome e subtitulo
+            // passam a ocupar so a parte pintada dela, senao o subtitulo cai na borda
+            var sign = root.Find("Placa") as RectTransform;
+            if (sign != null)
+                UiKit.Frac(sign, 545.2f / 900f, 1f - 98.6f / 530f, 853f / 900f, 1f - 47.8f / 530f);
+        }
+
+        /// <summary>
+        /// No cenario da equipe o quadro da parede ja vem desenhado: a etiqueta e o
+        /// cartaz vao para um quadro de avisos de cortica na parede livre ao lado
+        /// dele, presos com alfinete, em vez de ficarem soltos no ar.
+        /// </summary>
+        static void RearrangeForTeamArt(Transform root, StageView stage, Manifest manifest)
+        {
+            // parede livre entre o quadro e o responsavel (px do palco de 900x530)
+            const float x0 = 504f, y0 = 110f, x1 = 658f, y1 = 242f;
+            var board = CorkBoard(root, x0, y0, x1, y1, manifest);
+            board.SetSiblingIndex(1);   // logo acima da imagem de fundo
+
+            // nenhum caso usa os dois juntos; os dois cabem dentro da cortica
+            MoveSlot(root, "etiqueta", 542f, 192f, 78f, 38f, manifest);
+            MoveSlot(root, "cartaz", 519f, 121f, 124f, 110f, manifest);
+
+            foreach (var id in new[] { "etiqueta", "cartaz" })
+            {
+                var slot = stage.slots.Find(s => s.id == id);
+                if (slot == null || slot.caption == null) continue;
+                if (id == "cartaz") slot.caption.fontSize = 11f;   // a etiqueta do cartaz cabe no quadro
+                Pin(slot.caption.transform.parent.parent);
+            }
+        }
+
+        static Transform CorkBoard(Transform root, float x0, float y0, float x1, float y1, Manifest manifest)
+        {
+            RectTransform Layer(string name, Transform parent, Color color, float inset, float dx = 0f, float dy = 0f)
+            {
+                var image = UiKit.Panel(name, parent, color);
+                image.raycastTarget = false;
+                var rect = UiKit.Rect(image.gameObject);
+                UiKit.Frac(rect, (x0 + inset + dx) / manifest.largura, 1f - (y1 - inset + dy) / manifest.altura,
+                           (x1 - inset + dx) / manifest.largura, 1f - (y0 + inset + dy) / manifest.altura);
+                return rect;
+            }
+
+            var group = UiKit.Node("QuadroDeAvisos", root).transform;
+            UiKit.Full(UiKit.Rect(group.gameObject));
+            Layer("Sombra", group, Palette.Alpha(Palette.Shadow, 0.2f), 0f, 4f, 4f);
+            Layer("Contorno", group, Palette.Shadow, 0f);
+            Layer("Moldura", group, Palette.Hex("C08050"), 3f);
+            Layer("Cortica", group, Palette.Hex("9A5F3C"), 8f);
+            return group;
+        }
+
+        /// <summary>Alfinete vermelho no alto da etiqueta, como no mural do HTML.</summary>
+        static void Pin(Transform tag)
+        {
+            var head = UiKit.Panel("Alfinete", tag, Palette.Shadow);
+            head.raycastTarget = false;
+            var rect = UiKit.Rect(head.gameObject);
+            rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 1f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = Vector2.zero;
+            rect.sizeDelta = new Vector2(12f, 12f);
+            var layout = head.gameObject.AddComponent<LayoutElement>();
+            layout.ignoreLayout = true;
+
+            var dot = UiKit.Panel("Cabeca", head.transform, Palette.Red);
+            dot.raycastTarget = false;
+            var dotRect = UiKit.Rect(dot.gameObject);
+            UiKit.Full(dotRect);
+            dotRect.offsetMin = new Vector2(2f, 2f);
+            dotRect.offsetMax = new Vector2(-2f, -2f);
+        }
+
+        static void MoveSlot(Transform root, string id, float x, float y, float w, float h, Manifest manifest)
+        {
+            if (!(root.Find("Encaixe_" + id) is RectTransform rect)) return;
+            UiKit.Frac(rect, x / manifest.largura, 1f - (y + h) / manifest.altura,
+                       (x + w) / manifest.largura, 1f - y / manifest.altura);
+        }
+
+        static void WriteInBlank(Transform root, string tagPath, float x0, float y0, float x1, float y1, float size)
+        {
+            var tag = root.Find(tagPath);
+            if (tag == null) return;
+            var source = tag.GetComponentInChildren<TMP_Text>(true);
+            tag.gameObject.SetActive(false);
+            if (source == null) return;
+
+            var label = UiKit.Label(tag.name + "NaImagem", root, source.text, size, Palette.BlueDark, TextAlignmentOptions.Center);
+            UiKit.Frac(label.rectTransform, x0 / 900f, 1f - y1 / 530f, x1 / 900f, 1f - y0 / 530f);
+            label.characterSpacing = source.characterSpacing;
+            label.fontStyle = source.fontStyle;
+            label.color = source.color;
+            label.fontSharedMaterial = source.fontSharedMaterial;
+            label.margin = new Vector4(4f, 0f, 4f, 0f);
+            label.enableAutoSizing = true;
+            label.fontSizeMin = 10f;
+            label.fontSizeMax = size;
+            label.raycastTarget = false;
         }
 
         /// <summary>Faixa "VISITA X DE Y / CHEGANDO: LOCAL" do HTML, por cima de tudo.</summary>

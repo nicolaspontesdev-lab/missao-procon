@@ -14,6 +14,12 @@ namespace Procon
         public static bool HasLevel { get; set; }
         public static bool SfxOn { get; set; } = true;
 
+        /// <summary>
+        /// Atalho de apresentacao: o local que abre a proxima rodada. Vale para uma
+        /// rodada so; depois o jogo volta a sortear a ordem.
+        /// </summary>
+        public static ScenarioKey? FirstScenario { get; set; }
+
         static bool loaded;
 
         public static void LoadPreferences()

@@ -27,8 +27,9 @@ namespace Procon
         /// <summary>
         /// Sorteia a ordem dos locais e, em cada local, abre pelo caso que tem
         /// dossie de investigacao. Nunca pede mais casos do que o banco tem.
+        /// Com <paramref name="first"/>, esse local abre a rodada e o resto segue sorteado.
         /// </summary>
-        public static Round Build(CaseDatabase database, LevelKey level)
+        public static Round Build(CaseDatabase database, LevelKey level, ScenarioKey? first = null)
         {
             var round = new Round();
             if (database == null) return round;
@@ -36,6 +37,7 @@ namespace Procon
             var order = new List<ScenarioKey>();
             foreach (var scenario in database.scenarios) order.Add(scenario.key);
             Shuffle(order);
+            if (first.HasValue && order.Remove(first.Value)) order.Insert(0, first.Value);
 
             foreach (var scenarioKey in order)
             {

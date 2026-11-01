@@ -212,6 +212,22 @@ namespace Procon
             SceneManager.LoadScene(gameSceneName);
         }
 
+        /// <summary>
+        /// Atalho escondido para apresentacao: comeca uma rodada normal que abre
+        /// pelo local escolhido. Sem dificuldade escolhida, usa a primeira.
+        /// </summary>
+        void StartAt(ScenarioKey scenario)
+        {
+            if (!GameSession.HasLevel)
+            {
+                GameSession.Level = LevelKey.Fundamental;
+                GameSession.HasLevel = true;
+            }
+            GameSession.FirstScenario = scenario;
+            ChiptuneAudio.Instance.Play("select");
+            SceneManager.LoadScene(gameSceneName);
+        }
+
         void Quit()
         {
             GameSession.SavePreferences();
@@ -241,6 +257,11 @@ namespace Procon
 
             var keyboard = Keyboard.current;
             if (keyboard == null) return;
+
+            // atalhos de apresentacao (nao aparecem na tela): S de sorveteria, B de
+            // borracharia. Teclas F nao servem: no notebook viram brilho e volume.
+            if (keyboard.sKey.wasPressedThisFrame) { StartAt(ScenarioKey.Supermercado); return; }
+            if (keyboard.bKey.wasPressedThisFrame) { StartAt(ScenarioKey.Eletronicos); return; }
 
             if (activePanel == titlePanel)
             {
