@@ -180,8 +180,21 @@ namespace Procon.EditorTools
                 var title = (GameObject)PrefabUtility.InstantiatePrefab(titlePrefab);
                 title.transform.position = new Vector3(0f, wall.center.y + 0.15f, front - 0.2f);
                 title.transform.localScale = Vector3.one * 1.05f;
-                Spot("Luz do titulo", new Vector3(0f, 6.8f, front - 6f), title.transform.position + Vector3.up * 0.6f,
-                     new Color(1f, 0.92f, 0.8f), 28f, 34f);
+                // luz larga e mais fraca, vinda de longe: ilumina o titulo por igual. A antiga
+                // (estreita e forte, no centro) estourava o "W" de branco
+                var titleLight = Spot("Luz do titulo", new Vector3(0f, 7.5f, front - 9f), title.transform.position + Vector3.up * 0.9f,
+                     new Color(1f, 0.94f, 0.85f), 9f, 70f);
+                titleLight.range = 18f;
+                // prata menos espelhada e sem brilho proprio, para nao virar mancha branca
+                var silver = AssetDatabase.LoadAssetAtPath<Material>(ArtFolder + "/Materiais/Letra prata.mat");
+                if (silver != null)
+                {
+                    silver.SetColor("_BaseColor", new Color(0.86f, 0.89f, 0.95f));
+                    silver.SetFloat("_Metallic", 0.25f);
+                    silver.SetFloat("_Smoothness", 0.45f);
+                    silver.SetColor("_EmissionColor", new Color(0.86f, 0.89f, 0.95f) * 0.08f);
+                    EditorUtility.SetDirty(silver);
+                }
             }
 
             // holofotes de show: luz real com cone de luz visivel, varrendo o palco

@@ -114,7 +114,7 @@ namespace Procon.EditorTools
             Arch(bottom.transform, 0.32f, 9f);
 
             StripToolComponents(root);
-            Paint(top, ShowBuilder.Material("Letra prata", new Color(0.95f, 0.96f, 1f), 0.45f), 0.6f);
+            Paint(top, ShowBuilder.Material("Letra prata", new Color(0.86f, 0.89f, 0.95f), 0.08f), 0.25f);
             Paint(bottom, ShowBuilder.Material("Letra dourada", new Color(1f, 0.74f, 0.2f), 0.35f), 0.85f);
 
             if (AssetDatabase.IsValidFolder(GeneratedByTool))
